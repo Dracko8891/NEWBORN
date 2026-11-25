@@ -14,7 +14,7 @@ Survival horror em primeira pessoa. Projeto em desenvolvimento com Three.js, Vit
 
 ## Desenvolvimento
 ```bash
-npm ci
+npm install
 npm run dev
 npm test
 npm run build
