@@ -7,6 +7,7 @@ const MAT_ALERT := preload("res://materials/emergency_red.tres")
 const Campaign = preload("res://systems/campaign_data.gd")
 
 func _ready() -> void:
+	_ensure_environment()
 	CampaignDirector.begin_chapter(chapter_number)
 	_build_sector()
 	_build_chapter_landmarks()
@@ -162,3 +163,20 @@ func _make_cylinder(label: String, pos: Vector3, radius: float, height: float, m
 	mesh_node.mesh = mesh
 	mesh_node.material_override = mat
 	node.add_child(mesh_node)
+
+func _ensure_environment() -> void:
+	if get_tree().current_scene != null and get_tree().current_scene.find_child("WorldEnvironment", true, false) != null:
+		return
+	var world := WorldEnvironment.new()
+	world.name = "WorldEnvironment"
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.012, 0.018, 0.024)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.32, 0.38, 0.42)
+	env.ambient_light_energy = 0.35
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.16, 0.19, 0.21)
+	env.fog_density = 0.018
+	world.environment = env
+	add_child(world)
