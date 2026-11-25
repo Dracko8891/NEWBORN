@@ -14,6 +14,9 @@ var movement_slider: HSlider
 var look_value_label: Label
 var movement_value_label: Label
 
+func _game_state() -> Node:
+	return get_node_or_null("/root/GameState")
+
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -56,7 +59,7 @@ func _build_sensitivity_ui() -> void:
 	look_slider.min_value = 0.5
 	look_slider.max_value = 2.0
 	look_slider.step = 0.05
-	look_slider.value = GameState.look_sensitivity
+	look_slider.value = float(_game_state().get("look_sensitivity")) if _game_state() != null else 1.0
 	look_slider.custom_minimum_size = Vector2(220, 20)
 	look_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	look_slider.value_changed.connect(_on_look_sensitivity_changed)
@@ -68,7 +71,7 @@ func _build_sensitivity_ui() -> void:
 	movement_slider.min_value = 0.75
 	movement_slider.max_value = 1.25
 	movement_slider.step = 0.05
-	movement_slider.value = GameState.movement_speed_multiplier
+	movement_slider.value = float(_game_state().get("movement_speed_multiplier")) if _game_state() != null else 1.0
 	movement_slider.custom_minimum_size = Vector2(220, 20)
 	movement_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	movement_slider.value_changed.connect(_on_movement_speed_changed)
@@ -85,16 +88,18 @@ func _position_sensitivity_ui() -> void:
 
 func _refresh_tuning_labels() -> void:
 	if look_value_label != null:
-		look_value_label.text = "LOOK SENSITIVITY  %.2fx" % GameState.look_sensitivity
+		look_value_label.text = "LOOK SENSITIVITY  %.2fx" % float(_game_state().get("look_sensitivity")) if _game_state() != null else 1.0
 	if movement_value_label != null:
-		movement_value_label.text = "MOVEMENT SPEED  %.2fx" % GameState.movement_speed_multiplier
+		movement_value_label.text = "MOVEMENT SPEED  %.2fx" % float(_game_state().get("movement_speed_multiplier")) if _game_state() != null else 1.0
 
 func _on_look_sensitivity_changed(value: float) -> void:
-	GameState.set_look_sensitivity(value)
+	if _game_state() != null:
+		_game_state().call("set_look_sensitivity", value)
 	_refresh_tuning_labels()
 
 func _on_movement_speed_changed(value: float) -> void:
-	GameState.set_movement_speed_multiplier(value)
+	if _game_state() != null:
+		_game_state().call("set_movement_speed_multiplier", value)
 	_refresh_tuning_labels()
 
 func get_virtual_move() -> Vector2:
