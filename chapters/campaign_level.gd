@@ -442,7 +442,7 @@ func _build_chapter_puzzle_stations() -> void:
 			_add_puzzle_station("set_flag", "CHIP BETA", "Sincronize o Chip Beta recuperado no compartimento drenado.", ["recuperar"], ["recuperar"], Vector3(0.0, 1.0, -27.0), "beta_chip_recovered", {"beta_chip":1})
 		5:
 			_add_puzzle_station("reactor_shutdown", "PROCEDIMENTO DO REATOR", "Apague as luzes e opere os braços: esquerdo, central, direito.", ["lights_off", "arm_left", "arm_center", "arm_right"], ["lights_off", "arm_left", "arm_center", "arm_right"], Vector3(0, 1.0, -12.0))
-			_add_puzzle_station("robot_arms", "CONTROLE DOS BRAÇOS", "Opere os braços na ordem: esquerdo, central, direito.", ["left", "center", "right"], ["left", "center", "right"], Vector3(0.0, 1.0, 8.0))
+			_add_puzzle_station("robot_arms", "CONTROLE DOS BRAÇOS", "Opere os braços na ordem: esquerdo, central, direito.", ["left", "center", "right"], ["left", "center", "right"], Vector3(-6.0, 1.0, 8.0))
 			_add_puzzle_station("camera_grid", "GRADE DE CÂMERAS", "Desative as câmeras na sequência A, B e C.", ["cam_a", "cam_b", "cam_c"], ["cam_a", "cam_b", "cam_c"], Vector3(-6.0, 1.0, -5.0))
 			_add_puzzle_station("set_flag", "ARCO ELÉTRICO", "Use o arco elétrico para cegar o Newborn.", ["disparar"], ["disparar"], Vector3(6.0, 1.0, 2.0), "electric_arc_used", {"electric_arc":1})
 			_add_puzzle_station("set_flag", "COFRE GAMA", "Sincronize o Chip Gamma após estabilizar o núcleo.", ["retirar"], ["retirar"], Vector3(-2.5, 1.0, -27.0), "gamma_chip_recovered", {"gamma_chip":1})
