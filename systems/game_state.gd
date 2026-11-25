@@ -39,22 +39,34 @@ func add_item(item_id: String, display_name: String, consumable: bool = false) -
 	return true
 
 func has_item(item_id: String, amount: int = 1) -> bool:
+	if amount <= 0:
+		return false
+	var total := 0
 	for slot in inventory:
-		if str(slot.get("id", "")) == item_id and int(slot.get("count", 1)) >= amount:
-			return true
+		if str(slot.get("id", "")) == item_id:
+			total += maxi(0, int(slot.get("count", 1)))
+			if total >= amount:
+				return true
 	return false
 
 func remove_item(item_id: String, amount: int = 1) -> bool:
-	if amount <= 0:
+	if amount <= 0 or not has_item(item_id, amount):
 		return false
-	for i in range(inventory.size()):
-		if str(inventory[i].get("id", "")) == item_id and int(inventory[i].get("count", 1)) >= amount:
-			inventory[i]["count"] = int(inventory[i].get("count", 1)) - amount
-			if inventory[i]["count"] <= 0:
-				inventory.remove_at(i)
-			inventory_changed.emit()
-			return true
-	return false
+	var remaining := amount
+	# Consume from the last matching stack first; pre-check prevents partial removal.
+	for i in range(inventory.size() - 1, -1, -1):
+		if str(inventory[i].get("id", "")) != item_id:
+			continue
+		var available := maxi(0, int(inventory[i].get("count", 1)))
+		var taken := mini(available, remaining)
+		remaining -= taken
+		inventory[i]["count"] = available - taken
+		if int(inventory[i]["count"]) <= 0:
+			inventory.remove_at(i)
+		if remaining <= 0:
+			break
+	inventory_changed.emit()
+	return true
 
 func discard_item(item_id: String) -> bool:
 	for i in range(inventory.size()):
