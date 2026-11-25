@@ -79,7 +79,7 @@ func activate_hydraulic_coupling(index: int) -> bool:
 		GameState.save_game()
 	return true
 
-func _same_set(a: Array[String], b: Array[String]) -> bool:
+func _same_set(a: Array[String], b: Array) -> bool:
 	if a.size() != b.size():
 		return false
 	for value in a:
