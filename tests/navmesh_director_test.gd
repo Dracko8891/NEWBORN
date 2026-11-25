@@ -27,5 +27,13 @@ func _run() -> void:
 	assert(region != null, "Chapter navigation region should be created")
 	assert(region.navigation_mesh != null, "Chapter NavigationMesh resource should exist")
 	assert(region.navigation_mesh.get_polygon_count() > 0, "Background bake should produce walkable polygons")
-	print("NEWBORN threaded chapter NavigationMesh bake test: PASS")
+
+	# Releasing a chapter while a bake is pending must cancel safely, not call into a freed region.
+	var cancelled_level := Node3D.new()
+	root.add_child(cancelled_level)
+	NavMeshDirector.garantir_navegacao_capitulo(cancelled_level)
+	cancelled_level.queue_free()
+	await process_frame
+	await physics_frame
+	print("NEWBORN threaded chapter NavigationMesh bake / cancellation test: PASS")
 	quit(0)

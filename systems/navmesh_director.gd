@@ -26,7 +26,13 @@ static func garantir_navegacao_capitulo(level: Node3D) -> void:
 	if region.navigation_mesh == null:
 		push_warning("Chapter %d has no NavigationMesh resource" % int(level.get("chapter_number")))
 		return
+	var tree := level.get_tree()
+	if tree == null:
+		return
 	region.bake_navigation_mesh(true)
-	while region.is_baking():
-		await level.get_tree().process_frame
-	await level.get_tree().physics_frame
+	while is_instance_valid(region) and region.is_inside_tree() and region.is_baking():
+		await tree.process_frame
+	# A chapter scene may be replaced or freed while its asynchronous bake is running.
+	if not is_instance_valid(level) or not is_instance_valid(region) or not region.is_inside_tree():
+		return
+	await tree.physics_frame
