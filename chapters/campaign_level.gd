@@ -20,6 +20,7 @@ func _ready() -> void:
 	_build_chapter_landmarks()
 	_build_chapter_wings()
 	_build_exploration_routes()
+	_build_room_location_markers()
 	_build_hide_spots()
 	var chapter_data := Campaign.get_chapter(chapter_number)
 	if bool(chapter_data.get("safe_room", false)):
@@ -523,3 +524,60 @@ func _build_chapter_puzzle_stations() -> void:
 			_add_puzzle_station("set_flag", "LEITOR ÔMEGA", "Insira o Cartão Mestre Ômega recuperado no Berçário.", ["inserir"], ["inserir"], Vector3(-6.0, 1.0, -25.0), "omega_card_inserted", {"omega_master_card":1})
 			_add_puzzle_station("hangar_override", "CABINE OVERRIDE", "Valide os três acoplamentos e o Cartão Mestre Ômega para liberar o hangar.", ["validar", "override"], ["validar", "override"], Vector3(6.0, 1.0, -25.0))
 			_add_puzzle_station("set_flag", "SELAMENTO EXTERNO", "Acione o selo manual e alcance a superfície.", ["selar"], ["selar"], Vector3(0, 1.0, -32.0), "surface_escape_complete")
+
+
+func _build_room_location_markers() -> void:
+	# Markers are placed inside real walkable volumes, not inferred from distance.
+	# Main-spine anchors correspond to the four physical corridor sections.
+	var spine_ids := {
+		1: [["c1_security", "Sala de Segurança", Vector3(0, 1.0, 28)], ["c1_triage", "Sala de Triagem", Vector3(0, 1.0, 7)], ["c1_relay", "Painel de Relés", Vector3(0, 1.0, -17)], ["c1_hatch", "Comporta do Átrio", Vector3(0, 1.0, -32)]],
+		2: [["c2_atrium", "Átrio Central", Vector3(0, 1.0, 28)], ["c2_west", "Recepção Oeste", Vector3(0, 1.0, 7)], ["c2_matrix", "Matriz de DNA", Vector3(0, 1.0, -17)], ["c2_safe", "Sala Segura Central", Vector3(0, 1.0, -32)]],
+		3: [["c3_quarters", "Cabines da Tripulação", Vector3(0, 1.0, 28)], ["c3_cafeteria", "Refeitório", Vector3(0, 1.0, 7)], ["c3_therapy", "Sala de Terapia Sonora", Vector3(0, 1.0, -17)], ["c3_locker", "Armário do Turno Gama", Vector3(0, 1.0, -32)]],
+		4: [["c4_upper", "Passarela Superior Respirável", Vector3(0, 1.0, 28)], ["c4_synthesis", "Cabine de Síntese", Vector3(0, 1.0, 7)], ["c4_lower", "Piso Inferior — Tanques", Vector3(0, 1.0, -17)], ["c4_valves", "Galeria de Válvulas", Vector3(0, 1.0, -32)]],
+		5: [["c5_safe", "Sala Segura da Engenharia", Vector3(0, 1.0, 28)], ["c5_load", "Controle de Carga", Vector3(0, 1.0, 7)], ["c5_core", "Câmara do Núcleo de Plasma", Vector3(0, 1.0, -17)], ["c5_jeffries", "Tubos de Jeffries", Vector3(0, 1.0, -32)]],
+		6: [["c6_lab", "Laboratório Ômega", Vector3(0, 1.0, 28)], ["c6_tubes", "Galeria dos Quatro Estágios", Vector3(0, 1.0, 7)], ["c6_chamber", "Câmara de Contenção 00", Vector3(0, 1.0, -17)], ["c6_download", "Terminal Mestre", Vector3(0, 1.0, -32)]],
+		7: [["c7_atrium", "Átrio em Colapso", Vector3(0, 1.0, 28)], ["c7_hangar", "Hangar de Carga", Vector3(0, 1.0, 7)], ["c7_couplings", "Pátio dos Acoplamentos", Vector3(0, 1.0, -17)], ["c7_override", "Cabine do Override", Vector3(0, 1.0, -32)]]
+	}
+	for entry in spine_ids.get(chapter_number, []):
+		_add_room_marker(str(entry[0]), str(entry[1]), entry[2], 2.8)
+
+	# Side-wing and annex markers sit beyond their actual door thresholds.
+	var wing_ids := {
+		1: [["c1_triage", "Sala de Triagem", 1.0, -16.0], ["c1_relay", "Painel de Relés", -1.0, -30.0]],
+		2: [["c2_east", "Recepção Leste", 1.0, -16.0], ["c2_matrix", "Matriz de DNA", -1.0, -30.0]],
+		3: [["c3_quarters", "Cabines da Tripulação", 1.0, 22.0], ["c3_therapy", "Sala de Terapia Sonora", -1.0, -30.0]],
+		4: [["c4_upper", "Passarela Superior Respirável", 1.0, 22.0], ["c4_synthesis", "Cabine de Síntese", -1.0, -30.0]],
+		5: [["c5_core", "Câmara do Núcleo de Plasma", -1.0, -30.0]],
+		6: [["c6_tubes", "Galeria dos Quatro Estágios", 1.0, 22.0], ["c6_chamber", "Câmara de Contenção 00", -1.0, -30.0]],
+		7: [["c7_atrium", "Átrio em Colapso", 1.0, 22.0], ["c7_hangar", "Hangar de Carga", 1.0, -30.0]]
+	}
+	for entry in wing_ids.get(chapter_number, []):
+		_add_room_marker(str(entry[0]), str(entry[1]), Vector3(float(entry[2]) * 6.55, 1.0, float(entry[3])), 2.0)
+
+	var annex_ids := {
+		1: ["c1_triage", "Sala de Triagem", 1.0],
+		2: ["c2_west", "Recepção Oeste", 1.0],
+		3: ["c3_locker", "Armário do Turno Gama", -1.0],
+		4: ["c4_pit", "Poço Drenado", -1.0],
+		5: ["c5_load", "Controle de Carga", 1.0],
+		6: ["c6_lab", "Laboratório Ômega", 1.0],
+		7: ["c7_couplings", "Pátio dos Acoplamentos", -1.0]
+	}
+	var annex: Array = annex_ids.get(chapter_number, [])
+	if not annex.is_empty():
+		_add_room_marker(str(annex[0]), str(annex[1]), Vector3(float(annex[2]) * 6.55, 1.0, -3.0), 2.0)
+
+func _add_room_marker(room_id: String, room_name: String, marker_position: Vector3, radius: float) -> void:
+	var marker := Area3D.new()
+	marker.name = "RoomMarker_" + room_id
+	marker.position = marker_position
+	marker.set_script(load("res://scripts/world_room_marker.gd"))
+	marker.set("room_id", room_id)
+	marker.set("room_name", room_name)
+	var shape_node := CollisionShape3D.new()
+	var shape := SphereShape3D.new()
+	shape.radius = radius
+	shape_node.shape = shape
+	marker.add_child(shape_node)
+	add_child(marker)
+
