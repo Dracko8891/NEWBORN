@@ -45,6 +45,7 @@ jobs:
         run: timeout 240s godot --headless --path . --install-android-build-template
 
       - name: Export debug APK
+        timeout-minutes: 15
         run: |
           mkdir -p build
           godot --headless --path . --export-debug "Android" build/PROTOCOLO_NEWBORN-beta.apk
