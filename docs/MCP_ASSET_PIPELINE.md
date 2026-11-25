@@ -147,3 +147,25 @@ Para registrar também o servidor Veo, somente se o binário `mcp-veo-go` estive
 O script não instala binários, não configura credenciais e não gera conteúdo. Ele apenas registra comandos já instalados no Codex local.
 
 Para OhMyGame, não copie um caminho ou token de exemplo: ative Settings → MCP Server → Connect e use exatamente o comando/argumentos gerados pela versão instalada do aplicativo. O token muda quando o daemon reinicia.
+
+
+## Outras referências avaliadas (não são dependências do jogo)
+
+| Repositório | Uso possível | Decisão |
+|---|---|---|
+| [SummerEngine/summer](https://github.com/SummerEngine/summer) | Engine/CLI/MCP alternativo | Não instalar no NEWBORN: substituiria ou duplicaria Godot. |
+| [XHiddenProjects/VExtraStudio](https://github.com/XHiddenProjects/VExtraStudio) | Ainda não confirmado | Não instalar até verificar README, licença, releases e requisitos. |
+| [SifuInTheShell/Effigy](https://github.com/SifuInTheShell/Effigy) | Geração local de assets 2D/3D | Candidato para workstation; upstream descreve GPU NVIDIA de 16 GB. Não é dependência Android. |
+| [toxsam/open-source-3D-assets](https://github.com/toxsam/open-source-3D-assets) | Descoberta de assets | Revisar licença e atribuição por arquivo, não apenas licença do repositório. |
+| [LudicDynamics/WorldLines](https://github.com/LudicDynamics/WorldLines) | Worldbuilding/documentação | Referência conceitual; não importar runtime. Licenças variam por subdiretório. |
+| [op7418/guizang-game-skill](https://github.com/op7418/guizang-game-skill) | Checklists de produção, revisão visual e packaging | Adaptar conceitos independentemente; não copiar código/conteúdo AGPL-3.0 nem migrar para Three.js. |
+| [croatianrdy2defend-create/RPG-OS](https://github.com/croatianrdy2defend-create/RPG-OS) | Continuidade de narrativa e estado | Não substituir CampaignDirector/save system. |
+| [west132/AI-GM-Engine](https://github.com/west132/AI-GM-Engine) | Referência de regras/estado de RPG | Não integrar ao jogo de ação; README declara MIT. |
+| [horizonfps/project-lunar](https://github.com/horizonfps/project-lunar) | Não confirmado | Branch/README não foi possível validar; não instalar por enquanto. |
+| [IvanMurzak/Unreal-MCP](https://github.com/IvanMurzak/Unreal-MCP) | Ferramentas de Unreal Editor | Incompatível com Godot; não instalar. |
+
+A triagem é arquitetural, não auditoria de segurança. Antes de executar terceiros, revisar release, código, dependências, licença e permissões. FlowKit e Flow Agent são alternativas concorrentes: escolha no máximo um. O MCP do Godot AI é o candidato principal para edição do editor; GenMedia é o candidato de mídia na nuvem; Effigy é alternativa local para 3D.
+
+## Regra de runtime offline
+
+MCP, Google Cloud, Gemini, Flow, Effigy, OhMyGame e ferramentas de edição são exclusivos do ambiente de autoria. APK e Web devem conter apenas recursos locais do projeto. Desativar/remover todos os MCPs e desconectar a rede não pode impedir iniciar, salvar, carregar ou concluir uma partida.

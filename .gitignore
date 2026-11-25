@@ -6,3 +6,7 @@ android/
 .env
 .env.*
 !.env.example
+
+# Local-only asset staging and Godot editor cache
+assets/inbox/
+.godot/

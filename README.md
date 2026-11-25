@@ -47,3 +47,8 @@ O workflow .github/workflows/godot-validation.yml roda:
 2. Inicialização headless por alguns frames.
 
 A aprovação desse workflow valida apenas importação e inicialização técnica; não substitui testes de gameplay, desempenho ou testes no Moto G35.
+
+
+## MCP e produção de assets
+
+O projeto inclui skills de apoio e um pipeline local para importar assets revisados. MCPs são opcionais e exclusivos do ambiente de desenvolvimento; o jogo não depende de serviços externos em runtime. Consulte [docs/MCP_ASSET_PIPELINE.md](docs/MCP_ASSET_PIPELINE.md) e [.agents/skills/README.md](.agents/skills/README.md). A conexão real do Godot AI/GenMedia/Flow requer instalação e autenticação local; os arquivos de instrução não significam que esses servidores já estejam conectados.

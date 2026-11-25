@@ -28,3 +28,11 @@ Estas skills são guias de projeto, não instalações de aplicações nem ferra
 ## Geração e integração de assets
 
 Para gerar, revisar ou importar mídia externa, leia `docs/MCP_ASSET_PIPELINE.md` e a skill `.agents/skills/gemini-media-producer/SKILL.md`. Assets aprovados entram em `assets/generated/` por meio de `tools/asset_pipeline.py`. O runtime deve usar apenas recursos locais `res://`; nunca exigir MCP, API, rede ou credenciais para iniciar ou jogar.
+
+
+## MCP do editor e curadoria de assets
+
+- MCP do editor Godot: leia .agents/skills/godot-editor-mcp/SKILL.md. Só considere conectado após confirmação do cliente MCP.
+- Curadoria, licenças, assets 3D e worldbuilding: leia .agents/skills/asset-curation-worldbuilding/SKILL.md.
+- Para configuração de provedores e isolamento offline: consulte docs/MCP_ASSET_PIPELINE.md.
+- Não instale engines alternativas (Summer, Unreal) no projeto Godot. Não integre runtimes de RPG ao CampaignDirector.
