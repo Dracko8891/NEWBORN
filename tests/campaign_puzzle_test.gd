@@ -72,9 +72,32 @@ func _run() -> void:
 	assert(not puzzle_system.submit_robot_arms(_strings(["center", "left", "right"])))
 	assert(puzzle_system.submit_robot_arms(_strings(["left", "center", "right"])))
 	assert(campaign_director._objective_requirements_met("c5_o3"))
+	assert(not puzzle_system.submit_camera_grid(_strings(["cam_b", "cam_a", "cam_c"])))
+	assert(puzzle_system.submit_camera_grid(_strings(["cam_a", "cam_b", "cam_c"])))
 	assert(not puzzle_system.submit_quarters_pin("0314"))
 	assert(puzzle_system.submit_quarters_pin("0315"))
 	assert(campaign_director._objective_requirements_met("c3_o1"))
+	game_state.set_flag("clara_distress_followed")
+	assert(campaign_director._objective_requirements_met("c1_o5"))
+	game_state.chapter = 2
+	game_state.set_flag("safe_room_visited_chapter_2")
+	game_state.set_flag("west_cable_scanned")
+	assert(campaign_director._objective_requirements_met("c2_o3"))
+	assert(campaign_director._objective_requirements_met("c2_o4"))
+	game_state.chapter = 3
+	game_state.set_flag("cafeteria_exit_unlocked")
+	assert(campaign_director._objective_requirements_met("c3_o5"))
+	game_state.chapter = 5
+	game_state.set_flag("safe_room_visited_chapter_5")
+	game_state.set_flag("core_chips_inserted")
+	game_state.set_flag("gamma_chip_recovered")
+	assert(campaign_director._objective_requirements_met("c5_o1"))
+	assert(campaign_director._objective_requirements_met("c5_o5"))
+	game_state.chapter = 6
+	game_state.set_flag("omega_tubes_scanned")
+	game_state.set_flag("tricorder_level_2")
+	assert(campaign_director._objective_requirements_met("c6_o1"))
+	game_state.chapter = 1
 
 	# Chapter 4: synthesis requires and consumes the exact ingredient quantities.
 	var synthesis_station: Variant = load("res://scripts/puzzle_station.gd").new()
