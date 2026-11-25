@@ -58,7 +58,12 @@ func _notification(what: int) -> void:
 		flashlight.visible = flashlight_on and flashlight_charge > 0.0
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and look_enabled:
+	if OS.has_feature("web") and event is InputEventMouseButton and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	elif OS.has_feature("web") and event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		set_peek(0.0)
+	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and look_enabled:
 		_rotate_view(event.relative)
 	elif event.is_action_pressed("flashlight"):
 		toggle_flashlight()
