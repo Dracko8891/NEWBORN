@@ -8,6 +8,9 @@ const Campaign = preload("res://systems/campaign_data.gd")
 const NavMeshDirector = preload("res://systems/navmesh_director.gd")
 
 func _ready() -> void:
+	if bool(GameState.get_flag("campaign_completed", false)):
+		get_tree().change_scene_to_file("res://chapters/epilogue.tscn")
+		return
 	var loading_layer := _create_initial_loading_screen()
 	await GameState.wait_for_preloads()
 	_ensure_environment()

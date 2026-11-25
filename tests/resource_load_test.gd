@@ -4,6 +4,7 @@ const CRITICAL_RESOURCES := [
 	"res://scenes/main.tscn",
 	"res://scenes/player.tscn",
 	"res://ai/newborn_hunter.tscn",
+	"res://chapters/epilogue.tscn",
 	"res://chapters/chapter_01.tscn",
 	"res://chapters/chapter_02.tscn",
 	"res://chapters/chapter_03.tscn",

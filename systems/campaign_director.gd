@@ -101,6 +101,9 @@ func _on_chapter_completed(chapter: int) -> void:
 		GameState.set_flag("campaign_completed")
 		GameState.save_game()
 		campaign_message.emit("FIM — A escotilha se fecha, mas o Newborn alcançou a superfície. O sinal de Clara desaparece.")
+		await get_tree().create_timer(3.0).timeout
+		if ResourceLoader.exists("res://chapters/epilogue.tscn"):
+			get_tree().change_scene_to_file("res://chapters/epilogue.tscn")
 		return
 	await get_tree().create_timer(2.0).timeout
 	chapter_transition_pending = false
