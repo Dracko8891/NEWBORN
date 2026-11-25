@@ -66,3 +66,45 @@ func _same_set(a: Array[String], b: Array[String]) -> bool:
 		if not b.has(value):
 			return false
 	return true
+
+
+func submit_dna_matrix(sequence: Array[String]) -> bool:
+	if sequence != ["east", "west"]:
+		puzzle_failed.emit("dna_matrix", "Calibração exige Leste e depois Oeste")
+		return false
+	GameState.set_flag("dna_matrix_calibrated")
+	puzzle_solved.emit("dna_matrix")
+	GameState.save_game()
+	return true
+
+func submit_reactor_shutdown(sequence: Array[String]) -> bool:
+	if sequence != ["lights_off", "arm_left", "arm_center", "arm_right"]:
+		puzzle_failed.emit("reactor_shutdown", "Procedimento de desligamento inválido")
+		return false
+	GameState.set_flag("reactor_shutdown_complete")
+	puzzle_solved.emit("reactor_shutdown")
+	GameState.save_game()
+	return true
+
+func complete_omega_download() -> void:
+	GameState.set_flag("omega_download_complete")
+	puzzle_solved.emit("omega_download")
+	GameState.save_game()
+
+func survive_omega_siege() -> void:
+	GameState.set_flag("omega_siege_survived")
+	puzzle_solved.emit("omega_siege")
+	GameState.save_game()
+
+func execute_hangar_override() -> bool:
+	var couplings: Array = GameState.puzzle_flags.get("hangar_couplings", [false, false, false])
+	if not couplings.all(func(value: Variant) -> bool: return bool(value)):
+		puzzle_failed.emit("hangar_override", "Os três acoplamentos hidráulicos ainda não estão conectados")
+		return false
+	if not GameState.has_item("omega_master_card"):
+		puzzle_failed.emit("hangar_override", "Cartão Mestre Ômega ausente")
+		return false
+	GameState.set_flag("hangar_override_complete")
+	puzzle_solved.emit("hangar_override")
+	GameState.save_game()
+	return true
