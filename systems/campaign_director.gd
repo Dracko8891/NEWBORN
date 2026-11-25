@@ -98,7 +98,9 @@ func _on_chapter_completed(chapter: int) -> void:
 		return
 	chapter_transition_pending = true
 	if chapter >= 7:
-		campaign_message.emit("SINAL PERDIDO — A criatura alcançou a superfície.")
+		GameState.set_flag("campaign_completed")
+		GameState.save_game()
+		campaign_message.emit("FIM — A escotilha se fecha, mas o Newborn alcançou a superfície. O sinal de Clara desaparece.")
 		return
 	await get_tree().create_timer(2.0).timeout
 	chapter_transition_pending = false
