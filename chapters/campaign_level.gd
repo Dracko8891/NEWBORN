@@ -18,6 +18,7 @@ func _ready() -> void:
 	_build_safe_room()
 	_build_supply_pickups()
 	_build_objectives()
+	_build_chapter_puzzle_stations()
 	_spawn_hunter()
 
 func _make_box(label: String, pos: Vector3, size: Vector3, mat: Material, solid: bool = true) -> void:
@@ -280,3 +281,59 @@ func _build_hide_spots() -> void:
 		shape.size = Vector3(1.8, 2.2, 1.0)
 		collision.shape = shape
 		spot.add_child(collision)
+
+
+func _add_puzzle_station(id: String, label: String, instructions: String, choices: Array[String], solution: Array[String], position: Vector3, flag: String = "") -> void:
+	var station := Area3D.new()
+	station.name = "PuzzleStation_" + id
+	station.position = position
+	station.set_script(load("res://scripts/puzzle_station.gd"))
+	station.set("puzzle_id", id)
+	station.set("title", label)
+	station.set("instructions", instructions)
+	station.set("choices", choices)
+	station.set("solution", solution)
+	station.set("success_flag", flag)
+	add_child(station)
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(2.0, 2.2, 1.5)
+	collision.shape = shape
+	station.add_child(collision)
+	var marker := Label3D.new()
+	marker.text = label
+	marker.position = Vector3(0, 1.6, 0)
+	marker.font_size = 30
+	marker.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	marker.modulate = Color(0.45, 0.95, 0.9)
+	station.add_child(marker)
+
+func _build_chapter_puzzle_stations() -> void:
+	match chapter_number:
+		1:
+			_add_puzzle_station("medical_pin", "FECHADURA 0719", "Use a anotação encontrada na triagem.", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], ["0", "7", "1", "9"], Vector3(-6.5, 1.0, -10.0))
+			_add_puzzle_station("medical_relays", "RELÉS MÉDICOS", "Restaure os dois relés identificados no painel.", ["cyan", "amber"], ["cyan", "amber"], Vector3(6.0, 1.0, -10.0))
+		2:
+			_add_puzzle_station("dna_matrix", "MATRIZ DE CALIBRAGEM", "Calibre primeiro o canal Leste e depois o Oeste.", ["east", "west"], ["east", "west"], Vector3(0, 1.0, -8.0))
+			_add_puzzle_station("set_flag", "CAMPO DA ALA LESTE", "Desative o campo magnético para liberar a passagem.", ["desativar"], ["desativar"], Vector3(6.0, 1.0, 8.0), "east_field_disabled")
+		3:
+			_add_puzzle_station("therapy_melody", "TERAPIA SONORA", "Reproduza a gravação: Dó, Mi, Sol, Ré, Lá.", ["C", "E", "G", "D", "A"], ["C", "E", "G", "D", "A"], Vector3(0, 1.0, 4.0))
+			_add_puzzle_station("set_flag", "LEITOR DE CHIP ALFA", "Aproxime o chip Alfa e atualize o Tricorder.", ["sincronizar"], ["sincronizar"], Vector3(-6.0, 1.0, -18.0), "alpha_chip_recovered")
+		4:
+			_add_puzzle_station("set_flag", "DRENAGEM DE AMÔNIA", "Abra a linha de purga e confirme a leitura segura.", ["drenar"], ["drenar"], Vector3(0, 1.0, 8.0), "ammonia_fog_drained")
+			_add_puzzle_station("genesis_valves", "GALERIA DE VÁLVULAS", "Ordem de fluxo: Azul → Verde → Vermelha.", ["blue", "green", "red"], ["blue", "green", "red"], Vector3(0, 1.0, -18.0))
+			_add_puzzle_station("set_flag", "CHIP BETA", "Recupere o chip do compartimento drenado.", ["recuperar"], ["recuperar"], Vector3(6.0, 1.0, -25.0), "beta_chip_recovered")
+	5:
+			_add_puzzle_station("reactor_shutdown", "PROCEDIMENTO DO REATOR", "Apague as luzes e opere os braços: esquerdo, central, direito.", ["lights_off", "arm_left", "arm_center", "arm_right"], ["lights_off", "arm_left", "arm_center", "arm_right"], Vector3(0, 1.0, -12.0))
+			_add_puzzle_station("set_flag", "CONTROLE DOS BRAÇOS", "Confirme a operação dos três braços robóticos.", ["confirmar"], ["confirmar"], Vector3(6.0, 1.0, 10.0), "robot_arms_operated")
+			_add_puzzle_station("set_flag", "COFRE GAMA", "Retire o Chip Gama após estabilizar o núcleo.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -25.0), "gamma_chip_recovered")
+	6:
+			_add_puzzle_station("omega_biochips", "MATRIZ EVOLUTIVA", "Ordene os estágios: Celular, Esquelético, Neural, Despertar.", ["cellular", "skeletal", "neural", "awakening"], ["cellular", "skeletal", "neural", "awakening"], Vector3(0, 1.0, -14.0))
+			_add_puzzle_station("set_flag", "DOWNLOAD ÔMEGA", "Inicie e confirme a extração dos dados do terminal.", ["iniciar"], ["iniciar"], Vector3(6.0, 1.0, -24.0), "omega_download_complete")
+			_add_puzzle_station("set_flag", "CARTÃO MESTRE ÔMEGA", "Retire o cartão mestre do terminal.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -27.0), "omega_master_card_recovered")
+			_add_puzzle_station("set_flag", "CERCO SOBREVIVIDO", "Confirme que a contenção foi atravessada.", ["confirmar"], ["confirmar"], Vector3(0, 1.0, -30.0), "omega_siege_survived")
+	7:
+			_add_puzzle_station("hangar_couplings", "ACOPLAMENTOS HIDRÁULICOS", "Conecte os três acoplamentos na ordem 1, 2 e 3.", ["1", "2", "3"], ["1", "2", "3"], Vector3(0, 1.0, -8.0))
+			_add_puzzle_station("set_flag", "LEITOR ÔMEGA", "Insira o Cartão Mestre Ômega.", ["inserir"], ["inserir"], Vector3(-6.0, 1.0, -25.0), "omega_card_inserted")
+			_add_puzzle_station("set_flag", "CABINE OVERRIDE", "Execute a sequência de abertura do hangar.", ["override"], ["override"], Vector3(6.0, 1.0, -25.0), "hangar_override_complete")
+			_add_puzzle_station("set_flag", "SELAMENTO EXTERNO", "Acione o selo manual e alcance a superfície.", ["selar"], ["selar"], Vector3(0, 1.0, -32.0), "surface_escape_complete")
