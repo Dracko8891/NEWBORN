@@ -192,6 +192,7 @@ func _set_button_scale(value: float, action: String) -> void:
 func _draw() -> void:
 	if not visible:
 		return
+	modulate.a = 0.68
 	var s := get_viewport_rect().size
 	var radius := minf(s.x, s.y) * 0.14
 	var origin := joystick_origin if joystick_finger != -1 else Vector2(radius * 1.45, s.y - radius * 1.45)

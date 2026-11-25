@@ -34,8 +34,15 @@ enabled = true
 position = Vector3(0.12, -0.08, -0.18)
 light_energy = 2.8
 spot_range = 22.0
-spot_angle = 31.0
+spot_angle = 24.0
 shadow_enabled = true
+
+[node name="FlashlightPeripheral" type="SpotLight3D" parent="Head/Camera3D"]
+position = Vector3(0.12, -0.08, -0.18)
+light_energy = 0.42
+spot_range = 13.0
+spot_angle = 48.0
+shadow_enabled = false
 
 [node name="MobileControls" type="CanvasLayer" parent="."]
 layer = 10

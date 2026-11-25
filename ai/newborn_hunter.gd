@@ -88,6 +88,16 @@ func _build_organic_body() -> void:
 	var old_veins := get_node_or_null("Body/FaceVeins") as MeshInstance3D
 	if old_veins != null:
 		old_veins.visible = false
+	var model_path := "res://assets/models/newborn.glb"
+	if ResourceLoader.exists(model_path):
+		var imported := load(model_path) as PackedScene
+		if imported != null:
+			var imported_model := imported.instantiate()
+			imported_model.name = "ImportedNewbornGLB"
+			add_child(imported_model)
+			if imported_model is Node3D:
+				imported_model.position = Vector3(0, 0, 0)
+			return
 	var porcelain := _organic_material(Color(0.72, 0.68, 0.62), 0.22, 0.0)
 	var shadow := _organic_material(Color(0.075, 0.055, 0.06), 0.48, 0.0)
 	var vein_material := _organic_material(Color(0.19, 0.012, 0.035), 0.3, 0.8)
@@ -124,6 +134,9 @@ func _organic_material(color: Color, roughness: float, emission_energy: float) -
 	material.albedo_color = color
 	material.roughness = roughness
 	material.metallic = 0.0
+	material.rim_enabled = true
+	material.rim = 0.32
+	material.rim_tint = 0.28
 	if emission_energy > 0.0:
 		material.emission_enabled = true
 		material.emission = Color(0.55, 0.008, 0.045)

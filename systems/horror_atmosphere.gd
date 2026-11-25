@@ -51,6 +51,8 @@ uniform float vignette_strength = 0.42;
 uniform float pulse = 0.0;
 uniform float chromatic = 0.0;
 uniform float clock = 0.0;
+uniform float threat = 0.0;
+uniform float crt_scan = 0.0;
 float hash21(vec2 p) {
 	p = fract(p * vec2(123.34, 456.21));
 	p += dot(p, p + 45.32);
@@ -66,9 +68,12 @@ void fragment() {
 	col.r = texture(screen_texture, uv + direction * shift).r;
 	col.g = texture(screen_texture, uv).g;
 	col.b = texture(screen_texture, uv - direction * shift).b;
-	float grain = (hash21(floor(uv * vec2(1280.0, 720.0) + clock * 37.0)) - 0.5) * grain_strength;
+	float noise = hash21(floor(uv * vec2(1280.0, 720.0) + clock * 37.0));
+	float grain = (noise - 0.5) * grain_strength;
+	float scan = sin(uv.y * 920.0 + clock * 2.0) * crt_scan * 0.025;
+	float interference = step(0.997, hash21(vec2(floor(clock * 3.0), floor(uv.y * 12.0)))) * threat * 0.035;
 	float vignette = 1.0 - edge * (vignette_strength + pulse * 0.12);
-	col = col * vignette + grain;
+	col = col * vignette + grain + scan + interference;
 	COLOR = vec4(col, 1.0);
 }
 """
@@ -147,3 +152,5 @@ func _process(delta: float) -> void:
 		_shader_material.set_shader_parameter("chromatic", 0.0 if _photosensitive else fear * (1.0 if hunting else 0.35))
 		_shader_material.set_shader_parameter("grain_strength", 0.009 if _photosensitive else 0.018)
 		_shader_material.set_shader_parameter("vignette_strength", 0.28 if _photosensitive else 0.42)
+		_shader_material.set_shader_parameter("threat", 0.0 if _photosensitive else fear)
+		_shader_material.set_shader_parameter("crt_scan", 0.0 if _photosensitive else (1.0 if enemy_distance < 8.0 or hunting else 0.0))

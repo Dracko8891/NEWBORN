@@ -205,6 +205,8 @@ func _build_global_architecture_kit() -> void:
 			_make_hanging_cable(i, z, accent)
 		if i % 3 == 1:
 			_make_floor_spill(i, z)
+		if i % 3 == 0:
+			_make_grime_and_drag_marks(i, z)
 		if i == 4 or i == 8:
 			_make_corpse_silhouette(i, z)
 	# Heavy bulkhead surround at the far end, leaving the existing door opening usable.
@@ -214,8 +216,7 @@ func _build_global_architecture_kit() -> void:
 
 
 func _chapter_accent(chapter: int) -> Color:
-	var colors := [Color(0.65,0.055,0.035), Color(0.10,0.34,0.62), Color(0.72,0.34,0.09), Color(0.18,0.55,0.20), Color(0.08,0.26,0.72), Color(0.20,0.22,0.26), Color(0.42,0.48,0.52)]
-	return colors[clampi(chapter - 1, 0, 6)]
+	return load("res://systems/horror_visual_director.gd").chapter_accent(chapter)
 
 
 func _make_hanging_cable(index: int, z: float, accent: Color) -> void:
@@ -242,6 +243,14 @@ func _make_hanging_cable(index: int, z: float, accent: Color) -> void:
 		spark.omni_range = 1.4
 		add_child(spark)
 
+
+
+func _make_grime_and_drag_marks(index: int, z: float) -> void:
+	var director = load("res://systems/horror_visual_director.gd")
+	var stain := director.add_grime_quad(self, "DriedBloodStain_%02d" % index, Vector3(-0.72, 0.012, z), Vector2(0.72, 0.34), Color(0.16, 0.012, 0.018, 0.72))
+	stain.rotation.x = -PI * 0.5
+	var drag := director.add_grime_quad(self, "DraggedResidue_%02d" % index, Vector3(-0.70, 0.013, z - 0.72), Vector2(0.18, 1.15), Color(0.085, 0.008, 0.012, 0.52))
+	drag.rotation.x = -PI * 0.5
 
 func _make_floor_spill(index: int, z: float) -> void:
 	var puddle := MeshInstance3D.new()
@@ -297,7 +306,7 @@ func _make_corpse_silhouette(index: int, z: float) -> void:
 	body.add_child(leg)
 
 func _chapter_material(chapter: int, floor_surface: bool) -> StandardMaterial3D:
-	return load("res://systems/procedural_pbr.gd").material_for(chapter, "floor" if floor_surface else "wall")
+	return load("res://systems/horror_visual_director.gd").material_for(chapter, "floor" if floor_surface else "wall")
 
 func _build_chapter_landmarks() -> void:
 	match chapter_number:
@@ -463,6 +472,7 @@ func _install_horror_atmosphere() -> void:
 func _ensure_environment() -> void:
 	var existing := get_tree().current_scene.find_child("WorldEnvironment", true, false) if get_tree().current_scene != null else null
 	if existing is WorldEnvironment and existing.environment != null:
+		load("res://systems/horror_visual_director.gd").apply_environment(existing.environment, chapter_number)
 		_apply_cinematic_environment(existing.environment)
 		return
 	var world := WorldEnvironment.new()
@@ -472,20 +482,14 @@ func _ensure_environment() -> void:
 	env.background_color = Color(0.012, 0.018, 0.024)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(0.32, 0.38, 0.42)
-	env.ambient_light_energy = 0.35
-	env.fog_enabled = true
-	env.fog_light_color = Color(0.16, 0.19, 0.21)
-	env.fog_density = 0.018
+	load("res://systems/horror_visual_director.gd").apply_environment(env, chapter_number)
 	_apply_cinematic_environment(env)
 	world.environment = env
 	add_child(world)
 
 
 func _apply_cinematic_environment(env: Environment) -> void:
-	env.ambient_light_energy = 0.05
-	env.tonemap_mode = Environment.TONE_MAPPER_ACES
-	env.tonemap_exposure = 0.92
-	env.fog_density = 0.012
+	load("res://systems/horror_visual_director.gd").apply_environment(env, chapter_number)
 
 
 func _build_safe_room() -> void:
