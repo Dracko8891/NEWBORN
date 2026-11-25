@@ -10,7 +10,7 @@ enum State { OBSERVE, PATROL, INVESTIGATE, HUNT, STUNNED, MIMIC_AMBUSH }
 @export var mimic_enabled := false
 @export var patrol_points: Array[Vector3] = []
 
-@onready var eyes: RayCast3D = $EyesRay
+var eyes: RayCast3D
 var navigation: NavigationAgent3D
 @onready var face_veins: MeshInstance3D = get_node_or_null("FaceVeins")
 
@@ -26,6 +26,13 @@ var _investigate_timer := 0.0
 
 func _ready() -> void:
 	add_to_group("noise_listeners")
+	eyes = get_node_or_null("EyesRay") as RayCast3D
+	if eyes == null:
+		eyes = RayCast3D.new()
+		eyes.name = "EyesRay"
+		eyes.target_position = Vector3(0, 0, -22)
+		eyes.enabled = true
+		add_child(eyes)
 	if navigation == null:
 		navigation = get_node_or_null("NavigationAgent3D") as NavigationAgent3D
 	if navigation == null:
