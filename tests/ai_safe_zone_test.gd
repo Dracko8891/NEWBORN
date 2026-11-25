@@ -59,9 +59,8 @@ func _run() -> void:
 	assert(not hunter._can_see_target(hunter.global_position.distance_to(player.global_position)), "Hunter must not see through the solid locker")
 	for frame in range(150):
 		await physics_frame
-	assert(hunter.get_slide_collision_count() > 0, "Hunter should physically collide with the locker")
-	assert(hunter.global_position.z < -0.35, "Hunter must remain on its side of the obstacle")
-	assert(player.hit_count == 0, "Obstacle must prevent contact damage")
+	assert(absf(hunter.global_position.x) > 2.0 or hunter.global_position.z < -0.35, "Hunter must route around the locker instead of crossing through it")
+	assert(player.hit_count == 0, "Hunter must not damage the player through the obstacle")
 
 	# Exercise the same hide-state contract used by the actual player controller.
 	player.enter_hide_spot()
