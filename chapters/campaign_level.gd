@@ -15,6 +15,7 @@ func _ready() -> void:
 	_build_sector()
 	_build_chapter_landmarks()
 	_build_hide_spots()
+	_build_safe_room()
 	_build_objectives()
 	_spawn_hunter()
 
@@ -184,6 +185,40 @@ func _ensure_environment() -> void:
 	env.fog_density = 0.018
 	world.environment = env
 	add_child(world)
+
+
+func _build_safe_room() -> void:
+	# Compact safe room beside the starting corridor; zone layer 2 is ignored by the interaction ray.
+	_make_box("Sala_Segura_Piso", Vector3(0, 0.08, 23), Vector3(8.0, 0.16, 9.0), MAT_FLOOR)
+	_make_box("Sala_Segura_Parede_E", Vector3(-4.1, 1.9, 23), Vector3(0.25, 3.8, 9.0), MAT_WALL)
+	_make_box("Sala_Segura_Parede_D", Vector3(4.1, 1.9, 23), Vector3(0.25, 3.8, 9.0), MAT_WALL)
+	_make_box("Sala_Segura_Parede_Fundo", Vector3(0, 1.9, 18.5), Vector3(8.0, 3.8, 0.25), MAT_WALL)
+	var zone := Area3D.new()
+	zone.name = "SafeRoomZone"
+	zone.position = Vector3(0, 1.2, 23)
+	zone.set_script(load("res://scripts/safe_room.gd"))
+	add_child(zone)
+	var zone_collision := CollisionShape3D.new()
+	var zone_shape := BoxShape3D.new()
+	zone_shape.size = Vector3(7.8, 3.4, 8.8)
+	zone_collision.shape = zone_shape
+	zone.add_child(zone_collision)
+	var terminal := Area3D.new()
+	terminal.name = "SafeStorageTerminal"
+	terminal.position = Vector3(0, 1.0, 25.5)
+	terminal.set_script(load("res://scripts/safe_storage_terminal.gd"))
+	add_child(terminal)
+	var terminal_collision := CollisionShape3D.new()
+	var terminal_shape := BoxShape3D.new()
+	terminal_shape.size = Vector3(1.8, 2.0, 0.9)
+	terminal_collision.shape = terminal_shape
+	terminal.add_child(terminal_collision)
+	var console_mesh := MeshInstance3D.new()
+	var console_box := BoxMesh.new()
+	console_box.size = Vector3(1.25, 1.6, 0.55)
+	console_mesh.mesh = console_box
+	console_mesh.material_override = MAT_ALERT
+	terminal.add_child(console_mesh)
 
 func _build_hide_spots() -> void:
 	for index in range(2):
