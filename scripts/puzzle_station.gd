@@ -124,6 +124,8 @@ func _commit_puzzle() -> bool:
 			success = PuzzleSystem.submit_reactor_shutdown(sequence)
 		"robot_arms":
 			success = PuzzleSystem.submit_robot_arms(sequence)
+		"camera_grid":
+			success = PuzzleSystem.submit_camera_grid(sequence)
 		"omega_biochips":
 			success = PuzzleSystem.submit_biochips(sequence)
 		"omega_download":
