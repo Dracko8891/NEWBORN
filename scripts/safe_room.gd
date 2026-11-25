@@ -10,6 +10,8 @@ func _ready() -> void:
 func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
 		body.set("in_safe_room", true)
+		GameState.set_flag("safe_room_visited_chapter_%d" % GameState.chapter)
+		GameState.save_game()
 		GameState.notification_requested.emit("Zona segura: Newborn não pode entrar")
 
 func _on_body_exited(body: Node3D) -> void:
