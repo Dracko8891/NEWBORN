@@ -20,7 +20,9 @@ func _ready() -> void:
 	_build_chapter_landmarks()
 	_build_chapter_wings()
 	_build_hide_spots()
-	_build_safe_room()
+	var chapter_data := Campaign.get_chapter(chapter_number)
+	if bool(chapter_data.get("safe_room", false)):
+		_build_safe_room()
 	_build_supply_pickups()
 	_build_objectives()
 	_build_chapter_puzzle_stations()
@@ -175,19 +177,19 @@ func _build_chapter_wings() -> void:
 	var rooms: Array[Dictionary] = []
 	match chapter_number:
 		1:
-			rooms = [{"name":"TRIAGEM","side":1.0,"z":12.0},{"name":"ENFERMARIA","side":-1.0,"z":-16.0}]
+			rooms = [{"name":"TRIAGEM","side":1.0,"z":-16.0},{"name":"ENFERMARIA","side":-1.0,"z":-30.0}]
 		2:
-			rooms = [{"name":"RECEPÇÃO LESTE","side":1.0,"z":12.0},{"name":"MATRIZ CENTRAL","side":-1.0,"z":-16.0}]
+			rooms = [{"name":"RECEPÇÃO LESTE","side":1.0,"z":-16.0},{"name":"MATRIZ CENTRAL","side":-1.0,"z":-30.0}]
 		3:
-			rooms = [{"name":"ALOJAMENTOS","side":1.0,"z":12.0},{"name":"PSICOLOGIA","side":-1.0,"z":-16.0}]
+			rooms = [{"name":"ALOJAMENTOS","side":1.0,"z":22.0},{"name":"PSICOLOGIA","side":-1.0,"z":-30.0}]
 		4:
-			rooms = [{"name":"CULTURA CELULAR","side":1.0,"z":12.0},{"name":"BANCADA DE SÍNTESE","side":-1.0,"z":-16.0}]
+			rooms = [{"name":"CULTURA CELULAR","side":1.0,"z":22.0},{"name":"BANCADA DE SÍNTESE","side":-1.0,"z":-30.0}]
 		5:
-			rooms = [{"name":"CONTROLE DE ENERGIA","side":1.0,"z":12.0},{"name":"CÂMARA DO REATOR","side":-1.0,"z":-16.0}]
+			rooms = [{"name":"CÂMARA DO REATOR","side":-1.0,"z":-30.0}]
 		6:
-			rooms = [{"name":"TUBOS EVOLUTIVOS","side":1.0,"z":12.0},{"name":"CÂMARA OMEGA","side":-1.0,"z":-16.0}]
+			rooms = [{"name":"TUBOS EVOLUTIVOS","side":1.0,"z":22.0},{"name":"CÂMARA OMEGA","side":-1.0,"z":-30.0}]
 		7:
-			rooms = [{"name":"ÁTRIO RUPTURADO","side":1.0,"z":12.0},{"name":"HANGAR DE CARGA","side":-1.0,"z":-16.0}]
+			rooms = [{"name":"ÁTRIO RUPTURADO","side":1.0,"z":22.0},{"name":"HANGAR DE CARGA","side":1.0,"z":-30.0}]
 	for index in range(rooms.size()):
 		var room: Dictionary = rooms[index]
 		var side := float(room.side)
