@@ -32,8 +32,8 @@ func _make_box(label: String, pos: Vector3, size: Vector3, mat: Material, solid:
 
 func _build_sector() -> void:
 	var data := Campaign.get_chapter(chapter_number)
-	var wall := MAT_WALL
-	var floor_mat := MAT_FLOOR
+	var wall := _chapter_material(chapter_number, false)
+	var floor_mat := _chapter_material(chapter_number, true)
 	var alert := MAT_ALERT
 	_make_box("Setor_Piso", Vector3(0, -0.2, 0), Vector3(18, 0.4, 70), floor_mat)
 	_make_box("Setor_Teto", Vector3(0, 4.0, 0), Vector3(18, 0.3, 70), wall)
@@ -96,3 +96,19 @@ func _spawn_hunter() -> void:
 	hunter.name = "NewbornHunter"
 	hunter.position = Vector3(0, 0.1, -18)
 	add_child(hunter)
+
+func _chapter_material(chapter: int, floor_surface: bool) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	var colors := [
+		Color(0.22, 0.27, 0.29), Color(0.12, 0.24, 0.29),
+		Color(0.26, 0.22, 0.29), Color(0.18, 0.31, 0.25),
+		Color(0.16, 0.20, 0.24), Color(0.12, 0.13, 0.18),
+		Color(0.26, 0.24, 0.20)
+	]
+	var base: Color = colors[clampi(chapter - 1, 0, 6)]
+	if floor_surface:
+		base = base.darkened(0.58)
+	material.albedo_color = base
+	material.metallic = 0.42 if not floor_surface else 0.62
+	material.roughness = 0.68
+	return material
