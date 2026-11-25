@@ -8,6 +8,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 GameState="*res://systems/game_state.gd"
+CampaignDirector="*res://systems/campaign_director.gd"
 
 [display]
 window/size/viewport_width=1280
