@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Test offline generated asset pipeline
+        run: |
+          python -m unittest discover -s tests -p 'test_asset_pipeline.py' -v
+          python tools/asset_pipeline.py check-manifest
       - name: Install Godot
         uses: chickensoft-games/setup-godot@v2
         with:
