@@ -46,13 +46,19 @@ func _run() -> void:
 	mock_player.free()
 
 	# Safe storage supports bulk deposit, withdrawal and persistence.
+	game_state.set_health_state(1)
+	game_state.flashlight_charge_saved = 123.0
 	assert(game_state.add_item("keycard_test", "Cartão de teste", false))
 	assert(game_state.store_all_items() == 1)
 	assert(game_state.inventory.is_empty())
 	assert(game_state.safe_storage_count() == 1)
 	assert(game_state.save_game())
 	game_state.safe_storage.clear()
+	game_state.set_health_state(0)
+	game_state.flashlight_charge_saved = 0.0
 	assert(game_state.load_game())
+	assert(game_state.health_state == 1)
+	assert(is_equal_approx(game_state.flashlight_charge_saved, 123.0))
 	assert(game_state.safe_storage_count() == 1)
 	assert(game_state.retrieve_all_items() == 1)
 	assert(game_state.has_item("keycard_test"))
