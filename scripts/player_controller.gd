@@ -46,6 +46,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		interact()
 	elif event.is_action_pressed("dynamo"):
 		pump_dynamo()
+	elif event.is_action_pressed("use_medical"):
+		use_medical_resource()
+	elif event.is_action_pressed("use_battery"):
+		use_battery_resource()
 
 func _rotate_view(delta: Vector2) -> void:
 	rotate_y(-delta.x * mouse_sensitivity)
@@ -117,6 +121,24 @@ func pump_dynamo() -> void:
 	look_enabled = true
 	if not in_safe_room:
 		get_tree().call_group("noise_listeners", "hear_noise", global_position, 0.9)
+
+
+func use_medical_resource() -> void:
+	if GameState.health_state != 1:
+		GameState.notification_requested.emit("Nenhum ferimento precisa de tratamento")
+		return
+	for item_id in ["kit_estanca", "hemostatic_kit", "bandage", "curativo", "kit_medico", "first_aid_kit", "medkit", "hypo_spray", "hipospray"]:
+		if GameState.has_item(item_id):
+			GameState.use_item(item_id, self)
+			return
+	GameState.notification_requested.emit("Você não possui itens médicos")
+
+func use_battery_resource() -> void:
+	for item_id in ["bateria", "battery", "energy_cell", "celula_energia"]:
+		if GameState.has_item(item_id):
+			GameState.use_item(item_id, self)
+			return
+	GameState.notification_requested.emit("Você não possui baterias")
 
 func interact() -> void:
 	if interact_ray.is_colliding():
