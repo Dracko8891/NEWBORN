@@ -295,7 +295,8 @@ func _build_supply_pickups() -> void:
 				{"id":"battery","label":"Bateria de lanterna","position":Vector3(5.5,0.8,-5.0),"consumable":true},
 				{"id":"calibration_chip_east","label":"Chip de Calibração Leste","position":Vector3(-5.5,0.8,12.0)},
 				{"id":"calibration_chip_west","label":"Chip de Calibração Oeste","position":Vector3(5.5,0.8,2.0)},
-				{"id":"dielectric_key","label":"Chave Dielétrica","position":Vector3(-5.5,0.8,-20.0)}
+				{"id":"dielectric_key","label":"Chave Dielétrica","position":Vector3(-5.5,0.8,-20.0)},
+				{"id":"tricorder","label":"Tricorder de Campo","position":Vector3(5.5,0.8,-12.0)}
 			]
 		3:
 			supplies = [
@@ -424,13 +425,16 @@ func _build_chapter_puzzle_stations() -> void:
 		1:
 			_add_puzzle_station("medical_pin", "FECHADURA 0719", "Use a anotação encontrada na triagem.", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], ["0", "7", "1", "9"], Vector3(-6.5, 1.0, -10.0), "", {"pin_note_0719":1})
 			_add_puzzle_station("medical_relays", "RELÉS MÉDICOS", "Restaure os dois relés identificados no painel.", ["cyan", "amber"], ["cyan", "amber"], Vector3(6.0, 1.0, -10.0), "", {"supervisor_badge":1})
+			_add_puzzle_station("set_flag", "MENSAGEM DE CLARA", "Ouça a última transmissão de Clara Sato e siga o sinal de socorro.", ["ouvir"], ["ouvir"], Vector3(0, 1.0, -30.0), "clara_distress_followed")
 		2:
 			_add_puzzle_station("dna_matrix", "MATRIZ DE CALIBRAGEM", "Calibre primeiro o canal Leste e depois o Oeste.", ["east", "west"], ["east", "west"], Vector3(0, 1.0, -8.0), "", {"calibration_chip_east":1, "calibration_chip_west":1})
 			_add_puzzle_station("set_flag", "CAMPO DA ALA LESTE", "Use a Chave Dielétrica para desativar o campo magnético.", ["desativar"], ["desativar"], Vector3(6.0, 1.0, 8.0), "east_field_disabled", {"dielectric_key":1})
+			_add_puzzle_station("set_flag", "SCAN DO CABO OESTE", "Use o Tricorder de Campo para rastrear o cabo oeste.", ["escanear"], ["escanear"], Vector3(0, 1.0, -16.0), "west_cable_scanned", {"tricorder":1})
 		3:
 			_add_puzzle_station("quarters_pin", "ACESSO DOS ALOJAMENTOS 0315", "Use o código encontrado nos registros de psicologia.", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], ["0", "3", "1", "5"], Vector3(-6.0, 1.0, 12.0))
 			_add_puzzle_station("therapy_melody", "TERAPIA SONORA", "Reproduza a gravação: Dó, Mi, Sol, Ré, Lá.", ["C", "E", "G", "D", "A"], ["C", "E", "G", "D", "A"], Vector3(0, 1.0, 4.0))
 			_add_puzzle_station("set_flag", "LEITOR DE CHIP ALFA", "Sincronize o Chip Alpha e instale o módulo do Tricorder.", ["sincronizar"], ["sincronizar"], Vector3(-6.0, 1.0, -18.0), "alpha_chip_recovered", {"alpha_chip":1, "tricorder_upgrade":1})
+			_add_puzzle_station("set_flag", "SAÍDA DO REFEITÓRIO", "Libere a porta de retorno ao Átrio Central.", ["liberar"], ["liberar"], Vector3(0, 1.0, -30.0), "cafeteria_exit_unlocked", {"alpha_chip":1})
 		4:
 			_add_puzzle_station("set_flag", "DRENAGEM DE AMÔNIA", "Equipe a Máscara de Gás e abra a linha de purga.", ["drenar"], ["drenar"], Vector3(0, 1.0, 8.0), "ammonia_fog_drained", {"gas_mask":1})
 			_add_puzzle_station("synthesis_recipe", "BANCADA DE SÍNTESE", "Misture Nitro-Estéril ×2, Ácido Tampão ×1 e Enzima ×3 nessa ordem.", ["nitro", "acid", "enzyme"], ["nitro", "nitro", "acid", "enzyme", "enzyme", "enzyme"], Vector3(0, 1.0, -2.0), "", {"nitro_sterile":2, "acid_buffer":1, "enzyme":3})
@@ -439,10 +443,12 @@ func _build_chapter_puzzle_stations() -> void:
 		5:
 			_add_puzzle_station("reactor_shutdown", "PROCEDIMENTO DO REATOR", "Apague as luzes e opere os braços: esquerdo, central, direito.", ["lights_off", "arm_left", "arm_center", "arm_right"], ["lights_off", "arm_left", "arm_center", "arm_right"], Vector3(0, 1.0, -12.0))
 			_add_puzzle_station("robot_arms", "CONTROLE DOS BRAÇOS", "Opere os braços na ordem: esquerdo, central, direito.", ["left", "center", "right"], ["left", "center", "right"], Vector3(6.0, 1.0, 10.0))
+			_add_puzzle_station("camera_grid", "GRADE DE CÂMERAS", "Desative as câmeras na sequência A, B e C.", ["cam_a", "cam_b", "cam_c"], ["cam_a", "cam_b", "cam_c"], Vector3(-6.0, 1.0, -5.0))
 			_add_puzzle_station("set_flag", "ARCO ELÉTRICO", "Use o arco elétrico para cegar o Newborn.", ["disparar"], ["disparar"], Vector3(6.0, 1.0, 2.0), "electric_arc_used", {"electric_arc":1})
 			_add_puzzle_station("set_flag", "COFRE GAMA", "Sincronize o Chip Gamma após estabilizar o núcleo.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -25.0), "gamma_chip_recovered", {"gamma_chip":1})
 			_add_puzzle_station("set_flag", "PEDESTAL DE CHIPS", "Insira os Chips Beta e Gamma para estabilizar a saída.", ["inserir"], ["inserir"], Vector3(0, 1.0, -30.0), "core_chips_inserted", {"beta_chip":1, "gamma_chip":1})
 		6:
+			_add_puzzle_station("set_flag", "LEITURA DOS TUBOS", "Escaneie os quatro estágios biológicos com o Tricorder Nv2.", ["escanear"], ["escanear"], Vector3(6.0, 1.0, 12.0), "omega_tubes_scanned", {"tricorder_upgrade":1})
 			_add_puzzle_station("omega_biochips", "MATRIZ EVOLUTIVA", "Ordene os estágios: Celular, Esquelético, Neural, Despertar.", ["cellular", "skeletal", "neural", "awakening"], ["cellular", "skeletal", "neural", "awakening"], Vector3(0, 1.0, -14.0))
 			_add_puzzle_station("omega_download", "DOWNLOAD ÔMEGA", "Inicie a extração. O terminal precisa de 20 segundos sem interrupção.", ["iniciar"], ["iniciar"], Vector3(6.0, 1.0, -24.0))
 			_add_puzzle_station("set_flag", "CARTÃO MESTRE ÔMEGA", "Valide o Cartão Mestre Ômega recolhido.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -27.0), "omega_master_card_recovered", {"omega_master_card":1})
