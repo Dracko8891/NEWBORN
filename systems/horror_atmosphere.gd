@@ -7,7 +7,7 @@ const BASE_FOV := 70.0
 var _player: Node3D
 var _camera: Camera3D
 var _flashlight: SpotLight3D
-var _dust: CPUParticles3D
+var _dust: GPUParticles3D
 var _overlay: ColorRect
 var _shader_material: ShaderMaterial
 var _viewmodel: Node3D
@@ -97,12 +97,12 @@ func _create_viewmodel() -> void:
 	_add_box(_viewmodel, "FlashlightGrip", Vector3(0.08, -0.29, -0.82), Vector3(0.13, 0.18, 0.14), sleeve)
 
 func _create_dust() -> void:
-	_dust = CPUParticles3D.new()
+	_dust = GPUParticles3D.new()
 	_dust.name = "FloatingSpores"
 	_dust.amount = DUST_COUNT
 	_dust.lifetime = 8.0
 	_dust.explosiveness = 0.0
-	_dust.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	_dust.emission_shape = GPUParticles3D.EMISSION_SHAPE_BOX
 	_dust.emission_box_extents = Vector3(8.0, 2.5, 8.0)
 	_dust.direction = Vector3(0.1, 1.0, 0.0)
 	_dust.spread = 180.0

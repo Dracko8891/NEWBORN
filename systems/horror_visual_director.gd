@@ -53,7 +53,7 @@ static func _noise_texture(chapter: int, surface: String, as_normal: bool) -> Te
 	texture.width = 128
 	texture.height = 128
 	texture.seamless = true
-	texture.seamless_blend_skirt = 8
+	texture.seamless_blend_skirt = 0.1
 	texture.noise = noise
 	texture.as_normal_map = as_normal
 	texture.bump_strength = 0.32
