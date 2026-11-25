@@ -28,7 +28,7 @@ func _ready() -> void:
 	load_game()
 
 func start_new_game(mode: int = StartMode.STANDARD) -> void:
-	start_mode = mode as StartMode
+	start_mode = clampi(mode, 0, 1)
 	chapter = 1
 	health_state = 0
 	flashlight_charge_saved = 240.0
@@ -250,7 +250,7 @@ func load_game() -> bool:
 				unlocked_chapters.append(unlocked)
 	puzzle_flags = data.get("puzzle_flags", {}) if typeof(data.get("puzzle_flags", {})) == TYPE_DICTIONARY else {}
 	collected_flags = data.get("collected_flags", {}) if typeof(data.get("collected_flags", {})) == TYPE_DICTIONARY else {}
-	start_mode = int(data.get("start_mode", 0)) as StartMode
+	start_mode = clampi(int(data.get("start_mode", 0)), 0, 1)
 	photosensitive_mode = bool(data.get("photosensitive_mode", false))
 	directional_subtitles = bool(data.get("directional_subtitles", true))
 	inventory_changed.emit()
