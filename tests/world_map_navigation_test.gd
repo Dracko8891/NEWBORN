@@ -10,7 +10,7 @@ func _run() -> void:
 	assert(topology_errors.is_empty(), "Map topology errors: " + str(topology_errors))
 
 	var chapter_one := Navigation.rooms_for_chapter(1)
-	assert(chapter_one.size() == 4, "Chapter 1 should expose its four authored map rooms")
+	assert(chapter_one.size() == 6, "Chapter 1 should expose its six authored map rooms, including the annex and infirmary")
 
 	var security_neighbors := Navigation.adjacent_rooms("c1_security")
 	assert(security_neighbors.size() == 1)
