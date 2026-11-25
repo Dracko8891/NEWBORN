@@ -169,3 +169,18 @@ A triagem é arquitetural, não auditoria de segurança. Antes de executar terce
 ## Regra de runtime offline
 
 MCP, Google Cloud, Gemini, Flow, Effigy, OhMyGame e ferramentas de edição são exclusivos do ambiente de autoria. APK e Web devem conter apenas recursos locais do projeto. Desativar/remover todos os MCPs e desconectar a rede não pode impedir iniciar, salvar, carregar ou concluir uma partida.
+
+
+## Godot AI MCP — procedimento local do editor
+
+O MCP prioritário para editar o projeto deve ser o Godot AI, não o Unreal-MCP nem o Summer Engine.
+
+1. Abra o projeto NEWBORN com Godot 4.7.2.
+2. Consulte o README e os releases atuais em https://github.com/hi-godot/godot-ai e confirme compatibilidade exata com 4.7.2.
+3. Instale o add-on oficial pelo AssetLib ou release verificado em addons/godot_ai/; não sobrescreva uma versão existente.
+4. Ative em Project → Project Settings → Plugins → Godot AI.
+5. No dock Godot AI, selecione o cliente MCP e use Configure para gerar a configuração correta do cliente. A documentação atual descreve attach/stdio; não use URL HTTP copiada de exemplos antigos.
+6. Reinicie o cliente, confirme status conectado e liste as ferramentas disponíveis antes de executar qualquer edição.
+7. Faça um teste de leitura (listar cena ativa/árvore de nós) antes de permitir escrita. Confirme depois que o jogo roda com o add-on desativado.
+
+**Estado nesta revisão:** a skill e o procedimento foram adicionados ao repositório. Não foi possível instalar o add-on no desktop do usuário nem confirmar conexão ao editor nesta sessão.
