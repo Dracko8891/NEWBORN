@@ -149,6 +149,9 @@ func _run() -> void:
 	game_state.set_flag("hangar_couplings_complete")
 	assert(replay_station._commit_puzzle())
 	replay_station.free()
+	game_state.set_flag("omega_siege_survived", false)
+	game_state.set_flag("omega_download_complete", false)
+	game_state.set_flag("hangar_couplings_complete", false)
 
 	# Chapter 7: the override cannot run until all couplings and the master card exist.
 	assert(puzzle_system.activate_hydraulic_coupling(1))
