@@ -19,6 +19,16 @@ func _run() -> void:
 	await process_frame
 	controls.visible = true
 	controls._rebuild_button_rects()
+	assert(controls.look_slider != null and controls.movement_slider != null, "Mobile control tuning sliders must exist")
+	var previous_look := GameState.look_sensitivity
+	controls.look_slider.value = 1.25
+	assert(is_equal_approx(GameState.look_sensitivity, 1.25), "Look slider must update the global setting")
+	var saved_config := ConfigFile.new()
+	assert(saved_config.load("user://config.cfg") == OK, "Look sensitivity must persist to user://config.cfg")
+	assert(is_equal_approx(float(saved_config.get_value("controls", "look_sensitivity", 0.0)), 1.25), "Saved look sensitivity must match slider")
+	controls.look_slider.value = previous_look
+	controls._pulse_button("interact")
+	assert(controls.button_scales.has("interact"), "Touch press must start a button pulse tween")
 
 	for action in ["interact", "crouch", "sprint", "flashlight", "medical", "battery"]:
 		assert(controls.button_rects.has(action), "Missing mobile button: " + action)
