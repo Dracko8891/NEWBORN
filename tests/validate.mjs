@@ -5,6 +5,7 @@ const html=fs.readFileSync('index.html','utf8');
 const js=fs.readFileSync('src/main.js','utf8');
 const css=fs.readFileSync('src/style.css','utf8');
 const env=fs.readFileSync('src/environment.js','utf8');
+const billboards=fs.readFileSync('src/billboards.js','utf8');
 const icon=fs.readFileSync('public/icon.svg','utf8');
 const syntax=spawnSync(process.execPath,['--check','src/main.js'],{encoding:'utf8'});assert.equal(syntax.status,0,'JavaScript syntax error: '+syntax.stderr);
 assert(html.includes('/src/main.js'),'Vite entry missing');
@@ -14,5 +15,7 @@ assert(css.includes('#stick')&&css.includes('#modal'),'HUD/touch styling missing
 assert(js.includes("import { buildFacility } from './environment.js'") && js.includes('buildFacility(scene)'), 'Facility environment is not integrated');
 for(const token of ['LABORATÓRIO BIOLÓGICO','MANUTENÇÃO','ACESSO RESTRITO','CylinderGeometry','CanvasTexture']) assert(env.includes(token), 'Missing environmental landmark '+token);
 assert(icon.includes('<svg') && icon.includes('NEWB'), 'Game icon missing');
+assert(js.includes("import { addFacilityBillboards } from './billboards.js'") && js.includes('billboardFX.update'), 'Billboard renderer is not integrated');
+assert(billboards.includes('new THREE.Sprite') && billboards.includes('SpriteMaterial'), 'Camera-facing billboard sprites missing');
 const ids=[...html.matchAll(/id="([^"]+)"/g)].map(x=>x[1]);assert.equal(new Set(ids).size,ids.length,'duplicate HTML IDs');
 console.log('NEWBORN static validation: PASS');
