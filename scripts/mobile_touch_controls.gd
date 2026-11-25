@@ -81,6 +81,7 @@ func _touch_drag(index: int, pos: Vector2, relative: Vector2) -> void:
 		var target := get_tree().get_first_node_in_group("player")
 		if target != null and target.has_method("apply_touch_look"):
 			target.apply_touch_look(relative)
+		queue_redraw()
 
 func _touch_end(index: int) -> void:
 	if index == joystick_finger:
