@@ -9,6 +9,7 @@ const Campaign = preload("res://systems/campaign_data.gd")
 func _ready() -> void:
 	CampaignDirector.begin_chapter(chapter_number)
 	_build_sector()
+	_build_chapter_landmarks()
 	_build_objectives()
 	_spawn_hunter()
 
@@ -112,3 +113,52 @@ func _chapter_material(chapter: int, floor_surface: bool) -> StandardMaterial3D:
 	material.metallic = 0.42 if not floor_surface else 0.62
 	material.roughness = 0.68
 	return material
+
+func _build_chapter_landmarks() -> void:
+	match chapter_number:
+		1:
+			for i in range(4):
+				_make_box("Leito_Medico_%02d" % i, Vector3(-5.8, 0.55, -22.0 + float(i) * 5.5), Vector3(2.0, 1.1, 2.8), MAT_WALL)
+			_make_box("Balcao_Recepcao", Vector3(5.5, 0.65, 12), Vector3(3.2, 1.3, 1.2), MAT_WALL)
+		2:
+			_make_box("Passarela_Mezzanino", Vector3(0, 3.0, -2), Vector3(14, 0.3, 18), MAT_WALL)
+			for i in range(3):
+				_make_cylinder("Nucleo_Holografico_%d" % i, Vector3(-4.5 + float(i) * 4.5, 1.6, -5), 0.7, 3.0, MAT_ALERT)
+			_make_box("Matriz_Central", Vector3(0, 1.5, 8), Vector3(5.5, 2.6, 2.0), MAT_ALERT)
+		3:
+			for i in range(6):
+				_make_box("Modulo_Alojamento_%02d" % i, Vector3(-6.0 + float(i % 2) * 12.0, 1.1, -22.0 + float(i / 2) * 7.0), Vector3(2.2, 2.2, 3.4), MAT_WALL)
+			_make_box("Mesa_Terapia_Acustica", Vector3(0, 0.8, 4), Vector3(4.0, 1.6, 2.0), MAT_ALERT)
+		4:
+			for i in range(5):
+				_make_cylinder("Tanque_Genese_%02d" % i, Vector3(-6.0 + float(i % 3) * 6.0, 2.0, -20.0 + float(i / 3) * 14.0), 1.25, 4.0, MAT_ALERT)
+			_make_box("Passarela_Superior_Respiravel", Vector3(0, 2.1, 10), Vector3(15, 0.3, 5), MAT_WALL)
+		5:
+			_make_cylinder("Reator_Plasma", Vector3(0, 1.8, -12), 3.0, 5.5, MAT_ALERT)
+			for i in range(3):
+				_make_box("Passarela_Nucleo_%d" % i, Vector3(-5.0 + float(i) * 5.0, 1.0 + float(i % 2) * 0.7, -12), Vector3(1.2, 0.2, 17), MAT_WALL)
+			_make_box("Console_Bracos_Roboticos", Vector3(6, 1.0, 10), Vector3(2.5, 2.0, 1.2), MAT_ALERT)
+		6:
+			for i in range(4):
+				_make_cylinder("Tubo_Evolucao_%d" % i, Vector3(-6.0 + float(i) * 4.0, 2.0, -14), 0.85, 4.2, MAT_ALERT)
+			_make_box("Camara_00", Vector3(0, 1.8, -28), Vector3(8, 3.6, 0.35), MAT_WALL)
+			_make_box("Terminal_Download", Vector3(6, 1.2, -24), Vector3(1.0, 2.4, 1.0), MAT_ALERT)
+		7:
+			_make_box("Plataforma_Carga", Vector3(0, 0.5, -16), Vector3(14, 1.0, 18), MAT_WALL)
+			_make_box("Cabine_Override", Vector3(-6, 1.8, -27), Vector3(3.0, 3.6, 3.0), MAT_ALERT)
+			for i in range(3):
+				_make_cylinder("Acoplamento_Hidraulico_%d" % i, Vector3(-5.0 + float(i) * 5.0, 1.1, -8), 0.45, 2.2, MAT_ALERT)
+
+func _make_cylinder(label: String, pos: Vector3, radius: float, height: float, mat: Material) -> void:
+	var node := Node3D.new()
+	node.name = label
+	node.position = pos
+	add_child(node)
+	var mesh_node := MeshInstance3D.new()
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	mesh_node.mesh = mesh
+	mesh_node.material_override = mat
+	node.add_child(mesh_node)
