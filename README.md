@@ -10,7 +10,8 @@ Projeto de survival horror FPS 3D para Android em paisagem e Web, usando Godot 4
 - Construtor procedural de setores com materiais de identidade diferentes por capítulo.
 - Controlador FPS com movimento, sprint, agachar, lanterna, dínamo e interação por RayCast.
 - Inventário com 6 slots iniciais, 8 no capítulo 4, pilhas limitadas a 2, armazenamento e save/load.
-- Inimigo Newborn com estados de patrulha, investigação, busca, perseguição e atordoamento; percepção visual e auditiva inicial.
+- Inimigo Newborn com estados de patrulha, investigação, busca, perseguição e atordoamento; percepção visual/auditiva inicial e ataque por proximidade.
+- Esconderijos interativos e estados de dano em dois estágios (trauma/adrenalina e morte).
 - Workflow GitHub Actions para importar, analisar e iniciar o projeto em modo headless.
 
 ## Capítulos mapeados
@@ -35,7 +36,7 @@ Esta branch contém uma **estrutura funcional inicial e protótipos de sistemas*
 - O workflow headless já concluiu com sucesso em commits anteriores da branch; cada novo push dispara nova validação.
 - A geometria atual é blockout procedural, não arte final.
 - A IA ainda não implementa audição/visão/olfato completos, adaptação de esconderijos, mimetismo, captura ou animação cinematográfica.
-- Os sete cenários têm estrutura-base e identidade visual inicial, mas não possuem ainda o desenho artesanal completo de cada setor.
+- Os sete cenários têm blockout e marcos de cenário distintos (tanques, reator, alojamentos, passarela, hangar), mas não possuem ainda desenho artesanal completo de cada setor.
 - Puzzles têm funções de validação, mas falta interface diegética e integração de todos os passos com os objetivos.
 - PADD/LCARS, mapa 3D, áudio/logs, menus, acessibilidade, controles touch completos, cinemáticas, áudio final e export Android/Web permanecem em desenvolvimento.
 - Não há APK final nem validação em aparelho físico nesta etapa.
