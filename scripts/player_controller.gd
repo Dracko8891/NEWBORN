@@ -75,6 +75,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		use_medical_resource()
 	elif event.is_action_pressed("use_battery"):
 		use_battery_resource()
+	elif event is InputEventKey and not event.pressed:
+		if event.keycode == KEY_Q or event.keycode == KEY_E:
+			set_peek(0.0)
 	elif event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_Q:
 			set_peek(-1.0)
@@ -270,7 +273,7 @@ func _physics_process(delta: float) -> void:
 			input_2d = touch_move
 	var direction := (global_transform.basis * Vector3(input_2d.x, 0.0, input_2d.y)).normalized()
 	var sprinting := Input.is_action_pressed("sprint") and stamina > 0.0 and not crouched and not sliding
-	var speed := SLIDE_HEIGHT if false else walk_speed
+	var speed := walk_speed
 	if sliding:
 		speed = slide_speed
 	elif crouched:
