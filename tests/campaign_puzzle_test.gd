@@ -1,5 +1,7 @@
 extends Node
 
+const Campaign = preload("res://systems/campaign_data.gd")
+
 func _ready() -> void:
 	_run()
 
@@ -19,6 +21,22 @@ func _run() -> void:
 	game_state.collected_flags.clear()
 	campaign_director.objective_done.clear()
 	campaign_director.current_objective = 0
+
+	# All seven chapters must expose a title, five objectives and a scene resource.
+	for chapter in range(1, 8):
+		var chapter_data := Campaign.get_chapter(chapter)
+		assert(not chapter_data.is_empty())
+		assert(chapter_data.get("objectives", []).size() == 5)
+		assert(ResourceLoader.exists("res://chapters/chapter_%02d.tscn" % chapter))
+
+	# Quest pickups remain valid after a consumable is used.
+	game_state.chapter = 1
+	game_state.collected_flags["chapter_1:c1_kit_estanca_01"] = true
+	assert(campaign_director._objective_requirements_met("c1_o1"))
+	game_state.collected_flags["chapter_1:c1_supervisor_badge_03"] = true
+	game_state.collected_flags["chapter_1:c1_pin_note_0719_04"] = true
+	game_state.set_flag("medical_door_unlocked")
+	assert(campaign_director._objective_requirements_met("c1_o2"))
 
 	# Chapter 1: wrong PIN/relay sequence must not unlock progression.
 	assert(not puzzle_system.submit_pin("0718"))
@@ -51,6 +69,27 @@ func _run() -> void:
 	assert(not puzzle_system.submit_quarters_pin("0314"))
 	assert(puzzle_system.submit_quarters_pin("0315"))
 	assert(campaign_director._objective_requirements_met("c3_o1"))
+
+	# Chapter 4: synthesis requires and consumes the exact ingredient quantities.
+	var synthesis_station: Node = load("res://scripts/puzzle_station.gd").new()
+	synthesis_station.puzzle_id = "synthesis_recipe"
+	synthesis_station.required_items = {"nitro_sterile":2, "acid_buffer":1, "enzyme":3}
+	synthesis_station.entered = _strings(["nitro", "nitro", "acid", "enzyme", "enzyme", "enzyme"])
+	assert(not synthesis_station._commit_puzzle())
+	assert(game_state.add_item("nitro_sterile", "Nitro-Estéril", true))
+	assert(game_state.add_item("nitro_sterile", "Nitro-Estéril", true))
+	assert(game_state.add_item("acid_buffer", "Ácido Tampão", true))
+	assert(game_state.add_item("enzyme", "Enzima", true))
+	assert(game_state.add_item("enzyme", "Enzima", true))
+	assert(game_state.add_item("enzyme", "Enzima", true))
+	assert(synthesis_station._commit_puzzle())
+	assert(not game_state.has_item("nitro_sterile"))
+	assert(not game_state.has_item("acid_buffer"))
+	assert(not game_state.has_item("enzyme"))
+	game_state.chapter = 4
+	assert(campaign_director._objective_requirements_met("c4_o2"))
+	game_state.chapter = 1
+	synthesis_station.free()
 
 	# Chapter 6: four evolution stages in the correct order.
 	assert(not puzzle_system.submit_biochips(_strings(["cellular", "neural", "skeletal", "awakening"])))
