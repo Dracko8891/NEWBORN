@@ -21,8 +21,11 @@ var crouched: bool = false
 var dynamo_busy: bool = false
 var look_enabled: bool = true
 var hidden_in_cover: bool = false
+var in_safe_room: bool = false
+var crouched_before_hiding: bool = false
 var peek_direction: float = 0.0
 var noise_level: float = 0.0
+var noise_emit_timer: float = 0.0
 var adrenaline_timer: float = 0.0
 var dead: bool = false
 
@@ -37,7 +40,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_rotate_view(event.relative)
 	elif event.is_action_pressed("flashlight"):
 		toggle_flashlight()
-	elif event.is_action_pressed("crouch"):
+	elif event.is_action_pressed("crouch") and not hidden_in_cover:
 		crouched = not crouched
 	elif event.is_action_pressed("interact"):
 		interact()
@@ -50,20 +53,29 @@ func _rotate_view(delta: Vector2) -> void:
 
 func apply_touch_look(delta: Vector2) -> void:
 	if look_enabled:
-		_rotate_view(delta * 1.0)
+		_rotate_view(delta)
 
 func is_hidden() -> bool:
 	return hidden_in_cover
 
 func enter_hide_spot() -> void:
+	if hidden_in_cover:
+		return
+	crouched_before_hiding = crouched
 	hidden_in_cover = true
+	crouched = true
+	noise_level = 0.0
 	velocity = Vector3.ZERO
 
 func leave_hide_spot() -> void:
+	if not hidden_in_cover:
+		return
 	hidden_in_cover = false
+	crouched = crouched_before_hiding
+	noise_level = 0.0
 
 func take_hit() -> void:
-	if dead or adrenaline_timer > 0.0 or hidden_in_cover:
+	if dead or adrenaline_timer > 0.0 or hidden_in_cover or in_safe_room:
 		return
 	if GameState.health_state == 0:
 		GameState.set_health_state(1)
@@ -84,20 +96,27 @@ func toggle_flashlight() -> void:
 		flashlight_on = not flashlight_on
 		flashlight.visible = flashlight_on
 
+func recharge_flashlight(amount: float = 90.0) -> bool:
+	if amount <= 0.0 or flashlight_charge >= flashlight_seconds:
+		return false
+	flashlight_charge = minf(flashlight_seconds, flashlight_charge + amount)
+	flashlight_on = true
+	flashlight.visible = true
+	return true
+
 func pump_dynamo() -> void:
-	if dynamo_busy or flashlight_charge >= flashlight_seconds:
+	if dynamo_busy or flashlight_charge >= flashlight_seconds or hidden_in_cover:
 		return
 	dynamo_busy = true
 	look_enabled = false
 	await get_tree().create_timer(3.0).timeout
 	if not is_inside_tree():
 		return
-	flashlight_charge = flashlight_seconds
-	flashlight_on = true
-	flashlight.visible = true
+	recharge_flashlight(flashlight_seconds)
 	dynamo_busy = false
 	look_enabled = true
-	get_tree().call_group("noise_listeners", "hear_noise", global_position, 0.9)
+	if not in_safe_room:
+		get_tree().call_group("noise_listeners", "hear_noise", global_position, 0.9)
 
 func interact() -> void:
 	if interact_ray.is_colliding():
@@ -108,15 +127,18 @@ func interact() -> void:
 func _physics_process(delta: float) -> void:
 	if adrenaline_timer > 0.0:
 		adrenaline_timer = maxf(0.0, adrenaline_timer - delta)
+	noise_emit_timer = maxf(0.0, noise_emit_timer - delta)
 	if dead:
+		return
+	if hidden_in_cover:
+		velocity = Vector3.ZERO
+		move_and_slide()
 		return
 	var input_2d := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var touch_layer := get_node_or_null("MobileControls/TouchSurface")
 	if touch_layer != null and touch_layer.has_method("get_virtual_move"):
 		var touch_move: Vector2 = touch_layer.get_virtual_move()
 		if touch_move.length() > input_2d.length():
-			# The virtual stick already reports up as a negative Y, matching Input.get_vector().
-			# Inverting Y here made pushing forward move the player backwards on Android.
 			input_2d = touch_move
 	var direction := (transform.basis * Vector3(input_2d.x, 0.0, input_2d.y)).normalized()
 	var sprinting := Input.is_action_pressed("sprint") and stamina > 0.0 and not crouched
@@ -131,7 +153,9 @@ func _physics_process(delta: float) -> void:
 	if sprinting and direction.length() > 0.1:
 		stamina = maxf(0.0, stamina - 24.0 * delta)
 		noise_level = 0.65
-		get_tree().call_group("noise_listeners", "hear_noise", global_position, noise_level)
+		if noise_emit_timer <= 0.0 and not in_safe_room:
+			get_tree().call_group("noise_listeners", "hear_noise", global_position, noise_level)
+			noise_emit_timer = 0.65
 	else:
 		stamina = minf(100.0, stamina + 16.0 * delta)
 		noise_level = 0.08 if direction.length() > 0.1 and not crouched else 0.015
