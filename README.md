@@ -1,36 +1,48 @@
-# PROTOCOLO NEWBORN — Godot reboot
+# PROTOCOLO NEWBORN — reconstrução Godot
 
-Projeto reconstruído em Godot 4.7.2, GDScript e renderer Compatibility (OpenGL ES 3 / WebGL 2), com orientação paisagem.
+Projeto de survival horror FPS 3D para Android em paisagem e Web, usando Godot 4.x, GDScript e renderer Compatibility.
 
-## Plataformas
-- Android: exportação nativa APK.
-- Web: exportação single-threaded para navegadores WebGL 2.
-- Entrada: teclado/mouse, gamepad e multitouch com zonas separadas.
+## Conteúdo incorporado nesta etapa
+- Sete cenas de capítulo (chapters/chapter_01.tscn até chapter_07.tscn) com carregamento por progressão.
+- Dados narrativos e objetivos dos sete capítulos.
+- Diretor de campanha com objetivos sequenciais, salvamento de progresso e transição automática de capítulo.
+- Validações para PIN 0719, relés, melodia, válvulas, biochips e acoplamentos hidráulicos.
+- Construtor procedural de setores com materiais de identidade diferentes por capítulo.
+- Controlador FPS com movimento, sprint, agachar, lanterna, dínamo e interação por RayCast.
+- Inventário com 6 slots iniciais, 8 no capítulo 4, pilhas limitadas a 2, armazenamento e save/load.
+- Inimigo Newborn com estados de patrulha, investigação, busca, perseguição e atordoamento; percepção visual e auditiva inicial.
+- Workflow GitHub Actions para importar, analisar e iniciar o projeto em modo headless.
 
-## Estrutura inicial
-- `scenes/`: cenas jogáveis, setores, salas seguras e puzzles.
-- `scripts/`: controlador FPS, movimento, interação e câmera.
-- `systems/`: estado global, inventário, salvamento, áudio e progressão.
-- `ai/`: percepção e máquina de estados do Newborn.
-- `ui/`: PADD, hotbar, HUD, controles touch e menus.
-- `chapters/`: sete capítulos e dados de missão.
+## Capítulos mapeados
+1. **O Silêncio Após o Grito** — Ala Médica; triagem, PIN 0719, relés e fuga inicial.
+2. **O Coração de Aço** — Átrio; matriz de energia, Chips e Safe Room.
+3. **A Armadilha da Empatia** — Alojamentos/Psicologia; registros, sequência musical, mimetismo vocal.
+4. **Tanques de Gênese** — Bio-Cultura/Síntese; máscara, composto, névoa e válvulas.
+5. **Apagão do Núcleo** — Engenharia Profunda; blecaute, núcleo e Chip Gamma.
+6. **Berçário Proibido** — Subnível Omega; biochips e cerco de 75 segundos.
+7. **Ruptura e Liberdade Fatal** — Hangar; hidráulica, Override e final com as grades térmicas abertas.
 
 ## Regras obrigatórias
-- Sem armas ou combate direto.
-- Lanterna cinética sem soft-lock: dínamo recupera carga em 3 segundos.
-- Inventário: 6 slots; 8 a partir do capítulo 4; consumíveis empilham até 2.
-- Safe Rooms inacessíveis ao inimigo e armazenamento compartilhado.
-- Logs e inspeção 3D pausam o mundo; inventário rápido não pausa.
-- Puzzles validam pré-condições e possuem rotas anti-softlock.
-- Mobile: limitar sombras dinâmicas, partículas, resolução e pós-processamento.
-- Nenhum capítulo é considerado concluído sem testes funcionais, gameplay e desempenho.
+- Sem armas de fogo ou combate direto.
+- Dínamo recupera a carga da lanterna em 3 segundos; o ruído é comunicado aos ouvintes.
+- Inventário 6→8 slots; consumíveis empilham até 2.
+- Safe storage compartilhado.
+- Orientação paisagem e renderer Compatibility para Android/Web.
+- Os objetivos e puzzles estão estruturados como sistemas; ainda precisam de integração completa com interfaces, animações, salas e eventos de história.
 
-## Roadmap
-1. Vertical slice do Capítulo 1: movimentação, lanterna/dínamo, interação, inventário, PIN, armário e IA.
-2. Sistemas globais: PADD, save/load, Safe Rooms, cápsula pneumática, áudio espacial e acessibilidade.
-3. Capítulos 2–7 com progressão e puzzles específicos.
-4. Testes automatizados de invariantes, gameplay e profiling no Moto G35.
-5. Exportação e validação Android/Web.
+## Estado honesto do desenvolvimento
+Esta branch contém uma **estrutura funcional inicial e protótipos de sistemas**, não o jogo final completo.
+- O workflow headless já concluiu com sucesso em commits anteriores da branch; cada novo push dispara nova validação.
+- A geometria atual é blockout procedural, não arte final.
+- A IA ainda não implementa audição/visão/olfato completos, adaptação de esconderijos, mimetismo, captura ou animação cinematográfica.
+- Os sete cenários têm estrutura-base e identidade visual inicial, mas não possuem ainda o desenho artesanal completo de cada setor.
+- Puzzles têm funções de validação, mas falta interface diegética e integração de todos os passos com os objetivos.
+- PADD/LCARS, mapa 3D, áudio/logs, menus, acessibilidade, controles touch completos, cinemáticas, áudio final e export Android/Web permanecem em desenvolvimento.
+- Não há APK final nem validação em aparelho físico nesta etapa.
 
-## Estado atual
-Fundação inicial criada no branch `protocol-newborn-godot`. Ainda não é uma versão jogável completa.
+## Validação automatizada
+O workflow .github/workflows/godot-validation.yml roda:
+1. Importação e análise do projeto com Godot headless.
+2. Inicialização headless por alguns frames.
+
+A aprovação desse workflow valida apenas importação e inicialização técnica; não substitui testes de gameplay, desempenho ou testes no Moto G35.
