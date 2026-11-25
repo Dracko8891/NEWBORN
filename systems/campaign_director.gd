@@ -89,7 +89,6 @@ func restore_campaign_state() -> void:
 	var data := Campaign.get_chapter(GameState.chapter)
 	var objective_count := int(data.get("objectives", []).size())
 	current_objective = clampi(int(GameState.puzzle_flags.get("campaign_objective", 0)), 0, objective_count)
-	_emit_current_objective()
 
 func _on_chapter_completed(chapter: int) -> void:
 	if chapter_transition_pending:
