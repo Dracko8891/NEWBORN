@@ -148,7 +148,8 @@ func _can_see_target(distance: float) -> bool:
 	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 1.4, target.global_position + Vector3.UP * 0.8)
 	query.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	return hit.is_empty() or hit.get("collider") == target
+	# No hit is not proof of visibility: fail closed unless the first collider is the player.
+	return not hit.is_empty() and hit.get("collider") == target
 
 # Rebuild a local 1 m navigation grid from real physics occupancy.
 func _refresh_path(goal: Vector3) -> void:
