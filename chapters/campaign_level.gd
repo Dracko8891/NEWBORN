@@ -16,6 +16,7 @@ func _ready() -> void:
 	_build_chapter_landmarks()
 	_build_hide_spots()
 	_build_safe_room()
+	_build_supply_pickups()
 	_build_objectives()
 	_spawn_hunter()
 
@@ -219,6 +220,34 @@ func _build_safe_room() -> void:
 	console_mesh.mesh = console_box
 	console_mesh.material_override = MAT_ALERT
 	terminal.add_child(console_mesh)
+
+
+func _build_supply_pickups() -> void:
+	var supplies: Array[Dictionary] = [
+		{"id": "kit_estanca", "label": "Kit Estanca", "position": Vector3(-5.5, 0.8, 5.0)},
+		{"id": "battery", "label": "Bateria de lanterna", "position": Vector3(5.5, 0.8, -5.0)}
+	]
+	for supply in supplies:
+		var pickup := Area3D.new()
+		pickup.name = "Pickup_" + str(supply.id)
+		pickup.position = supply.position
+		pickup.set_script(load("res://scripts/item_pickup.gd"))
+		pickup.set("item_id", str(supply.id))
+		pickup.set("display_name", str(supply.label))
+		pickup.set("is_consumable", true)
+		pickup.set("pickup_id", "c%d_%s" % [chapter_number, str(supply.id)])
+		add_child(pickup)
+		var pickup_collision := CollisionShape3D.new()
+		var pickup_shape := SphereShape3D.new()
+		pickup_shape.radius = 0.85
+		pickup_collision.shape = pickup_shape
+		pickup.add_child(pickup_collision)
+		var marker := MeshInstance3D.new()
+		var marker_mesh := BoxMesh.new()
+		marker_mesh.size = Vector3(0.45, 0.45, 0.45)
+		marker.mesh = marker_mesh
+		marker.material_override = MAT_ALERT if str(supply.id) == "kit_estanca" else MAT_FLOOR
+		pickup.add_child(marker)
 
 func _build_hide_spots() -> void:
 	for index in range(2):
