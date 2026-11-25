@@ -7,10 +7,15 @@ var chapter_label: Label
 var objective_label: Label
 var progress_label: Label
 var message_label: Label
+var holographic_map: Control
 
 func _ready() -> void:
 	layer = 25
 	_build_interface()
+	holographic_map = Control.new()
+	holographic_map.name = "HolographicMap"
+	holographic_map.set_script(load("res://scripts/holographic_map.gd"))
+	add_child(holographic_map)
 	CampaignDirector.chapter_started.connect(_on_chapter_started)
 	CampaignDirector.objective_updated.connect(_on_objective_updated)
 	CampaignDirector.campaign_message.connect(_show_message)
@@ -43,6 +48,10 @@ func _build_interface() -> void:
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message_label.modulate = Color(1.0, 0.78, 0.35)
 	column.add_child(message_label)
+	var map_button := Button.new()
+	map_button.text = "ABRIR MAPA HOLOGRÁFICO  [M]"
+	map_button.pressed.connect(_toggle_map)
+	column.add_child(map_button)
 
 func _refresh_current() -> void:
 	var chapter := GameState.chapter
@@ -81,3 +90,12 @@ func _on_chapter_completed(chapter: int) -> void:
 		chapter_label.text = "PROTOCOLO ENCERRADO"
 		progress_label.text = "CAMPANHA 100% — SETE CAPÍTULOS"
 		objective_label.text = "FIM\nA escotilha se fecha. O Newborn alcançou a superfície. O sinal de Clara desaparece."
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_M:
+		_toggle_map()
+		get_viewport().set_input_as_handled()
+
+func _toggle_map() -> void:
+	if holographic_map != null and holographic_map.has_method("toggle_map"):
+		holographic_map.toggle_map()
