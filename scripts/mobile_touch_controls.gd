@@ -195,13 +195,14 @@ func _draw() -> void:
 	var s := get_viewport_rect().size
 	var radius := minf(s.x, s.y) * 0.14
 	var origin := joystick_origin if joystick_finger != -1 else Vector2(radius * 1.45, s.y - radius * 1.45)
-	draw_circle(origin, radius, Color(0.1, 0.72, 0.78, 0.16))
-	draw_circle(origin + joystick_vector * radius, radius * 0.36, Color(0.3, 0.9, 0.9, 0.48))
+	draw_circle(origin, radius, Color(0.1, 0.42, 0.48, 0.075))
+	draw_arc(origin, radius, 0.0, TAU, 40, Color(0.42, 0.72, 0.74, 0.20), 1.3)
+	draw_circle(origin + joystick_vector * radius, radius * 0.34, Color(0.48, 0.78, 0.78, 0.22))
 	var labels := {"interact":"F", "crouch":"C", "sprint":"RUN", "flashlight":"L", "medical":"MED", "battery":"BAT"}
 	for action in button_rects:
 		var rect: Rect2 = button_rects[action]
 		var scale := float(button_scales.get(action, 1.0))
 		var button_radius := rect.size.x * 0.48 * scale
-		draw_circle(rect.get_center(), button_radius, Color(0.06, 0.16, 0.22, 0.72))
-		draw_arc(rect.get_center(), button_radius, 0.0, TAU, 32, Color(0.25, 0.85, 0.88, 0.9), 2.0)
-		draw_string(ThemeDB.fallback_font, rect.position + Vector2(8, rect.size.y * 0.58), labels[action], HORIZONTAL_ALIGNMENT_CENTER, rect.size.x - 16, 14, Color(0.85, 0.98, 1.0))
+		draw_circle(rect.get_center(), button_radius, Color(0.025, 0.045, 0.052, 0.24))
+		draw_arc(rect.get_center(), button_radius, 0.0, TAU, 32, Color(0.48, 0.72, 0.74, 0.38), 1.4)
+		draw_string(ThemeDB.fallback_font, rect.position + Vector2(8, rect.size.y * 0.58), labels[action], HORIZONTAL_ALIGNMENT_CENTER, rect.size.x - 16, 14, Color(0.78, 0.88, 0.88, 0.76))

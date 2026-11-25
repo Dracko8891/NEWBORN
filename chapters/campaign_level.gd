@@ -23,6 +23,7 @@ func _ready() -> void:
 	add_child(campaign_hud)
 	CampaignDirector.begin_chapter(chapter_number)
 	_build_sector()
+	_build_global_architecture_kit()
 	_build_chapter_landmarks()
 	_build_chapter_wings()
 	_build_exploration_routes()
@@ -82,14 +83,14 @@ func _build_sector() -> void:
 	var floor_mat := _chapter_material(chapter_number, true)
 	var alert := MAT_ALERT
 	_make_box("Setor_Piso", Vector3(0, -0.2, 0), Vector3(18, 0.4, 70), floor_mat)
-	_make_box("Setor_Teto", Vector3(0, 4.0, 0), Vector3(18, 0.3, 70), wall)
-	_make_box("Parede_E", Vector3(-9.1, 2, 0), Vector3(0.3, 4, 70), wall)
-	_make_box("Parede_D", Vector3(9.1, 2, 0), Vector3(0.3, 4, 70), wall)
+	_make_box("Setor_Teto", Vector3(0, 3.0, 0), Vector3(18, 0.3, 70), wall)
+	_make_box("Parede_E", Vector3(-9.1, 1.5, 0), Vector3(0.3, 3.0, 70), wall)
+	_make_box("Parede_D", Vector3(9.1, 1.5, 0), Vector3(0.3, 3.0, 70), wall)
 	for i in range(11):
 		var z := -32.0 + float(i) * 6.4
-		_make_box("Arco_Estrutural_%02d" % i, Vector3(0, 3.65, z), Vector3(18, 0.35, 0.45), wall)
-		_make_box("Painel_Tecnico_E_%02d" % i, Vector3(-8.88, 2.6, z + 2.1), Vector3(0.12, 1.4, 2.2), floor_mat, false)
-		_make_box("Painel_Tecnico_D_%02d" % i, Vector3(8.88, 2.6, z + 2.1), Vector3(0.12, 1.4, 2.2), floor_mat, false)
+		_make_box("Arco_Estrutural_%02d" % i, Vector3(0, 2.78, z), Vector3(18, 0.28, 0.45), wall)
+		_make_box("Painel_Tecnico_E_%02d" % i, Vector3(-8.88, 2.05, z + 2.1), Vector3(0.12, 1.15, 2.2), floor_mat, false)
+		_make_box("Painel_Tecnico_D_%02d" % i, Vector3(8.88, 2.05, z + 2.1), Vector3(0.12, 1.15, 2.2), floor_mat, false)
 	for side in [-1.0, 1.0]:
 		for j in range(5):
 			_make_box("Conduite_%d_%d" % [int(side), j], Vector3(side * 7.8, 3.25, -25.0 + float(j) * 12.0), Vector3(0.35, 0.35, 5.0), alert, false)
@@ -152,21 +153,122 @@ func _spawn_hunter() -> void:
 	hunter.set("mimic_enabled", chapter_number >= 3)
 	add_child(hunter)
 
-func _chapter_material(chapter: int, floor_surface: bool) -> StandardMaterial3D:
+
+func _build_global_architecture_kit() -> void:
+	# Reusable low-poly industrial detail pass shared by all seven sectors.
+	var wall_mat := _chapter_material(chapter_number, false)
+	var metal_mat: StandardMaterial3D = load("res://systems/procedural_pbr.gd").material_for(chapter_number, "metal")
+	var accent := _chapter_accent(chapter_number)
+	var trim := StandardMaterial3D.new()
+	trim.albedo_color = Color(0.075, 0.085, 0.09)
+	trim.metallic = 0.82
+	trim.roughness = 0.42
+	for side in [-1.0, 1.0]:
+		_make_box("Industrial_Baseboard_%d" % int(side), Vector3(side * 8.88, 0.16, 0), Vector3(0.12, 0.28, 69.0), trim, false)
+		for rib in range(9):
+			var z := -29.0 + float(rib) * 7.2
+			_make_box("Wall_Pilaster_%d_%02d" % [int(side), rib], Vector3(side * 8.72, 1.48, z), Vector3(0.34, 2.72, 0.42), metal_mat, false)
+			_make_box("Pilaster_Cap_%d_%02d" % [int(side), rib], Vector3(side * 8.69, 2.78, z), Vector3(0.42, 0.09, 0.58), trim, false)
+	for i in range(10):
+		var z := -31.0 + float(i) * 6.8
+		_make_box("Ceiling_Service_Rail_%02d" % i, Vector3(0, 2.72, z), Vector3(1.8, 0.12, 0.16), trim, false)
+		if i % 2 == 0:
+			_make_hanging_cable(i, z, accent)
+		if i % 3 == 1:
+			_make_floor_spill(i, z)
+		if i == 4 or i == 8:
+			_make_corpse_silhouette(i, z)
+	# Heavy bulkhead surround at the far end, leaving the existing door opening usable.
+	_make_box("Bulkhead_Frame_Left", Vector3(-1.95, 1.42, -34.18), Vector3(0.22, 2.84, 0.34), metal_mat, false)
+	_make_box("Bulkhead_Frame_Right", Vector3(1.95, 1.42, -34.18), Vector3(0.22, 2.84, 0.34), metal_mat, false)
+	_make_box("Bulkhead_Frame_Top", Vector3(0, 2.75, -34.18), Vector3(4.1, 0.18, 0.34), metal_mat, false)
+
+
+func _chapter_accent(chapter: int) -> Color:
+	var colors := [Color(0.65,0.055,0.035), Color(0.10,0.34,0.62), Color(0.72,0.34,0.09), Color(0.18,0.55,0.20), Color(0.08,0.26,0.72), Color(0.20,0.22,0.26), Color(0.42,0.48,0.52)]
+	return colors[clampi(chapter - 1, 0, 6)]
+
+
+func _make_hanging_cable(index: int, z: float, accent: Color) -> void:
+	var cable := MeshInstance3D.new()
+	cable.name = "HangingCable_%02d" % index
+	var cylinder := CylinderMesh.new()
+	cylinder.top_radius = 0.025
+	cylinder.bottom_radius = 0.018
+	cylinder.height = 0.85
+	cable.mesh = cylinder
 	var material := StandardMaterial3D.new()
-	var colors := [
-		Color(0.22, 0.27, 0.29), Color(0.12, 0.24, 0.29),
-		Color(0.26, 0.22, 0.29), Color(0.18, 0.31, 0.25),
-		Color(0.16, 0.20, 0.24), Color(0.12, 0.13, 0.18),
-		Color(0.26, 0.24, 0.20)
-	]
-	var base: Color = colors[clampi(chapter - 1, 0, 6)]
-	if floor_surface:
-		base = base.darkened(0.58)
-	material.albedo_color = base
-	material.metallic = 0.42 if not floor_surface else 0.62
-	material.roughness = 0.68
-	return material
+	material.albedo_color = Color(0.035, 0.04, 0.045)
+	material.roughness = 0.82
+	cable.material_override = material
+	cable.position = Vector3(sin(float(index)) * 0.8, 2.25, z)
+	cable.rotation.z = 0.12 * sin(float(index) * 1.7)
+	add_child(cable)
+	if index % 4 == 0:
+		var spark := OmniLight3D.new()
+		spark.name = "CableSpark_%02d" % index
+		spark.position = cable.position + Vector3(0, -0.42, 0)
+		spark.light_color = accent
+		spark.light_energy = 0.22
+		spark.omni_range = 1.4
+		add_child(spark)
+
+
+func _make_floor_spill(index: int, z: float) -> void:
+	var puddle := MeshInstance3D.new()
+	puddle.name = "DarkFluidPool_%02d" % index
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.5
+	sphere.height = 0.08
+	puddle.mesh = sphere
+	puddle.scale = Vector3(1.2 + float(index % 2) * 0.4, 0.22, 1.0)
+	puddle.position = Vector3(-0.8 if index % 2 == 0 else 0.8, 0.025, z)
+	var fluid := StandardMaterial3D.new()
+	fluid.albedo_color = Color(0.075, 0.009, 0.014, 0.86)
+	fluid.metallic = 0.18
+	fluid.roughness = 0.19
+	fluid.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	puddle.material_override = fluid
+	add_child(puddle)
+
+
+func _make_corpse_silhouette(index: int, z: float) -> void:
+	var body := Node3D.new()
+	body.name = "CrewRemains_%02d" % index
+	body.position = Vector3(7.9 if index % 2 == 0 else -7.9, 0.1, z)
+	body.rotation.y = 0.8 if index % 2 == 0 else -0.8
+	add_child(body)
+	var cloth := StandardMaterial3D.new()
+	cloth.albedo_color = Color(0.018, 0.022, 0.025)
+	cloth.roughness = 0.96
+	var torso := MeshInstance3D.new()
+	var torso_mesh := CapsuleMesh.new()
+	torso_mesh.radius = 0.23
+	torso_mesh.height = 0.82
+	torso.mesh = torso_mesh
+	torso.material_override = cloth
+	torso.rotation.z = PI * 0.5
+	torso.position = Vector3(0, 0.27, 0)
+	body.add_child(torso)
+	var head := MeshInstance3D.new()
+	var head_mesh := SphereMesh.new()
+	head_mesh.radius = 0.16
+	head.mesh = head_mesh
+	head.material_override = cloth
+	head.position = Vector3(0.48, 0.18, 0.05)
+	body.add_child(head)
+	var leg := MeshInstance3D.new()
+	var leg_mesh := CapsuleMesh.new()
+	leg_mesh.radius = 0.11
+	leg_mesh.height = 0.68
+	leg.mesh = leg_mesh
+	leg.material_override = cloth
+	leg.position = Vector3(-0.42, 0.14, 0.16)
+	leg.rotation.z = -0.8
+	body.add_child(leg)
+
+func _chapter_material(chapter: int, floor_surface: bool) -> StandardMaterial3D:
+	return load("res://systems/procedural_pbr.gd").material_for(chapter, "floor" if floor_surface else "wall")
 
 func _build_chapter_landmarks() -> void:
 	match chapter_number:

@@ -2,7 +2,7 @@ extends Node3D
 ## Lightweight cinematic layer: one screen shader, low-count CPU dust and a tiny first-person viewmodel.
 
 const DUST_COUNT := 36
-const BASE_FOV := 78.0
+const BASE_FOV := 64.0
 const PLAYER_SCENE := preload("res://scenes/player.tscn")
 
 var _player: Node3D
@@ -131,8 +131,8 @@ func _process(delta: float) -> void:
 		var state_value: Variant = _enemy.get("state")
 		hunting = state_value != null and int(state_value) in [2, 3, 5]
 	var fear := clampf(1.0 - enemy_distance / 12.0, 0.0, 1.0)
-	var target_fov := BASE_FOV + (3.0 if hunting else 0.0) + fear * 2.0
-	_fov_offset = move_toward(_fov_offset, target_fov - BASE_FOV, delta * (1.4 if hunting else 2.8))
+	var target_fov := lerpf(BASE_FOV, 54.0, fear) if hunting else lerpf(BASE_FOV, 60.0, fear * 0.45)
+	_fov_offset = move_toward(_fov_offset, target_fov - BASE_FOV, delta * (2.0 if hunting else 3.2))
 	_camera.fov = BASE_FOV + _fov_offset
 	var heartbeat_rate := 1.0 + fear * 1.8
 	_heartbeat = (sin(_time * TAU * heartbeat_rate) * 0.5 + 0.5) * fear

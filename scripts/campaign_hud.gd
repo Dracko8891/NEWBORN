@@ -25,9 +25,20 @@ func _ready() -> void:
 
 func _build_interface() -> void:
 	var panel := PanelContainer.new()
-	panel.position = Vector2(20, 20)
-	panel.custom_minimum_size = Vector2(390, 0)
-	panel.size = Vector2(390, 150)
+	panel.name = "MinimalDiegeticHUD"
+	panel.position = Vector2(18, 16)
+	panel.custom_minimum_size = Vector2(310, 0)
+	panel.size = Vector2(310, 112)
+	var glass := StyleBoxFlat.new()
+	glass.bg_color = Color(0.012, 0.022, 0.028, 0.22)
+	glass.border_color = Color(0.35, 0.62, 0.65, 0.18)
+	glass.set_border_width_all(1)
+	glass.set_corner_radius_all(3)
+	glass.content_margin_left = 10
+	glass.content_margin_right = 10
+	glass.content_margin_top = 6
+	glass.content_margin_bottom = 6
+	panel.add_theme_stylebox_override("panel", glass)
 	add_child(panel)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 5)
@@ -49,7 +60,9 @@ func _build_interface() -> void:
 	message_label.modulate = Color(1.0, 0.78, 0.35)
 	column.add_child(message_label)
 	var map_button := Button.new()
-	map_button.text = "ABRIR MAPA HOLOGRÁFICO  [M]"
+	map_button.text = "PADD  [M]"
+	map_button.flat = true
+	map_button.modulate = Color(0.68, 0.82, 0.84, 0.72)
 	map_button.pressed.connect(_toggle_map)
 	column.add_child(map_button)
 
