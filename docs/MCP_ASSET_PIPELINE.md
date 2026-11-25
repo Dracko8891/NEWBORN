@@ -120,3 +120,30 @@ Não adicione geração, download, API keys ou MCPs como dependência de `projec
 ## Estado de conexão
 
 Este documento não significa que servidores MCP estejam conectados. A conexão só está confirmada quando o cliente mostra o servidor online e suas ferramentas respondem a uma chamada de teste.
+
+
+## Cliente MCP: ChatGPT Web, ChatGPT Desktop ou Codex
+
+- **ChatGPT Web:** conexões MCP personalizadas exigem disponibilidade de plano/workspace e um endpoint remoto HTTPS ou Secure MCP Tunnel. No plano Free não há conexão customizada MCP documentada; planos Pro individuais têm suporte limitado a leitura/busca, enquanto Business e Enterprise/Edu têm suporte MCP completo sujeito a permissões do workspace. Consulte https://help.openai.com/en/articles/12584461-connecting-custom-mcp-servers-in-chatgpt.
+- **Codex CLI / extensão IDE:** aceita servidores locais por STDIO e configura em `~/.codex/config.toml`; consulte https://learn.chatgpt.com/docs/extend/mcp.
+- **ChatGPT Desktop:** a documentação atual descreve compartilhamento da configuração MCP do Codex entre os clientes desktop/CLI/IDE quando disponível. Isso não adiciona ferramentas ao ChatGPT Web nesta conversa.
+
+### Registro opcional do GenMedia no Windows + Codex
+
+Depois de instalar os binários GenMedia oficiais, configurar Google Cloud CLI e autenticar ADC:
+
+```powershell
+gcloud auth application-default login
+.	ools\register_genmedia_mcp.ps1 -GoogleCloudProject "SEU_PROJECT_ID"
+codex mcp list
+```
+
+Para registrar também o servidor Veo, somente se o binário `mcp-veo-go` estiver instalado e o uso de vídeo estiver aprovado:
+
+```powershell
+.	ools\register_genmedia_mcp.ps1 -GoogleCloudProject "SEU_PROJECT_ID" -IncludeVeo
+```
+
+O script não instala binários, não configura credenciais e não gera conteúdo. Ele apenas registra comandos já instalados no Codex local.
+
+Para OhMyGame, não copie um caminho ou token de exemplo: ative Settings → MCP Server → Connect e use exatamente o comando/argumentos gerados pela versão instalada do aplicativo. O token muda quando o daemon reinicia.
