@@ -24,7 +24,7 @@ func _notification(what: int) -> void:
 
 func _rebuild_button_rects() -> void:
 	var s := get_viewport_rect().size
-	var d := minf(s.x, s.y) * 0.105
+	var d := clampf(minf(s.x, s.y) * 0.105, 48.0, 80.0)
 	button_rects = {
 		"interact": Rect2(Vector2(s.x - d * 2.35, s.y - d * 2.25), Vector2(d, d)),
 		"crouch": Rect2(Vector2(s.x - d * 1.2, s.y - d * 2.25), Vector2(d, d)),
