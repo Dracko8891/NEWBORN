@@ -228,7 +228,7 @@ func _spawn_hunter() -> void:
 func _build_global_architecture_kit() -> void:
 	# Reusable low-poly industrial detail pass shared by all seven sectors.
 	var wall_mat := _chapter_material(chapter_number, false)
-	var metal_mat: StandardMaterial3D = load("res://systems/procedural_pbr.gd").material_for(chapter_number, "metal")
+	var metal_mat: StandardMaterial3D = load("res://systems/horror_visual_director.gd").material_for(chapter_number, "metal")
 	var accent := _chapter_accent(chapter_number)
 	var trim := StandardMaterial3D.new()
 	trim.albedo_color = Color(0.075, 0.085, 0.09)

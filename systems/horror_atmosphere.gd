@@ -81,17 +81,11 @@ void fragment() {
 	float edge = smoothstep(0.22, 0.78, length(centered) * 1.38);
 	vec2 direction = normalize(centered + vec2(0.0001));
 	vec2 radial_step = -centered * radial_blur * 0.075;
-	vec3 scene = vec3(0.0);
-	for (int i = 0; i < 5; i++) {
-		float t = float(i) / 4.0;
-		scene += texture(screen_texture, uv + radial_step * t).rgb;
-	}
-	scene /= 5.0;
 	float shift = chromatic * edge * 0.0035;
 	vec3 col;
-	col.r = texture(screen_texture, uv + direction * shift).r;
-	col.g = scene.g;
-	col.b = texture(screen_texture, uv - direction * shift).b;
+	col.r = texture(screen_texture, uv + direction * shift + radial_step).r;
+	col.g = texture(screen_texture, uv).g;
+	col.b = texture(screen_texture, uv - direction * shift + radial_step * 2.0).b;
 	float noise = hash21(floor(uv * vec2(1280.0, 720.0) + clock * 37.0));
 	float grain = (noise - 0.5) * grain_strength;
 	float scan = sin(uv.y * 920.0 + clock * 2.0) * crt_scan * 0.025;

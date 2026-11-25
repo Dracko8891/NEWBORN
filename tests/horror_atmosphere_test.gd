@@ -30,5 +30,7 @@ func _run() -> void:
 	assert(hunter.get_node_or_null("PorcelainTorso") != null, "Organic Newborn torso must exist.")
 	assert(hunter.get_node_or_null("SealedSkull/DoubleJaw") != null, "Double jaw must exist.")
 	assert(atmosphere.get_node_or_null("FloatingSpores") != null, "Low-count dust particles must exist.")
+	assert(atmosphere.get_node_or_null("DeveloperPanicEventRecorder") != null, "Developer panic telemetry must exist.")
+	assert(is_equal_approx(camera.fov, 64.0), "Default camera FOV must be 64 degrees.")
 	print("NEWBORN cinematic atmosphere / viewmodel / organic hunter test: PASS")
 	quit(0)
