@@ -65,6 +65,10 @@ func set_movement_speed_multiplier(value: float) -> void:
 	save_config()
 
 func start_resource_preloads() -> void:
+	# Headless CI tests load critical scenes synchronously in resource_load_test.gd.
+	# Avoid leaving threaded resource requests running while short test processes exit.
+	if DisplayServer.get_name() == "headless":
+		return
 	for resource_path in PRELOAD_RESOURCES:
 		if _preload_pending.has(resource_path) or _preload_cache.has(resource_path):
 			continue

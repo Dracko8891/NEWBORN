@@ -25,6 +25,8 @@ jobs:
         run: godot --headless --editor --path . --quit
       - name: Run project startup
         run: timeout 30s godot --headless --path . --quit-after 5
+      - name: Load all critical scenes and player resources synchronously
+        run: timeout 30s godot --headless --path . --script tests/resource_load_test.gd
       - name: Verify Android orientation is locked to landscape
         run: timeout 30s godot --headless --path . --script tests/orientation_test.gd
       - name: Verify background NavigationMesh bake
