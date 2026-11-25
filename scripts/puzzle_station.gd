@@ -73,7 +73,7 @@ func _submit_token(token: String) -> void:
 		entered.clear()
 		status_label.text = "SEQUÊNCIA INCORRETA — TENTE NOVAMENTE"
 		return
-	status_label.text = "ENTRADA: " + " → ".join(entered)
+	status_label.text = "ENTRADA: " + str(entered)
 	if entered.size() == solution.size():
 		if _commit_puzzle():
 			status_label.text = "SISTEMA RESTAURADO"
