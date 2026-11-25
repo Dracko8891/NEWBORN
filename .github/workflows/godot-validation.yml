@@ -29,6 +29,8 @@ jobs:
         run: timeout 30s godot --headless --path . --script tests/resource_load_test.gd
       - name: Verify the 3D snow epilogue
         run: timeout 30s godot --headless --path . --script tests/epilogue_test.gd
+      - name: Verify cinematic horror atmosphere and organic Newborn
+        run: timeout 30s godot --headless --path . --script tests/horror_atmosphere_test.gd
       - name: Verify Android orientation is locked to landscape
         run: timeout 30s godot --headless --path . --script tests/orientation_test.gd
       - name: Verify background NavigationMesh bake
