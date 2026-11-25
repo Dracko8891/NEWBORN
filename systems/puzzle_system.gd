@@ -25,6 +25,24 @@ func submit_relays(active_relays: Array[String]) -> bool:
 	puzzle_solved.emit("medical_relays")
 	return true
 
+func submit_quarters_pin(value: String) -> bool:
+	if value != "0315":
+		puzzle_failed.emit("quarters_pin", "Código de alojamentos incorreto")
+		return false
+	GameState.set_flag("quarters_code_unlocked")
+	puzzle_solved.emit("quarters_pin")
+	GameState.save_game()
+	return true
+
+func submit_robot_arms(sequence: Array[String]) -> bool:
+	if sequence != ["left", "center", "right"]:
+		puzzle_failed.emit("robot_arms", "Sequência dos braços inválida")
+		return false
+	GameState.set_flag("robot_arms_operated")
+	puzzle_solved.emit("robot_arms")
+	GameState.save_game()
+	return true
+
 func submit_melody(notes: Array[String]) -> bool:
 	if notes != MELODY_REQUIRED:
 		puzzle_failed.emit("therapy_melody", "Sequência musical incorreta")
