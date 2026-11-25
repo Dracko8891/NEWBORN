@@ -8,6 +8,9 @@ const Campaign = preload("res://systems/campaign_data.gd")
 
 func _ready() -> void:
 	_ensure_environment()
+	# The main scene is the resume entry point; continue from the saved chapter.
+	if chapter_number == 1 and GameState.chapter > 1:
+		chapter_number = GameState.chapter
 	CampaignDirector.begin_chapter(chapter_number)
 	_build_sector()
 	_build_chapter_landmarks()
