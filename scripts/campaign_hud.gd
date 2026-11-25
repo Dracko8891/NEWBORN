@@ -14,6 +14,7 @@ func _ready() -> void:
 	CampaignDirector.chapter_started.connect(_on_chapter_started)
 	CampaignDirector.objective_updated.connect(_on_objective_updated)
 	CampaignDirector.campaign_message.connect(_show_message)
+	CampaignDirector.chapter_completed.connect(_on_chapter_completed)
 	GameState.notification_requested.connect(_show_message)
 	_refresh_current()
 
@@ -74,3 +75,9 @@ func _show_message(message: String) -> void:
 		if is_instance_valid(message_label) and message_label.text == message:
 			message_label.text = ""
 	)
+
+func _on_chapter_completed(chapter: int) -> void:
+	if chapter == 7:
+		chapter_label.text = "PROTOCOLO ENCERRADO"
+		progress_label.text = "CAMPANHA 100% — SETE CAPÍTULOS"
+		objective_label.text = "FIM\nA escotilha se fecha. O Newborn alcançou a superfície. O sinal de Clara desaparece."
