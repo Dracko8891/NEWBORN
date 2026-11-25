@@ -134,43 +134,28 @@ func _save_discovery() -> void:
 	GameState.save_game()
 
 func _update_player_position() -> void:
-	var player := get_tree().get_first_node_in_group("player")
-	if player == null:
-		return
 	_chapter = clampi(GameState.chapter, 1, 7)
-	var p: Vector3 = player.global_position
-	var room_id := _resolve_room(_chapter, p)
-	if room_id != _current_room:
-		_current_room = room_id
-		if not room_id.is_empty() and not bool(_discovered.get(room_id, false)):
-			_discovered[room_id] = true
-			_save_discovery()
-			_refresh_room_list()
-			_map_canvas.queue_redraw()
-	var room := MapData.get_room(room_id)
-	var room_name := str(room.get("name", "Setor não catalogado"))
-	_position_label.text = "POSIÇÃO DO OPERADOR: %s  |  X %.1f  Z %.1f" % [room_name.to_upper(), p.x, p.z]
+	# The room marker writes the exact room ID when the player crosses its Area3D.
+	# Never fall back to coordinate guesses: unknown means not yet confirmed.
+	var room_id := str(GameState.puzzle_flags.get("map_current_room_id", ""))
+	var room_name := str(GameState.puzzle_flags.get("map_current_room_name", ""))
+	if not room_id.begins_with("c%d_" % _chapter):
+		room_id = ""
+		room_name = "LOCALIZAÇÃO NÃO CONFIRMADA"
+	_current_room = room_id
+	var saved: Variant = GameState.puzzle_flags.get("map_discovered_rooms", {})
+	if typeof(saved) == TYPE_DICTIONARY:
+		_discovered = saved.duplicate(true)
+	if not room_id.is_empty() and not bool(_discovered.get(room_id, false)):
+		_discovered[room_id] = true
+		_save_discovery()
+		_refresh_room_list()
+		_map_canvas.queue_redraw()
+	if room_name.is_empty():
+		room_name = "AGUARDANDO MARCADOR DE SALA"
+	_position_label.text = "POSIÇÃO DO OPERADOR: %s" % room_name.to_upper()
 	if visible:
 		_map_canvas.queue_redraw()
-
-func _resolve_room(chapter: int, p: Vector3) -> String:
-	var rooms: Array = []
-	for room in MapData.get_rooms():
-		if int(room.get("chapter", 0)) == chapter:
-			rooms.append(room)
-	if rooms.is_empty():
-		return ""
-	# The current level is a corridor with physical side annexes. Resolve those
-	# annexes first, then use corridor depth to identify the nearest authored zone.
-	if absf(p.x) > 4.2 and p.z > -8.0 and p.z < 2.0:
-		return str(rooms[mini(rooms.size() - 1, 1)].get("id", ""))
-	if p.z > 14.0:
-		return str(rooms[0].get("id", ""))
-	if p.z < -24.0:
-		return str(rooms[rooms.size() - 1].get("id", ""))
-	if p.z < -8.0:
-		return str(rooms[mini(rooms.size() - 1, 2)].get("id", ""))
-	return str(rooms[mini(1, rooms.size() - 1)].get("id", ""))
 
 func _refresh_room_list() -> void:
 	if _room_list == null:
