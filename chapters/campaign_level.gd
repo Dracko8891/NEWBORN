@@ -323,16 +323,16 @@ func _build_chapter_puzzle_stations() -> void:
 			_add_puzzle_station("set_flag", "DRENAGEM DE AMÔNIA", "Abra a linha de purga e confirme a leitura segura.", ["drenar"], ["drenar"], Vector3(0, 1.0, 8.0), "ammonia_fog_drained")
 			_add_puzzle_station("genesis_valves", "GALERIA DE VÁLVULAS", "Ordem de fluxo: Azul → Verde → Vermelha.", ["blue", "green", "red"], ["blue", "green", "red"], Vector3(0, 1.0, -18.0))
 			_add_puzzle_station("set_flag", "CHIP BETA", "Recupere o chip do compartimento drenado.", ["recuperar"], ["recuperar"], Vector3(6.0, 1.0, -25.0), "beta_chip_recovered")
-	5:
+		5:
 			_add_puzzle_station("reactor_shutdown", "PROCEDIMENTO DO REATOR", "Apague as luzes e opere os braços: esquerdo, central, direito.", ["lights_off", "arm_left", "arm_center", "arm_right"], ["lights_off", "arm_left", "arm_center", "arm_right"], Vector3(0, 1.0, -12.0))
 			_add_puzzle_station("set_flag", "CONTROLE DOS BRAÇOS", "Confirme a operação dos três braços robóticos.", ["confirmar"], ["confirmar"], Vector3(6.0, 1.0, 10.0), "robot_arms_operated")
 			_add_puzzle_station("set_flag", "COFRE GAMA", "Retire o Chip Gama após estabilizar o núcleo.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -25.0), "gamma_chip_recovered")
-	6:
+		6:
 			_add_puzzle_station("omega_biochips", "MATRIZ EVOLUTIVA", "Ordene os estágios: Celular, Esquelético, Neural, Despertar.", ["cellular", "skeletal", "neural", "awakening"], ["cellular", "skeletal", "neural", "awakening"], Vector3(0, 1.0, -14.0))
 			_add_puzzle_station("set_flag", "DOWNLOAD ÔMEGA", "Inicie e confirme a extração dos dados do terminal.", ["iniciar"], ["iniciar"], Vector3(6.0, 1.0, -24.0), "omega_download_complete")
 			_add_puzzle_station("set_flag", "CARTÃO MESTRE ÔMEGA", "Retire o cartão mestre do terminal.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -27.0), "omega_master_card_recovered")
 			_add_puzzle_station("set_flag", "CERCO SOBREVIVIDO", "Confirme que a contenção foi atravessada.", ["confirmar"], ["confirmar"], Vector3(0, 1.0, -30.0), "omega_siege_survived")
-	7:
+		7:
 			_add_puzzle_station("hangar_couplings", "ACOPLAMENTOS HIDRÁULICOS", "Conecte os três acoplamentos na ordem 1, 2 e 3.", ["1", "2", "3"], ["1", "2", "3"], Vector3(0, 1.0, -8.0))
 			_add_puzzle_station("set_flag", "LEITOR ÔMEGA", "Insira o Cartão Mestre Ômega.", ["inserir"], ["inserir"], Vector3(-6.0, 1.0, -25.0), "omega_card_inserted")
 			_add_puzzle_station("set_flag", "CABINE OVERRIDE", "Execute a sequência de abertura do hangar.", ["override"], ["override"], Vector3(6.0, 1.0, -25.0), "hangar_override_complete")
