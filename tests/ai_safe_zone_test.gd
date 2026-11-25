@@ -2,43 +2,101 @@ extends SceneTree
 
 const HunterScript = preload("res://ai/newborn_hunter.gd")
 
-class MockTarget:
-	extends Node3D
-	var in_safe_room: bool = false
+class MockPlayer:
+	extends CharacterBody3D
 	var hidden_in_cover: bool = false
+	var in_safe_room: bool = false
 	var hit_count: int = 0
 
 	func is_hidden() -> bool:
 		return hidden_in_cover
 
+	func enter_hide_spot() -> void:
+		hidden_in_cover = true
+		velocity = Vector3.ZERO
+
+	func leave_hide_spot() -> void:
+		hidden_in_cover = false
+
 	func take_hit() -> void:
 		hit_count += 1
 
 func _initialize() -> void:
-	var target := MockTarget.new()
-	target.name = "TestPlayer"
-	target.add_to_group("player")
-	root.add_child(target)
-	var hunter = HunterScript.new()
-	hunter.name = "TestHunter"
-	root.add_child(hunter)
-	call_deferred("_run", hunter, target)
+	call_deferred("_run")
 
-func _run(hunter: Variant, target: Variant) -> void:
-	# A safe-room occupant must immediately break the chase.
-	hunter.state = 4 # CHASE
-	target.in_safe_room = true
-	hunter._physics_process(0.016)
-	assert(hunter.state == 1) # PATROL
-	assert(target.hit_count == 0)
+func _run() -> void:
+	var world := Node3D.new()
+	world.name = "HideChasePhysicsTest"
+	root.add_child(world)
 
-	# Hiding blocks visual acquisition and contact damage.
-	target.in_safe_room = false
-	target.hidden_in_cover = true
+	# Real floor and solid obstacle participate in the 3D physics server.
+	var floor := StaticBody3D.new()
+	floor.position = Vector3(0, -0.5, 0)
+	world.add_child(floor)
+	_add_box_collision(floor, Vector3(30, 1, 30))
+
+	var obstacle := StaticBody3D.new()
+	obstacle.name = "LockerObstacle"
+	obstacle.position = Vector3(0, 1.5, 0)
+	world.add_child(obstacle)
+	_add_box_collision(obstacle, Vector3(4.0, 3.0, 0.9))
+
+	var player := MockPlayer.new()
+	player.name = "Player"
+	player.position = Vector3(0, 0.95, 7.0)
+	player.add_to_group("player")
+	world.add_child(player)
+	_add_capsule_collision(player, 0.32, 1.8)
+
+	var hunter: CharacterBody3D = HunterScript.new()
+	hunter.name = "NewbornHunter"
+	hunter.position = Vector3(0, 1.1, -7.0)
+	world.add_child(hunter)
+	_add_capsule_collision(hunter, 0.42, 2.25)
+	await physics_frame
+
 	hunter.state = 4 # CHASE
+	assert(not hunter._can_see_target(hunter.global_position.distance_to(player.global_position)), "Hunter must not see through the solid locker")
+	for frame in range(150):
+		await physics_frame
+	assert(hunter.get_slide_collision_count() > 0, "Hunter should physically collide with the locker")
+	assert(hunter.global_position.z < -0.35, "Hunter must remain on its side of the obstacle")
+	assert(player.hit_count == 0, "Obstacle must prevent contact damage")
+
+	# Exercise the same hide-state contract used by the actual player controller.
+	player.enter_hide_spot()
+	assert(player.is_hidden(), "Player should enter the hide state")
+	player.global_position = hunter.global_position + Vector3(0, 0, -0.8)
+	obstacle.queue_free()
+	await physics_frame
+	hunter.global_position = player.global_position + Vector3(0, 0, -0.8)
+	hunter.state = 4
 	hunter.attack_cooldown = 0.0
-	hunter._physics_process(0.016)
-	assert(target.hit_count == 0)
+	await physics_frame
+	assert(not hunter._can_see_target(hunter.global_position.distance_to(player.global_position)), "Hunter must not see a hidden player")
+	assert(player.hit_count == 0, "Hunter must not attack a player inside a hide spot")
 
-	print("NEWBORN hunter safe-room and hiding tests: PASS")
+	# Control case: leaving cover restores ordinary detection and attack behavior.
+	player.leave_hide_spot()
+	player.global_position = hunter.global_position + Vector3(0, 0, 0.8)
+	hunter.attack_cooldown = 0.0
+	await physics_frame
+	assert(player.hit_count == 1, "Visible, unhidden player at contact range should be attackable")
+
+	print("NEWBORN real physics chase / locker collision / hiding tests: PASS")
 	quit(0)
+
+func _add_box_collision(parent: Node3D, dimensions: Vector3) -> void:
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = dimensions
+	collision.shape = shape
+	parent.add_child(collision)
+
+func _add_capsule_collision(parent: Node3D, radius: float, height: float) -> void:
+	var collision := CollisionShape3D.new()
+	var shape := CapsuleShape3D.new()
+	shape.radius = radius
+	shape.height = height
+	collision.shape = shape
+	parent.add_child(collision)
