@@ -23,6 +23,8 @@ var look_enabled: bool = true
 var hidden_in_cover: bool = false
 var peek_direction: float = 0.0
 var noise_level: float = 0.0
+var adrenaline_timer: float = 0.0
+var dead: bool = false
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -39,7 +41,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle_flashlight()
 	elif event.is_action_pressed("crouch"):
 		crouched = not crouched
-		hidden_in_cover = crouched
 	elif event.is_action_pressed("interact"):
 		interact()
 	elif event.is_action_pressed("dynamo"):
@@ -51,6 +52,26 @@ func _rotate_view(delta: Vector2) -> void:
 
 func is_hidden() -> bool:
 	return hidden_in_cover
+
+func enter_hide_spot() -> void:
+	hidden_in_cover = true
+	velocity = Vector3.ZERO
+
+func leave_hide_spot() -> void:
+	hidden_in_cover = false
+
+func take_hit() -> void:
+	if dead or adrenaline_timer > 0.0 or hidden_in_cover:
+		return
+	if GameState.health_state == 0:
+		GameState.set_health_state(1)
+		adrenaline_timer = 3.0
+		GameState.notification_requested.emit("Trauma: encontre um Kit Estanca")
+	else:
+		GameState.set_health_state(2)
+		dead = true
+		GameState.notification_requested.emit("SINAL PERDIDO")
+		get_tree().paused = true
 
 func set_peek(direction: float) -> void:
 	peek_direction = clampf(direction, -1.0, 1.0)
@@ -83,6 +104,10 @@ func interact() -> void:
 			target.interact(self)
 
 func _physics_process(delta: float) -> void:
+	if adrenaline_timer > 0.0:
+		adrenaline_timer = maxf(0.0, adrenaline_timer - delta)
+	if dead:
+		return
 	var input_2d := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := (transform.basis * Vector3(input_2d.x, 0.0, input_2d.y)).normalized()
 	var sprinting := Input.is_action_pressed("sprint") and stamina > 0.0 and not crouched
