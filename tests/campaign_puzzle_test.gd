@@ -33,7 +33,14 @@ func _run() -> void:
 		var chapter_data := Campaign.get_chapter(chapter)
 		assert(not chapter_data.is_empty())
 		assert(chapter_data.get("objectives", []).size() == 5)
-		assert(ResourceLoader.exists("res://chapters/chapter_%02d.tscn" % chapter))
+		var scene_path := "res://chapters/chapter_%02d.tscn" % chapter
+		assert(ResourceLoader.exists(scene_path))
+		game_state.chapter = 1
+		var packed_scene: PackedScene = load(scene_path)
+		var chapter_root := packed_scene.instantiate()
+		add_child(chapter_root)
+		assert(int(chapter_root.get("chapter_number")) == chapter)
+		chapter_root.free()
 
 	# Quest pickups remain valid after a consumable is used.
 	game_state.chapter = 1
