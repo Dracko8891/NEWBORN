@@ -14,7 +14,7 @@ class AssetPipelineTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         self.source = self.root / "sample.png"
-        self.source.write_bytes(b"\\x89PNG\\r\\n\\x1a\\n" + b"test-image")
+        self.source.write_bytes(b"\x89PNG\r\n\x1a\n" + b"test-image")
         self.generated = self.root / "assets" / "generated"
         self.manifest = self.generated / "manifest.json"
 
