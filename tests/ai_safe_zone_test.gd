@@ -55,7 +55,7 @@ func _run() -> void:
 	_add_capsule_collision(hunter, 0.42, 2.25)
 	await physics_frame
 
-	hunter.state = 4 # CHASE
+	hunter.state = 3 # HUNT
 	assert(not hunter._can_see_target(hunter.global_position.distance_to(player.global_position)), "Hunter must not see through the solid locker")
 	for frame in range(150):
 		await physics_frame
@@ -69,7 +69,7 @@ func _run() -> void:
 	obstacle.queue_free()
 	await physics_frame
 	hunter.global_position = player.global_position + Vector3(0, 0, -0.8)
-	hunter.state = 4
+	hunter.state = 3
 	hunter.attack_cooldown = 0.0
 	await physics_frame
 	assert(not hunter._can_see_target(hunter.global_position.distance_to(player.global_position)), "Hunter must not see a hidden player")
@@ -78,6 +78,8 @@ func _run() -> void:
 	# Control case: leaving cover restores ordinary detection and attack behavior.
 	player.leave_hide_spot()
 	player.global_position = hunter.global_position + Vector3(0, 0, 0.8)
+	hunter.look_at(player.global_position, Vector3.UP)
+	hunter.state = 3
 	hunter.attack_cooldown = 0.0
 	await physics_frame
 	assert(player.hit_count == 1, "Visible, unhidden player at contact range should be attackable")
