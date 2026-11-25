@@ -9,11 +9,25 @@ const START_SLOTS := 6
 const EXPANDED_SLOTS := 8
 const STACK_LIMIT := 2
 const SAVE_PATH := "user://newborn_save.json"
+const CONFIG_PATH := "user://config.cfg"
+const PRELOAD_RESOURCES: Array[String] = [
+	"res://scenes/player.tscn", "res://ai/newborn_hunter.tscn",
+	"res://chapters/chapter_01.tscn", "res://chapters/chapter_02.tscn",
+	"res://chapters/chapter_03.tscn", "res://chapters/chapter_04.tscn",
+	"res://chapters/chapter_05.tscn", "res://chapters/chapter_06.tscn",
+	"res://chapters/chapter_07.tscn", "res://materials/medical_wall.tres",
+	"res://materials/medical_floor.tres", "res://materials/emergency_red.tres"
+]
 
 enum StartMode { STANDARD, CLASSIC_DATA_RODS }
 var start_mode: StartMode = StartMode.STANDARD
 var photosensitive_mode := false
 var directional_subtitles := true
+var look_sensitivity := 1.0
+var movement_speed_multiplier := 1.0
+var _preload_pending: Dictionary = {}
+var _preload_cache: Dictionary = {}
+var _preload_failed: Array[String] = []
 var chapter: int = 1
 var health_state: int = 0
 var flashlight_charge_saved: float = 240.0
@@ -25,7 +39,67 @@ var puzzle_flags: Dictionary = {}
 var collected_flags: Dictionary = {}
 
 func _ready() -> void:
+	load_config()
 	load_game()
+	start_resource_preloads()
+
+func load_config() -> void:
+	var config := ConfigFile.new()
+	if config.load(CONFIG_PATH) != OK:
+		return
+	look_sensitivity = clampf(float(config.get_value("controls", "look_sensitivity", 1.0)), 0.5, 2.0)
+	movement_speed_multiplier = clampf(float(config.get_value("controls", "movement_speed", 1.0)), 0.75, 1.25)
+
+func save_config() -> bool:
+	var config := ConfigFile.new()
+	config.set_value("controls", "look_sensitivity", look_sensitivity)
+	config.set_value("controls", "movement_speed", movement_speed_multiplier)
+	return config.save(CONFIG_PATH) == OK
+
+func set_look_sensitivity(value: float) -> void:
+	look_sensitivity = clampf(value, 0.5, 2.0)
+	save_config()
+
+func set_movement_speed_multiplier(value: float) -> void:
+	movement_speed_multiplier = clampf(value, 0.75, 1.25)
+	save_config()
+
+func start_resource_preloads() -> void:
+	for resource_path in PRELOAD_RESOURCES:
+		if _preload_pending.has(resource_path) or _preload_cache.has(resource_path):
+			continue
+		var request_error := ResourceLoader.load_threaded_request(resource_path, "", true)
+		if request_error == OK:
+			_preload_pending[resource_path] = true
+		else:
+			_preload_failed.append(resource_path)
+
+func _process(_delta: float) -> void:
+	for resource_path in _preload_pending.keys():
+		var progress: Array = []
+		var status := ResourceLoader.load_threaded_get_status(resource_path, progress)
+		if status == ResourceLoader.THREAD_LOAD_LOADED:
+			var resource: Resource = ResourceLoader.load_threaded_get(resource_path)
+			if resource != null:
+				_preload_cache[resource_path] = resource
+			else:
+				_preload_failed.append(resource_path)
+			_preload_pending.erase(resource_path)
+		elif status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			_preload_failed.append(resource_path)
+			_preload_pending.erase(resource_path)
+
+func wait_for_preloads() -> void:
+	while not _preload_pending.is_empty():
+		await get_tree().process_frame
+
+func get_cached_resource(resource_path: String) -> Resource:
+	if _preload_cache.has(resource_path):
+		return _preload_cache[resource_path] as Resource
+	return load(resource_path)
+
+func are_preloads_complete() -> bool:
+	return _preload_pending.is_empty()
 
 func start_new_game(mode: int = StartMode.STANDARD) -> void:
 	start_mode = clampi(mode, 0, 1)
