@@ -88,6 +88,14 @@ func _submit_token(token: String) -> void:
 			status_label.text = "FALHA DE VALIDAÇÃO — VERIFIQUE OS RECURSOS"
 
 func _commit_puzzle() -> bool:
+	# Completed timed objectives are permanent campaign milestones. Reopening a terminal
+	# must not restart the timer or charge the player for batteries a second time.
+	if puzzle_id == "omega_download" and bool(GameState.get_flag("omega_download_complete", false)):
+		return true
+	if puzzle_id == "omega_siege" and bool(GameState.get_flag("omega_siege_survived", false)):
+		return true
+	if puzzle_id == "hangar_couplings" and bool(GameState.get_flag("hangar_couplings_complete", false)):
+		return true
 	for item_id in required_items:
 		var amount := maxi(1, int(required_items[item_id]))
 		if not GameState.has_item(str(item_id), amount):
