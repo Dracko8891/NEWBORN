@@ -119,7 +119,7 @@ func _objective_requirements_met(objective_id: String) -> bool:
 		"c3_o3": ["therapy_melody_solved"],
 		"c3_o4": ["alpha_chip_recovered", "tricorder_level_2"],
 		"c4_o1": [],
-		"c4_o2": [],
+		"c4_o2": ["synthesis_compound_created"],
 		"c4_o3": ["ammonia_fog_drained"],
 		"c4_o4": ["genesis_valves_solved"],
 		"c4_o5": ["beta_chip_recovered"],
@@ -146,12 +146,22 @@ func _objective_requirements_met(objective_id: String) -> bool:
 		"c2_o1": {"calibration_chip_east":1, "calibration_chip_west":1},
 		"c3_o2": {"uv_flare":1},
 		"c4_o1": {"gas_mask":1},
-		"c4_o2": {"nitro_sterile":2, "acid_buffer":1, "enzyme":3},
+		
 		"c5_o4": {"electric_arc":1},
 		"c7_o3": {"omega_master_card":1}
 	}
 	for item_id in required_items.get(objective_id, {}):
 		var amount := int(required_items[objective_id][item_id])
-		if not GameState.has_item(str(item_id), amount):
+		if not _has_quest_item(str(item_id), amount):
 			return false
 	return true
+
+func _has_quest_item(item_id: String, amount: int) -> bool:
+	if GameState.has_item(item_id, amount):
+		return true
+	var prefix := "chapter_%d:c%d_%s_" % [GameState.chapter, GameState.chapter, item_id]
+	var collected := 0
+	for pickup_key in GameState.collected_flags:
+		if str(pickup_key).begins_with(prefix):
+			collected += 1
+	return collected >= amount
