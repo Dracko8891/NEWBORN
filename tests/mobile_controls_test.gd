@@ -13,6 +13,13 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	var game_state: Node = root.get_node_or_null("GameState")
+	if game_state == null:
+		game_state = Node.new()
+		game_state.name = "GameState"
+		game_state.set_script(load("res://systems/game_state.gd"))
+		root.add_child(game_state)
+		await process_frame
 	var controls := Control.new()
 	controls.set_script(TouchControlsScript)
 	root.add_child(controls)
@@ -20,9 +27,9 @@ func _run() -> void:
 	controls.visible = true
 	controls._rebuild_button_rects()
 	assert(controls.look_slider != null and controls.movement_slider != null, "Mobile control tuning sliders must exist")
-	var previous_look := GameState.look_sensitivity
+	var previous_look := float(game_state.get("look_sensitivity"))
 	controls.look_slider.value = 1.25
-	assert(is_equal_approx(GameState.look_sensitivity, 1.25), "Look slider must update the global setting")
+	assert(is_equal_approx(float(game_state.get("look_sensitivity")), 1.25), "Look slider must update the global setting")
 	var saved_config := ConfigFile.new()
 	assert(saved_config.load("user://config.cfg") == OK, "Look sensitivity must persist to user://config.cfg")
 	assert(is_equal_approx(float(saved_config.get_value("controls", "look_sensitivity", 0.0)), 1.25), "Saved look sensitivity must match slider")
