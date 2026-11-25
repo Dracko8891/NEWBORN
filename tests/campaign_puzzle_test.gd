@@ -3,6 +3,12 @@ extends Node
 func _ready() -> void:
 	_run()
 
+func _strings(values: Array) -> Array[String]:
+	var result: Array[String] = []
+	for value in values:
+		result.append(str(value))
+	return result
+
 func _run() -> void:
 	var game_state: Node = GameState
 	var puzzle_system: Node = PuzzleSystem
@@ -17,32 +23,38 @@ func _run() -> void:
 	# Chapter 1: wrong PIN/relay sequence must not unlock progression.
 	assert(not puzzle_system.submit_pin("0718"))
 	assert(puzzle_system.submit_pin("0719"))
-	assert(not puzzle_system.submit_relays(["amber", "blue"]))
-	assert(puzzle_system.submit_relays(["cyan", "amber"]))
+	assert(not puzzle_system.submit_relays(_strings(["amber", "blue"])))
+	assert(puzzle_system.submit_relays(_strings(["cyan", "amber"])))
 	assert(campaign_director._objective_requirements_met("c1_o3"))
 	assert(campaign_director._objective_requirements_met("c1_o4"))
 
 	# Chapter 2: both matrix channels must be calibrated in the documented order.
-	assert(not puzzle_system.submit_dna_matrix(["west", "east"]))
-	assert(puzzle_system.submit_dna_matrix(["east", "west"]))
+	assert(not puzzle_system.submit_dna_matrix(_strings(["west", "east"])))
+	assert(puzzle_system.submit_dna_matrix(_strings(["east", "west"])))
 	assert(campaign_director._objective_requirements_met("c2_o2"))
 
 	# Chapter 3 and 4: exact melody and valve order.
-	assert(not puzzle_system.submit_melody(["C", "G", "E", "D", "A"]))
-	assert(puzzle_system.submit_melody(["C", "E", "G", "D", "A"]))
-	assert(puzzle_system.submit_valves(["blue", "red", "green"]) == false)
-	assert(puzzle_system.submit_valves(["blue", "green", "red"]))
+	assert(not puzzle_system.submit_melody(_strings(["C", "G", "E", "D", "A"])))
+	assert(puzzle_system.submit_melody(_strings(["C", "E", "G", "D", "A"])))
+	assert(puzzle_system.submit_valves(_strings(["blue", "red", "green"])) == false)
+	assert(puzzle_system.submit_valves(_strings(["blue", "green", "red"])))
 	assert(campaign_director._objective_requirements_met("c3_o3"))
 	assert(campaign_director._objective_requirements_met("c4_o4"))
 
 	# Chapter 5: reactor shutdown requires all four ordered operations.
-	assert(not puzzle_system.submit_reactor_shutdown(["arm_left", "lights_off", "arm_center", "arm_right"]))
-	assert(puzzle_system.submit_reactor_shutdown(["lights_off", "arm_left", "arm_center", "arm_right"]))
+	assert(not puzzle_system.submit_reactor_shutdown(_strings(["arm_left", "lights_off", "arm_center", "arm_right"])))
+	assert(puzzle_system.submit_reactor_shutdown(_strings(["lights_off", "arm_left", "arm_center", "arm_right"])))
 	assert(campaign_director._objective_requirements_met("c5_o2"))
+	assert(not puzzle_system.submit_robot_arms(_strings(["center", "left", "right"])))
+	assert(puzzle_system.submit_robot_arms(_strings(["left", "center", "right"])))
+	assert(campaign_director._objective_requirements_met("c5_o3"))
+	assert(not puzzle_system.submit_quarters_pin("0314"))
+	assert(puzzle_system.submit_quarters_pin("0315"))
+	assert(campaign_director._objective_requirements_met("c3_o1"))
 
 	# Chapter 6: four evolution stages in the correct order.
-	assert(not puzzle_system.submit_biochips(["cellular", "neural", "skeletal", "awakening"]))
-	assert(puzzle_system.submit_biochips(["cellular", "skeletal", "neural", "awakening"]))
+	assert(not puzzle_system.submit_biochips(_strings(["cellular", "neural", "skeletal", "awakening"])))
+	assert(puzzle_system.submit_biochips(_strings(["cellular", "skeletal", "neural", "awakening"])))
 	assert(campaign_director._objective_requirements_met("c6_o2"))
 
 	# Chapter 7: the override cannot run until all couplings and the master card exist.
