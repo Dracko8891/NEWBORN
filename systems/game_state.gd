@@ -12,6 +12,7 @@ const SAVE_PATH := "user://newborn_save.json"
 
 var chapter: int = 1
 var health_state: int = 0 # 0 = saudável, 1 = sangramento, 2 = morto
+var flashlight_charge_saved: float = 240.0
 var inventory_capacity: int = START_SLOTS
 var inventory: Array[Dictionary] = []
 var safe_storage: Array[Dictionary] = []
@@ -184,9 +185,15 @@ func get_flag(flag: String, fallback: Variant = false) -> Variant:
 	return puzzle_flags.get(flag, fallback)
 
 func save_game() -> bool:
+	for player in get_tree().get_nodes_in_group("player"):
+		var current_charge: Variant = player.get("flashlight_charge")
+		if current_charge != null:
+			flashlight_charge_saved = clampf(float(current_charge), 0.0, 240.0)
+		break
 	var data := {
 		"chapter": chapter,
 		"health_state": health_state,
+		"flashlight_charge": flashlight_charge_saved,
 		"inventory_capacity": inventory_capacity,
 		"inventory": inventory,
 		"safe_storage": safe_storage,
@@ -220,6 +227,7 @@ func load_game() -> bool:
 	var data: Dictionary = parsed
 	chapter = clampi(int(data.get("chapter", 1)), 1, 7)
 	health_state = clampi(int(data.get("health_state", 0)), 0, 2)
+	flashlight_charge_saved = clampf(float(data.get("flashlight_charge", 240.0)), 0.0, 240.0)
 	inventory_capacity = EXPANDED_SLOTS if chapter >= 4 else START_SLOTS
 	inventory = _valid_slots(data.get("inventory", []), inventory_capacity)
 	safe_storage = _valid_slots(data.get("safe_storage", []), 1000)
