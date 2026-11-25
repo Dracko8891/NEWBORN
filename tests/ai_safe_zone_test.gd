@@ -24,7 +24,7 @@ func _initialize() -> void:
 	root.add_child(hunter)
 	call_deferred("_run", hunter, target)
 
-func _run(hunter: CharacterBody3D, target: Node3D) -> void:
+func _run(hunter: Variant, target: Variant) -> void:
 	# A safe-room occupant must immediately break the chase.
 	hunter.state = 4 # CHASE
 	target.in_safe_room = true
