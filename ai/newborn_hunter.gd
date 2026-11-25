@@ -22,6 +22,7 @@ var _path_grid := AStarGrid2D.new()
 var _path_points: Array[Vector3] = []
 var _path_index := 0
 var _path_refresh := 0.0
+var _path_valid := false
 var _path_shape := BoxShape3D.new()
 
 func _ready() -> void:
@@ -100,6 +101,16 @@ func _physics_process(delta: float) -> void:
 			destination = target.global_position
 		_:
 			pass
+	if not _path_valid:
+		# Fail closed: never steer directly toward a target when A* found no safe route.
+		velocity.x = 0.0
+		velocity.z = 0.0
+		if not is_on_floor():
+			velocity.y -= 18.0 * delta
+		else:
+			velocity.y = 0.0
+		move_and_slide()
+		return
 	if not _path_points.is_empty():
 		while _path_index < _path_points.size() - 1 and global_position.distance_to(_path_points[_path_index]) < 0.48:
 			_path_index += 1
@@ -141,6 +152,9 @@ func _can_see_target(distance: float) -> bool:
 
 # Rebuild a local 1 m navigation grid from real physics occupancy.
 func _refresh_path(goal: Vector3) -> void:
+	_path_valid = false
+	_path_points.clear()
+	_path_index = 0
 	var start_cell := Vector2i(floori(global_position.x), floori(global_position.z))
 	var goal_cell := Vector2i(floori(goal.x), floori(goal.z))
 	var min_x := maxi(-9, mini(start_cell.x, goal_cell.x) - 5)
@@ -148,8 +162,6 @@ func _refresh_path(goal: Vector3) -> void:
 	var max_x := mini(9, maxi(start_cell.x, goal_cell.x) + 6)
 	var max_z := mini(35, maxi(start_cell.y, goal_cell.y) + 6)
 	if max_x <= min_x or max_z <= min_z:
-		_path_points.clear()
-		_path_index = 0
 		return
 	_path_grid.region = Rect2i(min_x, min_z, max_x - min_x, max_z - min_z)
 	_path_grid.cell_size = Vector2.ONE
@@ -175,10 +187,11 @@ func _refresh_path(goal: Vector3) -> void:
 		_path_index = 0
 		return
 	var ids := _path_grid.get_id_path(start_cell, goal_cell)
-	_path_points.clear()
-	_path_index = 0
+	if ids.is_empty():
+		return
 	for i in range(1, ids.size()):
 		var cell: Vector2i = ids[i]
 		_path_points.append(Vector3(float(cell.x) + 0.5, global_position.y, float(cell.y) + 0.5))
 	if _path_points.is_empty() and start_cell == goal_cell:
 		_path_points.append(Vector3(float(goal_cell.x) + 0.5, global_position.y, float(goal_cell.y) + 0.5))
+	_path_valid = not _path_points.is_empty()
