@@ -20,6 +20,9 @@ var flashlight_on: bool = true
 var crouched: bool = false
 var dynamo_busy: bool = false
 var look_enabled: bool = true
+var hidden_in_cover: bool = false
+var peek_direction: float = 0.0
+var noise_level: float = 0.0
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -36,6 +39,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle_flashlight()
 	elif event.is_action_pressed("crouch"):
 		crouched = not crouched
+		hidden_in_cover = crouched
 	elif event.is_action_pressed("interact"):
 		interact()
 	elif event.is_action_pressed("dynamo"):
@@ -44,6 +48,13 @@ func _unhandled_input(event: InputEvent) -> void:
 func _rotate_view(delta: Vector2) -> void:
 	rotate_y(-delta.x * mouse_sensitivity)
 	head.rotation.x = clampf(head.rotation.x - delta.y * mouse_sensitivity, -1.35, 1.35)
+
+func is_hidden() -> bool:
+	return hidden_in_cover
+
+func set_peek(direction: float) -> void:
+	peek_direction = clampf(direction, -1.0, 1.0)
+	head.rotation.z = deg_to_rad(12.0) * peek_direction
 
 func toggle_flashlight() -> void:
 	if flashlight_charge > 0.0:
@@ -85,9 +96,11 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if sprinting and direction.length() > 0.1:
 		stamina = maxf(0.0, stamina - 24.0 * delta)
-		get_tree().call_group("noise_listeners", "hear_noise", global_position, 0.35)
+		noise_level = 0.65
+		get_tree().call_group("noise_listeners", "hear_noise", global_position, noise_level)
 	else:
 		stamina = minf(100.0, stamina + 16.0 * delta)
+		noise_level = 0.08 if direction.length() > 0.1 and not crouched else 0.015
 	if flashlight_on and flashlight_charge > 0.0:
 		flashlight_charge = maxf(0.0, flashlight_charge - delta)
 		if flashlight_charge <= 0.0:
