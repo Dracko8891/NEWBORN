@@ -57,9 +57,9 @@ def validate_file(source: Path, kind: str) -> dict:
         head = stream.read(32)
     valid = False
     if suffix == ".png":
-        valid = head.startswith(b"\\x89PNG\\r\\n\\x1a\\n")
+        valid = head.startswith(b"\x89PNG\r\n\x1a\n")
     elif suffix in {".jpg", ".jpeg"}:
-        valid = head.startswith(b"\\xff\\xd8\\xff")
+        valid = head.startswith(b"\xff\xd8\xff")
     elif suffix == ".webp":
         valid = len(head) >= 12 and head[:4] == b"RIFF" and head[8:12] == b"WEBP"
     elif suffix == ".wav":
@@ -111,7 +111,7 @@ def import_asset(source: Path, kind: str, name: str, provider: str, model: str, 
     }
     try:
         shutil.copy2(details["source"], target)
-        sidecar.write_text(json.dumps(entry, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+        sidecar.write_text(json.dumps(entry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         manifest_data = {"schema_version": 1, "assets": []}
         if MANIFEST.exists():
             manifest_data = json.loads(MANIFEST.read_text(encoding="utf-8"))
@@ -119,7 +119,7 @@ def import_asset(source: Path, kind: str, name: str, provider: str, model: str, 
             raise AssetPipelineError(f"ID já registrado no manifesto: {entry['id']}")
         manifest_data.setdefault("assets", []).append(entry)
         MANIFEST.parent.mkdir(parents=True, exist_ok=True)
-        MANIFEST.write_text(json.dumps(manifest_data, ensure_ascii=False, indent=2) + "\\n", encoding="utf-8")
+        MANIFEST.write_text(json.dumps(manifest_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     except Exception:
         target.unlink(missing_ok=True)
         sidecar.unlink(missing_ok=True)
