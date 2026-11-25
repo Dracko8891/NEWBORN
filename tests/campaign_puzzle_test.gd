@@ -2,6 +2,12 @@ extends Node
 
 const Campaign = preload("res://systems/campaign_data.gd")
 
+class MockPlayer:
+	extends Node
+	var dead: bool = false
+	func is_dead() -> bool:
+		return dead
+
 func _ready() -> void:
 	_run()
 
@@ -116,5 +122,38 @@ func _run() -> void:
 	game_state.puzzle_flags.clear()
 	game_state.collected_flags.clear()
 	game_state.save_game()
-	print("NEWBORN chapter puzzle and progression gate tests: PASS")
+	# Exercise the timed siege with a short test duration and verify death interrupts it.
+	var mock_player := MockPlayer.new()
+	mock_player.add_to_group("player")
+	add_child(mock_player)
+	var timed_station: Node = load("res://scripts/puzzle_station.gd").new()
+	add_child(timed_station)
+	timed_station._start_countdown(0.05, "siege")
+	var success_check := Timer.new()
+	success_check.wait_time = 0.15
+	success_check.one_shot = true
+	success_check.timeout.connect(_on_siege_success.bind(timed_station, mock_player))
+	add_child(success_check)
+	success_check.start()
+
+func _on_siege_success(timed_station: Node, mock_player: Node) -> void:
+	assert(GameState.get_flag("omega_siege_survived", false))
+	GameState.set_flag("omega_siege_survived", false)
+	mock_player.dead = true
+	timed_station._start_countdown(0.05, "siege")
+	var failure_check := Timer.new()
+	failure_check.wait_time = 0.15
+	failure_check.one_shot = true
+	failure_check.timeout.connect(_on_siege_interrupted.bind(timed_station, mock_player))
+	add_child(failure_check)
+	failure_check.start()
+
+func _on_siege_interrupted(timed_station: Node, mock_player: Node) -> void:
+	assert(not GameState.get_flag("omega_siege_survived", false))
+	timed_station.queue_free()
+	mock_player.queue_free()
+	GameState.puzzle_flags.clear()
+	GameState.collected_flags.clear()
+	GameState.save_game()
+	print("NEWBORN chapter puzzle, synthesis and timed siege tests: PASS")
 	get_tree().quit()
