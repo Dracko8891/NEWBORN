@@ -87,8 +87,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			set_peek(0.0)
 
 func _rotate_view(delta: Vector2) -> void:
-	rotate_y(-delta.x * mouse_sensitivity)
-	head.rotation.x = clampf(head.rotation.x - delta.y * mouse_sensitivity, -1.35, 1.35)
+	var sensitivity := mouse_sensitivity * GameState.look_sensitivity
+	rotate_y(-delta.x * sensitivity)
+	head.rotation.x = clampf(head.rotation.x - delta.y * sensitivity, -1.35, 1.35)
 
 func apply_touch_look(delta: Vector2) -> void:
 	if look_enabled:
@@ -273,11 +274,11 @@ func _physics_process(delta: float) -> void:
 			input_2d = touch_move
 	var direction := (global_transform.basis * Vector3(input_2d.x, 0.0, input_2d.y)).normalized()
 	var sprinting := Input.is_action_pressed("sprint") and stamina > 0.0 and not crouched and not sliding
-	var speed := walk_speed
+	var speed := walk_speed * GameState.movement_speed_multiplier
 	if sliding:
-		speed = slide_speed
+		speed = slide_speed * GameState.movement_speed_multiplier
 	elif crouched:
-		speed = crouch_speed
+		speed = crouch_speed * GameState.movement_speed_multiplier
 	elif sprinting:
 		speed *= sprint_multiplier
 	velocity.x = direction.x * speed
