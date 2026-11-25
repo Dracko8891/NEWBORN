@@ -37,6 +37,9 @@ func begin_chapter(chapter: int) -> void:
 	_emit_current_objective()
 
 func complete_objective(objective_id: String) -> bool:
+	if not _objective_requirements_met(objective_id):
+		campaign_message.emit("Objetivo bloqueado: conclua primeiro a tarefa ou puzzle correspondente.")
+		return false
 	var data := Campaign.get_chapter(GameState.chapter)
 	if data.is_empty():
 		return false
@@ -100,3 +103,32 @@ func _on_chapter_completed(chapter: int) -> void:
 	await get_tree().create_timer(2.0).timeout
 	chapter_transition_pending = false
 	advance_chapter()
+
+
+func _objective_requirements_met(objective_id: String) -> bool:
+	var required_flags := {
+		"c1_o3": ["medical_relays_restored"],
+		"c1_o4": ["medical_relays_restored", "medical_door_unlocked"],
+		"c2_o2": ["dna_matrix_calibrated"],
+		"c2_o5": ["east_field_disabled"],
+		"c3_o3": ["therapy_melody_solved"],
+		"c3_o4": ["alpha_chip_recovered", "tricorder_level_2"],
+		"c4_o3": ["ammonia_fog_drained"],
+		"c4_o4": ["genesis_valves_solved"],
+		"c4_o5": ["beta_chip_recovered"],
+		"c5_o2": ["reactor_shutdown_complete"],
+		"c5_o3": ["robot_arms_operated"],
+		"c5_o5": ["gamma_chip_recovered"],
+		"c6_o2": ["omega_biochips_solved"],
+		"c6_o3": ["omega_download_complete"],
+		"c6_o4": ["omega_siege_survived"],
+		"c6_o5": ["omega_master_card_recovered"],
+		"c7_o2": ["hangar_couplings_complete"],
+		"c7_o3": ["omega_card_inserted"],
+		"c7_o4": ["hangar_override_complete"],
+		"c7_o5": ["surface_escape_complete"]
+	}
+	for flag in required_flags.get(objective_id, []):
+		if not bool(GameState.get_flag(flag, false)):
+			return false
+	return true
