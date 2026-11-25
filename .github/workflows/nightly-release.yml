@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: nightly-godot-release
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   update-nightly:
