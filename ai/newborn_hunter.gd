@@ -173,7 +173,9 @@ func _refresh_path(goal: Vector3) -> void:
 	for z in range(min_z, max_z):
 		for x in range(min_x, max_x):
 			var cell := Vector2i(x, z)
-			if cell == start_cell or cell == goal_cell:
+			# Ignore only the hunter's occupied start cell; the goal must also
+			# pass the physical occupancy query so a closed door cannot be treated as open.
+			if cell == start_cell:
 				continue
 			var query := PhysicsShapeQueryParameters3D.new()
 			query.shape = _path_shape
