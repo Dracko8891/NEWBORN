@@ -11,6 +11,7 @@ func _ready() -> void:
 	CampaignDirector.begin_chapter(chapter_number)
 	_build_sector()
 	_build_chapter_landmarks()
+	_build_hide_spots()
 	_build_objectives()
 	_spawn_hunter()
 
@@ -180,3 +181,22 @@ func _ensure_environment() -> void:
 	env.fog_density = 0.018
 	world.environment = env
 	add_child(world)
+
+func _build_hide_spots() -> void:
+	for index in range(2):
+		var spot := Area3D.new()
+		spot.name = "HideSpot_Locker_%d" % index
+		spot.position = Vector3(-6.0 if index == 0 else 6.0, 1.1, 13.0 - float(index) * 8.0)
+		spot.set_script(load("res://scripts/hide_spot.gd"))
+		add_child(spot)
+		var collision := CollisionShape3D.new()
+		var shape := BoxShape3D.new()
+		shape.size = Vector3(1.8, 2.2, 1.8)
+		collision.shape = shape
+		spot.add_child(collision)
+		var marker := MeshInstance3D.new()
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(1.0, 2.0, 1.0)
+		marker.mesh = mesh
+		marker.material_override = MAT_WALL
+		spot.add_child(marker)
