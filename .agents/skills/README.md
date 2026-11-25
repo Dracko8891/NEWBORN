@@ -12,6 +12,9 @@ These are project-local Agent Skills stored under `.agents/skills/`. They provid
 | `gemini-media-producer` | Gemini/GenMedia image, video, audio and storyboard workflow | [GenMedia Creative Studio](https://github.com/GoogleCloudPlatform/genmedia-creative-studio), [generate-nanobanana](https://github.com/AntonioCardenas/generate-nanobanana), [omni-skill-agy](https://github.com/xbill9/omni-skill-agy) |
 | `google-flow-integration` | Guarded FlowKit/Flow Agent setup and integration guidance | [Bl0ck154/flowkit](https://github.com/Bl0ck154/flowkit), [kodelyx/flow-agent](https://github.com/kodelyx/flow-agent), MIT |
 
+| `godot-editor-mcp` | Integração segura do editor Godot com MCP local | [hi-godot/godot-ai](https://github.com/hi-godot/godot-ai) |
+| `asset-curation-worldbuilding` | Curadoria, revisão de licença, otimização e importação de assets | [Effigy](https://github.com/SifuInTheShell/Effigy), [Guizang Game Skill](https://github.com/op7418/guizang-game-skill), [open-source-3D-assets](https://github.com/toxsam/open-source-3D-assets), [WorldLines](https://github.com/LudicDynamics/WorldLines), [RPG-OS](https://github.com/croatianrdy2defend-create/RPG-OS), [AI-GM-Engine](https://github.com/west132/AI-GM-Engine) |
+
 ## Important distinction
 
 - These files are committed project instructions and can be read by compatible coding agents.
@@ -23,6 +26,3 @@ These are project-local Agent Skills stored under `.agents/skills/`. They provid
 ## Security policy
 
 Never commit `.env`, API keys, Google cookies, browser profiles, OAuth files, service-account JSON, token caches or generated private media. Do not expose local generation servers publicly without authentication. Paid media generation and public publishing require explicit approval.
-
-| `godot-editor-mcp` | Integração segura do editor Godot com MCP local | [hi-godot/godot-ai](https://github.com/hi-godot/godot-ai) |
-| `asset-curation-worldbuilding` | Curadoria, revisão de licença, otimização e importação de assets | [Effigy](https://github.com/SifuInTheShell/Effigy), [Guizang Game Skill](https://github.com/op7418/guizang-game-skill), [open-source-3D-assets](https://github.com/toxsam/open-source-3D-assets), [WorldLines](https://github.com/LudicDynamics/WorldLines), [RPG-OS](https://github.com/croatianrdy2defend-create/RPG-OS), [AI-GM-Engine](https://github.com/west132/AI-GM-Engine) |
