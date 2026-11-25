@@ -87,10 +87,16 @@ func _position_sensitivity_ui() -> void:
 	settings_panel.size = Vector2(minf(s.x * 0.38, 330.0), 112)
 
 func _refresh_tuning_labels() -> void:
+	var state := _game_state()
+	var look_value := 1.0
+	var movement_value := 1.0
+	if state != null:
+		look_value = float(state.get("look_sensitivity"))
+		movement_value = float(state.get("movement_speed_multiplier"))
 	if look_value_label != null:
-		look_value_label.text = "LOOK SENSITIVITY  %.2fx" % float(_game_state().get("look_sensitivity")) if _game_state() != null else 1.0
+		look_value_label.text = "LOOK SENSITIVITY  %.2fx" % look_value
 	if movement_value_label != null:
-		movement_value_label.text = "MOVEMENT SPEED  %.2fx" % float(_game_state().get("movement_speed_multiplier")) if _game_state() != null else 1.0
+		movement_value_label.text = "MOVEMENT SPEED  %.2fx" % movement_value
 
 func _on_look_sensitivity_changed(value: float) -> void:
 	if _game_state() != null:
