@@ -30,4 +30,4 @@ jobs:
       - name: Run campaign puzzle and progression tests
         run: timeout 30s godot --headless --path . res://tests/campaign_puzzle_test.tscn
       - name: Run seven chapter exploration map tests
-        run: timeout 30s godot --headless --path . --script tests/exploration_map_test.gd
+        run: timeout 30s godot --headless --path . res://tests/exploration_map_test.tscn
