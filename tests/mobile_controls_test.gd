@@ -1,6 +1,7 @@
 extends SceneTree
 
 const TouchControlsScript = preload("res://scripts/mobile_touch_controls.gd")
+const GameStateScript = preload("res://systems/game_state.gd")
 
 class LookTarget:
 	extends Node
@@ -9,34 +10,13 @@ class LookTarget:
 	func apply_touch_look(delta: Vector2) -> void:
 		look_delta += delta
 
-class MockGameState:
-	extends Node
-	var look_sensitivity := 1.0
-	var movement_speed_multiplier := 1.0
-
-	func set_look_sensitivity(value: float) -> void:
-		look_sensitivity = value
-		var config := ConfigFile.new()
-		config.load("user://config.cfg")
-		config.set_value("controls", "look_sensitivity", value)
-		config.set_value("controls", "movement_speed", movement_speed_multiplier)
-		config.save("user://config.cfg")
-
-	func set_movement_speed_multiplier(value: float) -> void:
-		movement_speed_multiplier = value
-		var config := ConfigFile.new()
-		config.load("user://config.cfg")
-		config.set_value("controls", "look_sensitivity", look_sensitivity)
-		config.set_value("controls", "movement_speed", value)
-		config.save("user://config.cfg")
-
 func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
 	var game_state: Node = root.get_node_or_null("GameState")
 	if game_state == null:
-		game_state = MockGameState.new()
+		game_state = GameStateScript.new()
 		game_state.name = "GameState"
 		root.add_child(game_state)
 		await process_frame
@@ -53,6 +33,10 @@ func _run() -> void:
 	var saved_config := ConfigFile.new()
 	assert(saved_config.load("user://config.cfg") == OK, "Look sensitivity must persist to user://config.cfg")
 	assert(is_equal_approx(float(saved_config.get_value("controls", "look_sensitivity", 0.0)), 1.25), "Saved look sensitivity must match slider")
+	controls.movement_slider.value = 1.15
+	assert(is_equal_approx(float(game_state.get("movement_speed_multiplier")), 1.15), "Movement slider must update global movement speed")
+	assert(saved_config.load("user://config.cfg") == OK)
+	assert(is_equal_approx(float(saved_config.get_value("controls", "movement_speed", 0.0)), 1.15), "Movement speed must persist to config")
 	controls.look_slider.value = previous_look
 	controls._pulse_button("interact")
 	assert(controls.button_scales.has("interact"), "Touch press must start a button pulse tween")
