@@ -50,6 +50,10 @@ func _rotate_view(delta: Vector2) -> void:
 	rotate_y(-delta.x * mouse_sensitivity)
 	head.rotation.x = clampf(head.rotation.x - delta.y * mouse_sensitivity, -1.35, 1.35)
 
+func apply_touch_look(delta: Vector2) -> void:
+	if look_enabled:
+		_rotate_view(delta * 1.0)
+
 func is_hidden() -> bool:
 	return hidden_in_cover
 
@@ -109,6 +113,11 @@ func _physics_process(delta: float) -> void:
 	if dead:
 		return
 	var input_2d := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var touch_layer := get_node_or_null("MobileControls/TouchSurface")
+	if touch_layer != null and touch_layer.has_method("get_virtual_move"):
+		var touch_move: Vector2 = touch_layer.get_virtual_move()
+		if touch_move.length() > input_2d.length():
+			input_2d = Vector2(touch_move.x, -touch_move.y)
 	var direction := (transform.basis * Vector3(input_2d.x, 0.0, input_2d.y)).normalized()
 	var sprinting := Input.is_action_pressed("sprint") and stamina > 0.0 and not crouched
 	var speed := crouch_speed if crouched else walk_speed * (sprint_multiplier if sprinting else 1.0)
