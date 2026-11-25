@@ -329,6 +329,7 @@ func _build_supply_pickups() -> void:
 			supplies = [
 				{"id":"kit_estanca","label":"Kit Estanca","position":Vector3(-5.5,0.8,5.0),"consumable":true},
 				{"id":"battery","label":"Bateria de lanterna","position":Vector3(5.5,0.8,-5.0),"consumable":true},
+				{"id":"battery","label":"Bateria de lanterna","position":Vector3(-5.5,0.8,-5.0),"consumable":true},
 				{"id":"omega_master_card","label":"Cartão Mestre Ômega","position":Vector3(-6.0,0.8,-27.0)}
 			]
 		7:
@@ -440,11 +441,12 @@ func _build_chapter_puzzle_stations() -> void:
 			_add_puzzle_station("robot_arms", "CONTROLE DOS BRAÇOS", "Opere os braços na ordem: esquerdo, central, direito.", ["left", "center", "right"], ["left", "center", "right"], Vector3(6.0, 1.0, 10.0))
 			_add_puzzle_station("set_flag", "ARCO ELÉTRICO", "Use o arco elétrico para cegar o Newborn.", ["disparar"], ["disparar"], Vector3(6.0, 1.0, 2.0), "electric_arc_used", {"electric_arc":1})
 			_add_puzzle_station("set_flag", "COFRE GAMA", "Sincronize o Chip Gamma após estabilizar o núcleo.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -25.0), "gamma_chip_recovered", {"gamma_chip":1})
+			_add_puzzle_station("set_flag", "PEDESTAL DE CHIPS", "Insira os Chips Beta e Gamma para estabilizar a saída.", ["inserir"], ["inserir"], Vector3(0, 1.0, -30.0), "core_chips_inserted", {"beta_chip":1, "gamma_chip":1})
 		6:
 			_add_puzzle_station("omega_biochips", "MATRIZ EVOLUTIVA", "Ordene os estágios: Celular, Esquelético, Neural, Despertar.", ["cellular", "skeletal", "neural", "awakening"], ["cellular", "skeletal", "neural", "awakening"], Vector3(0, 1.0, -14.0))
 			_add_puzzle_station("omega_download", "DOWNLOAD ÔMEGA", "Inicie a extração. O terminal precisa de 20 segundos sem interrupção.", ["iniciar"], ["iniciar"], Vector3(6.0, 1.0, -24.0))
 			_add_puzzle_station("set_flag", "CARTÃO MESTRE ÔMEGA", "Valide o Cartão Mestre Ômega recolhido.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -27.0), "omega_master_card_recovered", {"omega_master_card":1})
-			_add_puzzle_station("omega_siege", "CERCO ÔMEGA — 75 SEGUNDOS", "Acione o cerco e sobreviva por 75 segundos. Mover-se e esconder-se é permitido.", ["iniciar"], ["iniciar"], Vector3(0, 1.0, -30.0))
+			_add_puzzle_station("omega_siege", "CERCO ÔMEGA — 75 SEGUNDOS", "Use duas baterias e atravesse as quatro passagens na ordem Norte, Leste, Sul, Oeste. Sobreviva ao cerco.", ["north", "east", "south", "west"], ["north", "east", "south", "west"], Vector3(0, 1.0, -30.0), "", {"battery":2})
 		7:
 			_add_puzzle_station("hangar_couplings", "ACOPLAMENTOS HIDRÁULICOS", "Conecte os três acoplamentos na ordem 1, 2 e 3.", ["1", "2", "3"], ["1", "2", "3"], Vector3(0, 1.0, -8.0))
 			_add_puzzle_station("set_flag", "LEITOR ÔMEGA", "Insira o Cartão Mestre Ômega recuperado no Berçário.", ["inserir"], ["inserir"], Vector3(-6.0, 1.0, -25.0), "omega_card_inserted", {"omega_master_card":1})
