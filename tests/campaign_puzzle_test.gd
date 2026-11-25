@@ -1,12 +1,12 @@
-extends SceneTree
+extends Node
 
-func _initialize() -> void:
-	call_deferred("_run")
+func _ready() -> void:
+	_run()
 
 func _run() -> void:
-	var game_state: Node = root.get_node("GameState")
-	var puzzle_system: Node = root.get_node("PuzzleSystem")
-	var campaign_director: Node = root.get_node("CampaignDirector")
+	var game_state: Node = GameState
+	var puzzle_system: Node = PuzzleSystem
+	var campaign_director: Node = CampaignDirector
 	game_state.inventory.clear()
 	game_state.safe_storage.clear()
 	game_state.puzzle_flags.clear()
@@ -17,7 +17,7 @@ func _run() -> void:
 	# Chapter 1: wrong PIN/relay sequence must not unlock progression.
 	assert(not puzzle_system.submit_pin("0718"))
 	assert(puzzle_system.submit_pin("0719"))
-	assert(not puzzle_system.submit_relays(["amber", "cyan"]))
+	assert(not puzzle_system.submit_relays(["amber", "blue"]))
 	assert(puzzle_system.submit_relays(["cyan", "amber"]))
 	assert(campaign_director._objective_requirements_met("c1_o3"))
 	assert(campaign_director._objective_requirements_met("c1_o4"))
@@ -50,6 +50,7 @@ func _run() -> void:
 	assert(puzzle_system.activate_hydraulic_coupling(2))
 	assert(not puzzle_system.execute_hangar_override())
 	assert(puzzle_system.activate_hydraulic_coupling(3))
+	assert(game_state.get_flag("hangar_couplings_complete"))
 	assert(game_state.add_item("omega_master_card", "Cartão Mestre Ômega", false))
 	assert(puzzle_system.execute_hangar_override())
 	assert(campaign_director._objective_requirements_met("c7_o4"))
@@ -65,4 +66,4 @@ func _run() -> void:
 	game_state.collected_flags.clear()
 	game_state.save_game()
 	print("NEWBORN chapter puzzle and progression gate tests: PASS")
-	quit(0)
+	get_tree().quit()
