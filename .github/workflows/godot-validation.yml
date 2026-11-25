@@ -21,6 +21,8 @@ jobs:
         run: godot --headless --editor --path . --quit
       - name: Run project startup
         run: timeout 30s godot --headless --path . --quit-after 5
+      - name: Verify background NavigationMesh bake
+        run: timeout 45s godot --headless --path . --script tests/navmesh_director_test.gd
       - name: Run inventory, healing and safe storage tests
         run: timeout 30s godot --headless --path . --script tests/game_state_test.gd
       - name: Run hunter safe-room and hiding tests
