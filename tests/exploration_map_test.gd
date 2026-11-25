@@ -1,17 +1,14 @@
-extends SceneTree
+extends Node
 
 const CampaignLevelScript = preload("res://chapters/campaign_level.gd")
 
-func _initialize() -> void:
-	call_deferred("_run")
-
-func _run() -> void:
+func _ready() -> void:
 	for chapter in range(1, 8):
 		var level := Node3D.new()
 		level.set_script(CampaignLevelScript)
-		level.chapter_number = chapter
-		root.add_child(level)
-		level._build_exploration_routes()
+		level.set("chapter_number", chapter)
+		add_child(level)
+		level.call("_build_exploration_routes")
 		assert(level.get_node_or_null("Annex_%d_Workbench" % chapter) != null, "Missing chapter annex: %d" % chapter)
 		assert(level.get_node_or_null("AnnexSign_%d" % chapter) != null, "Missing annex sign: %d" % chapter)
 		for marker_index in range(7):
@@ -20,4 +17,4 @@ func _run() -> void:
 		level.free()
 
 	print("NEWBORN seven chapter annex / wayfinding map tests: PASS")
-	quit(0)
+	get_tree().quit(0)
