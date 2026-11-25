@@ -35,6 +35,7 @@ func _ready() -> void:
 	_build_objectives()
 	_build_chapter_puzzle_stations()
 	_spawn_hunter()
+	_install_horror_atmosphere()
 	await NavMeshDirector.garantir_navegacao_capitulo(self)
 	loading_layer.queue_free()
 
@@ -321,8 +322,17 @@ func _make_cylinder(label: String, pos: Vector3, radius: float, height: float, m
 	mesh_node.material_override = mat
 	node.add_child(mesh_node)
 
+func _install_horror_atmosphere() -> void:
+	var atmosphere := Node3D.new()
+	atmosphere.name = "HorrorAtmosphere"
+	atmosphere.set_script(load("res://systems/horror_atmosphere.gd"))
+	add_child(atmosphere)
+
+
 func _ensure_environment() -> void:
-	if get_tree().current_scene != null and get_tree().current_scene.find_child("WorldEnvironment", true, false) != null:
+	var existing := get_tree().current_scene.find_child("WorldEnvironment", true, false) if get_tree().current_scene != null else null
+	if existing is WorldEnvironment and existing.environment != null:
+		_apply_cinematic_environment(existing.environment)
 		return
 	var world := WorldEnvironment.new()
 	world.name = "WorldEnvironment"
@@ -335,8 +345,16 @@ func _ensure_environment() -> void:
 	env.fog_enabled = true
 	env.fog_light_color = Color(0.16, 0.19, 0.21)
 	env.fog_density = 0.018
+	_apply_cinematic_environment(env)
 	world.environment = env
 	add_child(world)
+
+
+func _apply_cinematic_environment(env: Environment) -> void:
+	env.ambient_light_energy = 0.05
+	env.tonemap_mode = Environment.TONE_MAPPER_ACES
+	env.tonemap_exposure = 0.92
+	env.fog_density = 0.012
 
 
 func _build_safe_room() -> void:

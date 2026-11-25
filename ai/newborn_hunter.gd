@@ -23,9 +23,14 @@ var patrol_index := 0
 var attack_cooldown := 0.0
 var _repath_timer := 0.0
 var _investigate_timer := 0.0
+var _organic_head: Node3D
+var _lower_jaw: Node3D
+var _organic_veins: Array[MeshInstance3D] = []
+var _horror_clock := 0.0
 
 func _ready() -> void:
 	add_to_group("noise_listeners")
+	_build_organic_body()
 	eyes = get_node_or_null("EyesRay") as RayCast3D
 	if eyes == null:
 		eyes = RayCast3D.new()
@@ -60,6 +65,89 @@ func stun(seconds: float = 4.5) -> void:
 	stun_timer = maxf(seconds, stun_seconds)
 	state = State.STUNNED
 	velocity = Vector3.ZERO
+
+func _process(delta: float) -> void:
+	_horror_clock += delta
+	if is_instance_valid(_organic_head):
+		var threat := 1.0 if state in [State.HUNT, State.MIMIC_AMBUSH] else 0.25
+		_organic_head.rotation.z = sin(_horror_clock * (9.0 + threat * 8.0)) * 0.045 * threat
+		_organic_head.rotation.x = sin(_horror_clock * 5.3) * 0.025
+	if is_instance_valid(_lower_jaw):
+		var jaw_open := 0.32 if state == State.HUNT else 0.02
+		_lower_jaw.rotation.x = lerpf(_lower_jaw.rotation.x, jaw_open + sin(_horror_clock * 17.0) * 0.025, delta * 5.0)
+	var pulse := 0.5 + 0.5 * sin(_horror_clock * 5.4)
+	for vein in _organic_veins:
+		var material := vein.material_override as StandardMaterial3D
+		if material != null:
+			material.emission_energy_multiplier = 0.35 + pulse * (1.25 if state == State.HUNT else 0.55)
+
+func _build_organic_body() -> void:
+	var old_body := get_node_or_null("Body") as MeshInstance3D
+	if old_body != null:
+		old_body.visible = false
+	var old_veins := get_node_or_null("Body/FaceVeins") as MeshInstance3D
+	if old_veins != null:
+		old_veins.visible = false
+	var porcelain := _organic_material(Color(0.72, 0.68, 0.62), 0.22, 0.0)
+	var shadow := _organic_material(Color(0.075, 0.055, 0.06), 0.48, 0.0)
+	var vein_material := _organic_material(Color(0.19, 0.012, 0.035), 0.3, 0.8)
+	var torso := _organic_sphere("PorcelainTorso", Vector3(0, 1.22, 0), Vector3(0.34, 0.76, 0.23), porcelain)
+	torso.rotation.z = -0.08
+	_organic_sphere("RibCageLeft", Vector3(-0.2, 1.38, -0.12), Vector3(0.11, 0.43, 0.14), shadow).rotation.z = -0.28
+	_organic_sphere("RibCageRight", Vector3(0.2, 1.38, -0.12), Vector3(0.11, 0.43, 0.14), shadow).rotation.z = 0.28
+	_organic_sphere("Pelvis", Vector3(0, 0.66, 0), Vector3(0.31, 0.23, 0.2), porcelain)
+	_organic_limb("LeftArm", Vector3(-0.3, 1.55, 0), Vector3(-0.48, 0.78, -0.08), 0.105, porcelain)
+	_organic_limb("RightArm", Vector3(0.3, 1.55, 0), Vector3(0.48, 0.78, -0.08), 0.105, porcelain)
+	_organic_limb("LeftLeg", Vector3(-0.17, 0.62, 0), Vector3(-0.2, 0.08, -0.04), 0.14, porcelain)
+	_organic_limb("RightLeg", Vector3(0.17, 0.62, 0), Vector3(0.2, 0.08, -0.04), 0.14, porcelain)
+	_organic_head = Node3D.new()
+	_organic_head.name = "SealedSkull"
+	_organic_head.position = Vector3(0, 2.0, -0.015)
+	add_child(_organic_head)
+	_organic_sphere("Skull", Vector3.ZERO, Vector3(0.29, 0.36, 0.27), porcelain, _organic_head)
+	_organic_sphere("SealedMouth", Vector3(0, -0.2, -0.21), Vector3(0.19, 0.065, 0.055), shadow, _organic_head)
+	_lower_jaw = Node3D.new()
+	_lower_jaw.name = "DoubleJaw"
+	_lower_jaw.position = Vector3(0, -0.22, -0.17)
+	_organic_head.add_child(_lower_jaw)
+	_organic_sphere("JawPlate", Vector3(0, -0.055, -0.08), Vector3(0.2, 0.075, 0.12), shadow, _lower_jaw)
+	for side in [-1.0, 1.0]:
+		var vein := _organic_sphere("PulsingVein", Vector3(side * 0.14, 1.25, -0.225), Vector3(0.035, 0.48, 0.025), vein_material)
+		vein.rotation.z = side * -0.22
+		_organic_veins.append(vein)
+		var neck_vein := _organic_sphere("NeckVein", Vector3(side * 0.08, 1.82, -0.18), Vector3(0.025, 0.22, 0.025), vein_material)
+		neck_vein.rotation.z = side * 0.35
+		_organic_veins.append(neck_vein)
+
+func _organic_material(color: Color, roughness: float, emission_energy: float) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = roughness
+	material.metallic = 0.0
+	if emission_energy > 0.0:
+		material.emission_enabled = true
+		material.emission = Color(0.55, 0.008, 0.045)
+		material.emission_energy_multiplier = emission_energy
+	return material
+
+func _organic_sphere(label: String, position: Vector3, scale_value: Vector3, material: Material, parent: Node3D = null) -> MeshInstance3D:
+	var mesh_node := MeshInstance3D.new()
+	mesh_node.name = label
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.5
+	sphere.height = 1.0
+	mesh_node.mesh = sphere
+	mesh_node.scale = scale_value
+	mesh_node.position = position
+	mesh_node.material_override = material
+	(parent if parent != null else self).add_child(mesh_node)
+	return mesh_node
+
+func _organic_limb(label: String, start: Vector3, finish: Vector3, radius: float, material: Material) -> void:
+	var delta := finish - start
+	var limb := _organic_sphere(label, (start + finish) * 0.5, Vector3(radius, delta.length() * 0.62, radius), material)
+	limb.look_at(finish, Vector3.UP)
+	limb.rotate_object_local(Vector3.RIGHT, PI * 0.5)
 
 func _physics_process(delta: float) -> void:
 	attack_cooldown = maxf(0.0, attack_cooldown - delta)
