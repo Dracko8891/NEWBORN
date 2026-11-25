@@ -442,9 +442,9 @@ func _build_chapter_puzzle_stations() -> void:
 			_add_puzzle_station("set_flag", "COFRE GAMA", "Sincronize o Chip Gamma após estabilizar o núcleo.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -25.0), "gamma_chip_recovered", {"gamma_chip":1})
 		6:
 			_add_puzzle_station("omega_biochips", "MATRIZ EVOLUTIVA", "Ordene os estágios: Celular, Esquelético, Neural, Despertar.", ["cellular", "skeletal", "neural", "awakening"], ["cellular", "skeletal", "neural", "awakening"], Vector3(0, 1.0, -14.0))
-			_add_puzzle_station("set_flag", "DOWNLOAD ÔMEGA", "Inicie e confirme a extração dos dados do terminal.", ["iniciar"], ["iniciar"], Vector3(6.0, 1.0, -24.0), "omega_download_complete")
+			_add_puzzle_station("omega_download", "DOWNLOAD ÔMEGA", "Inicie a extração. O terminal precisa de 20 segundos sem interrupção.", ["iniciar"], ["iniciar"], Vector3(6.0, 1.0, -24.0))
 			_add_puzzle_station("set_flag", "CARTÃO MESTRE ÔMEGA", "Valide o Cartão Mestre Ômega recolhido.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -27.0), "omega_master_card_recovered", {"omega_master_card":1})
-			_add_puzzle_station("set_flag", "CERCO SOBREVIVIDO", "Confirme que a contenção foi atravessada.", ["confirmar"], ["confirmar"], Vector3(0, 1.0, -30.0), "omega_siege_survived")
+			_add_puzzle_station("omega_siege", "CERCO ÔMEGA — 75 SEGUNDOS", "Acione o cerco e sobreviva por 75 segundos. Mover-se e esconder-se é permitido.", ["iniciar"], ["iniciar"], Vector3(0, 1.0, -30.0))
 		7:
 			_add_puzzle_station("hangar_couplings", "ACOPLAMENTOS HIDRÁULICOS", "Conecte os três acoplamentos na ordem 1, 2 e 3.", ["1", "2", "3"], ["1", "2", "3"], Vector3(0, 1.0, -8.0))
 			_add_puzzle_station("set_flag", "LEITOR ÔMEGA", "Insira o Cartão Mestre Ômega recuperado no Berçário.", ["inserir"], ["inserir"], Vector3(-6.0, 1.0, -25.0), "omega_card_inserted", {"omega_master_card":1})
