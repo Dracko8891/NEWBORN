@@ -97,6 +97,11 @@ func _build_organic_body() -> void:
 			add_child(imported_model)
 			if imported_model is Node3D:
 				imported_model.position = Vector3(0, 0, 0)
+			var animation_player := imported_model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+			if animation_player != null:
+				var animation_names := animation_player.get_animation_list()
+				if not animation_names.is_empty():
+					animation_player.play(animation_names[0])
 			return
 	var porcelain := _organic_material(Color(0.72, 0.68, 0.62), 0.22, 0.0)
 	var shadow := _organic_material(Color(0.075, 0.055, 0.06), 0.48, 0.0)

@@ -24,6 +24,7 @@ func _ready() -> void:
 	CampaignDirector.begin_chapter(chapter_number)
 	_build_sector()
 	_build_global_architecture_kit()
+	_build_crt_monitor()
 	_build_chapter_landmarks()
 	_build_chapter_wings()
 	_build_exploration_routes()
@@ -103,6 +104,47 @@ func _build_sector() -> void:
 	if player == null:
 		_spawn_player()
 
+
+
+func _build_crt_monitor() -> void:
+	var mount := Node3D.new()
+	mount.name = "ContainmentCCTV"
+	mount.position = Vector3(1.18, 2.05, -8.0)
+	add_child(mount)
+	var casing := MeshInstance3D.new()
+	casing.name = "CRT_Casing"
+	var box := BoxMesh.new()
+	box.size = Vector3(0.82, 0.56, 0.16)
+	casing.mesh = box
+	var case_mat := StandardMaterial3D.new()
+	case_mat.albedo_color = Color(0.025, 0.032, 0.035)
+	case_mat.metallic = 0.72
+	case_mat.roughness = 0.58
+	casing.material_override = case_mat
+	mount.add_child(casing)
+	var screen := MeshInstance3D.new()
+	screen.name = "CRT_NoiseFeed"
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.70, 0.43)
+	screen.mesh = quad
+	screen.position = Vector3(0, 0, 0.086)
+	screen.set_script(load("res://systems/crt_monitor.gd"))
+	mount.add_child(screen)
+	var frame := MeshInstance3D.new()
+	frame.name = "CRT_HeavyBezel"
+	var bezel := BoxMesh.new()
+	bezel.size = Vector3(0.92, 0.66, 0.10)
+	frame.mesh = bezel
+	frame.position.z = 0.10
+	frame.material_override = case_mat
+	mount.add_child(frame)
+	var label := Label3D.new()
+	label.text = "CONTAINMENT BREACH // FEED LOST"
+	label.font_size = 22
+	label.position = Vector3(0, -0.38, 0.13)
+	label.modulate = Color(0.68, 0.10, 0.08)
+	label.billboard = BaseMaterial3D.BILLBOARD_DISABLED
+	mount.add_child(label)
 
 func _build_corridor_walls_with_room_openings(wall: Material) -> void:
 	var openings: Array[float] = []

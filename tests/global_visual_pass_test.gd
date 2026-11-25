@@ -25,9 +25,11 @@ func _run() -> void:
 		assert(player != null, "Player must spawn in each chapter")
 		var camera := player.get_node_or_null("Head/Camera3D") as Camera3D
 		assert(camera != null and is_equal_approx(camera.fov, 64.0), "Default camera FOV must be 64 degrees")
-		var pbr_script := load("res://systems/procedural_pbr.gd")
+		var pbr_script := load("res://systems/horror_visual_director.gd")
 		var material := pbr_script.material_for(chapter, "wall") as StandardMaterial3D
 		assert(material.normal_texture != null and material.roughness_texture != null, "PBR maps must exist in every chapter")
+		assert(material.normal_texture is NoiseTexture2D and material.roughness_texture is NoiseTexture2D, "PBR maps must use seamless procedural NoiseTexture2D")
+		assert(level.find_child("ContainmentCCTV", true, false) != null, "CRT CCTV feed must exist in every chapter")
 		var hud := level.find_child("MinimalDiegeticHUD", true, false)
 		assert(hud != null, "Minimal translucent HUD must exist in every chapter")
 		level.queue_free()
