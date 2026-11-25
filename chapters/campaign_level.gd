@@ -82,15 +82,15 @@ func _build_sector() -> void:
 	var wall := _chapter_material(chapter_number, false)
 	var floor_mat := _chapter_material(chapter_number, true)
 	var alert := MAT_ALERT
-	_make_box("Setor_Piso", Vector3(0, -0.2, 0), Vector3(18, 0.4, 70), floor_mat)
-	_make_box("Setor_Teto", Vector3(0, 3.0, 0), Vector3(18, 0.3, 70), wall)
-	_make_box("Parede_E", Vector3(-9.1, 1.5, 0), Vector3(0.3, 3.0, 70), wall)
-	_make_box("Parede_D", Vector3(9.1, 1.5, 0), Vector3(0.3, 3.0, 70), wall)
+	# Main playable spine: 3.2 m clear width and 2.85 m clear height.
+	_make_box("Setor_Piso", Vector3(0, -0.2, 0), Vector3(3.2, 0.4, 70), floor_mat)
+	_make_box("Setor_Teto", Vector3(0, 3.0, 0), Vector3(3.2, 0.3, 70), wall)
+	_build_corridor_walls_with_room_openings(wall)
 	for i in range(11):
 		var z := -32.0 + float(i) * 6.4
-		_make_box("Arco_Estrutural_%02d" % i, Vector3(0, 2.78, z), Vector3(18, 0.28, 0.45), wall)
-		_make_box("Painel_Tecnico_E_%02d" % i, Vector3(-8.88, 2.05, z + 2.1), Vector3(0.12, 1.15, 2.2), floor_mat, false)
-		_make_box("Painel_Tecnico_D_%02d" % i, Vector3(8.88, 2.05, z + 2.1), Vector3(0.12, 1.15, 2.2), floor_mat, false)
+		_make_box("Arco_Estrutural_%02d" % i, Vector3(0, 2.78, z), Vector3(3.2, 0.28, 0.45), wall)
+		_make_box("Painel_Tecnico_E_%02d" % i, Vector3(-1.48, 2.05, z + 2.1), Vector3(0.12, 1.15, 2.2), floor_mat, false)
+		_make_box("Painel_Tecnico_D_%02d" % i, Vector3(1.48, 2.05, z + 2.1), Vector3(0.12, 1.15, 2.2), floor_mat, false)
 	for side in [-1.0, 1.0]:
 		for j in range(5):
 			_make_box("Conduite_%d_%d" % [int(side), j], Vector3(side * 7.8, 3.25, -25.0 + float(j) * 12.0), Vector3(0.35, 0.35, 5.0), alert, false)
@@ -102,6 +102,35 @@ func _build_sector() -> void:
 	var player := get_node_or_null("Player")
 	if player == null:
 		_spawn_player()
+
+
+func _build_corridor_walls_with_room_openings(wall: Material) -> void:
+	var openings: Array[float] = []
+	match chapter_number:
+		1, 2:
+			openings = [-16.0, -30.0, -3.0]
+		3:
+			openings = [22.0, -30.0, -3.0]
+		4:
+			openings = [22.0, -30.0, -3.0]
+		5:
+			openings = [-30.0, -3.0]
+		6:
+			openings = [22.0, -30.0, -3.0]
+		7:
+			openings = [22.0, -30.0, -3.0]
+	openings.sort()
+	for side in [-1.0, 1.0]:
+		var cursor := -35.0
+		for opening in openings:
+			var gap_start := opening - 1.45
+			var gap_end := opening + 1.45
+			if gap_start > cursor:
+				var segment_length := gap_start - cursor
+				_make_box("SpineWall_%d_%.1f" % [int(side), cursor], Vector3(side * 1.75, 1.5, cursor + segment_length * 0.5), Vector3(0.3, 3.0, segment_length), wall)
+			cursor = maxf(cursor, gap_end)
+		if cursor < 35.0:
+			_make_box("SpineWall_%d_End" % int(side), Vector3(side * 1.75, 1.5, (cursor + 35.0) * 0.5), Vector3(0.3, 3.0, 35.0 - cursor), wall)
 
 func _spawn_player() -> void:
 	var player_scene := GameState.get_cached_resource("res://scenes/player.tscn") as PackedScene
@@ -164,11 +193,11 @@ func _build_global_architecture_kit() -> void:
 	trim.metallic = 0.82
 	trim.roughness = 0.42
 	for side in [-1.0, 1.0]:
-		_make_box("Industrial_Baseboard_%d" % int(side), Vector3(side * 8.88, 0.16, 0), Vector3(0.12, 0.28, 69.0), trim, false)
+		_make_box("Industrial_Baseboard_%d" % int(side), Vector3(side * 1.55, 0.16, 0), Vector3(0.12, 0.28, 69.0), trim, false)
 		for rib in range(9):
 			var z := -29.0 + float(rib) * 7.2
-			_make_box("Wall_Pilaster_%d_%02d" % [int(side), rib], Vector3(side * 8.72, 1.48, z), Vector3(0.34, 2.72, 0.42), metal_mat, false)
-			_make_box("Pilaster_Cap_%d_%02d" % [int(side), rib], Vector3(side * 8.69, 2.78, z), Vector3(0.42, 0.09, 0.58), trim, false)
+			_make_box("Wall_Pilaster_%d_%02d" % [int(side), rib], Vector3(side * 1.42, 1.48, z), Vector3(0.34, 2.72, 0.42), metal_mat, false)
+			_make_box("Pilaster_Cap_%d_%02d" % [int(side), rib], Vector3(side * 1.39, 2.78, z), Vector3(0.42, 0.09, 0.58), trim, false)
 	for i in range(10):
 		var z := -31.0 + float(i) * 6.8
 		_make_box("Ceiling_Service_Rail_%02d" % i, Vector3(0, 2.72, z), Vector3(1.8, 0.12, 0.16), trim, false)
