@@ -36,6 +36,16 @@ func _ready() -> void:
 	flashlight.visible = flashlight_on
 	add_to_group("player")
 
+func _notification(what: int) -> void:
+	# Android can suspend the process when the user switches apps or locks the screen.
+	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST:
+		if is_inside_tree() and not dead:
+			GameState.save_game()
+	elif what == NOTIFICATION_APPLICATION_RESUMED:
+		if not dead:
+			flashlight_charge = clampf(flashlight_charge, 0.0, flashlight_seconds)
+			flashlight.visible = flashlight_on and flashlight_charge > 0.0
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and look_enabled:
 		_rotate_view(event.relative)
@@ -190,3 +200,5 @@ func _physics_process(delta: float) -> void:
 		if flashlight_charge <= 0.0:
 			flashlight.visible = false
 			flashlight_on = false
+			GameState.flashlight_charge_saved = 0.0
+			GameState.save_game()
