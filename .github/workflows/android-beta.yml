@@ -41,7 +41,8 @@ jobs:
         run: godot --headless --editor --path . --quit
 
       - name: Install Android build template
-        run: godot --headless --path . --install-android-build-template
+        timeout-minutes: 5
+        run: timeout 240s godot --headless --path . --install-android-build-template
 
       - name: Export debug APK
         run: |
