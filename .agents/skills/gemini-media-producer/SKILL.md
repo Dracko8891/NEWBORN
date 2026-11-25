@@ -54,3 +54,10 @@ When a GenMedia MCP server is connected, follow its exact tool schema and output
 - https://github.com/AntonioCardenas/generate-nanobanana (upstream describes cost approval, real references and prompt sidecars; verify its current license before copying code)
 - https://github.com/google-gemini/gemini-skills (Apache-2.0)
 - https://github.com/xbill9/omni-skill-agy (Apache-2.0; Omni MCP reference)
+
+
+## Import into Godot safely
+- Deliver approved outputs as local files; never wire provider API calls into gameplay.
+- For PROTOCOLO NEWBORN, use `docs/MCP_ASSET_PIPELINE.md` and `python tools/asset_pipeline.py validate/import`.
+- Import requires human approval and a declared license; preserve the prompt/provider/model sidecar and SHA-256 manifest.
+- Use only local `res://assets/generated/` paths at runtime. No MCP or credentials in exported game builds.
