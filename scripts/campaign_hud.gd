@@ -65,6 +65,12 @@ func _build_interface() -> void:
 	map_button.modulate = Color(0.68, 0.82, 0.84, 0.72)
 	map_button.pressed.connect(_toggle_map)
 	column.add_child(map_button)
+	var credits_button := Button.new()
+	credits_button.text = "CRÉDITOS"
+	credits_button.flat = true
+	credits_button.modulate = Color(0.68, 0.82, 0.84, 0.72)
+	credits_button.pressed.connect(_show_credits)
+	column.add_child(credits_button)
 
 func _refresh_current() -> void:
 	var chapter := GameState.chapter
@@ -112,3 +118,11 @@ func _unhandled_input(event: InputEvent) -> void:
 func _toggle_map() -> void:
 	if holographic_map != null and holographic_map.has_method("toggle_map"):
 		holographic_map.toggle_map()
+
+func _show_credits() -> void:
+	var dialog := AcceptDialog.new()
+	dialog.title = "CRÉDITOS — PROTOCOLO NEWBORN"
+	dialog.dialog_text = "IDEIA ORIGINAL: Nycollas Gabriel\n\nCRIAÇÃO: Damião Bruno\nDIREÇÃO CRIATIVA: Damião Bruno\nROTEIRO: Damião Bruno\nNARRAÇÃO: Damião Bruno\nVOZES: Damião Bruno\nATUAÇÃO: Damião Bruno\nPERSONAGENS: Damião Bruno\nCONCEPÇÃO DO NEWBORN: Damião Bruno\nDIREÇÃO DE ARTE: Damião Bruno\nDIREÇÃO VISUAL: Damião Bruno\nDESIGN DE AMBIENTES: Damião Bruno\nDESIGN DE FASES: Damião Bruno\nDESIGN DE GAMEPLAY: Damião Bruno\nDESIGN DE PUZZLES: Damião Bruno\nPROGRAMAÇÃO E INTEGRAÇÃO: Damião Bruno\nPRODUÇÃO: Damião Bruno\n\nRECURSOS DE TERCEIROS: conforme créditos e licenças dos respectivos autores."
+	dialog.min_size = Vector2i(560, 560)
+	add_child(dialog)
+	dialog.popup_centered()

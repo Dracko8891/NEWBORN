@@ -126,12 +126,12 @@ func _process(delta: float) -> void:
 	if not is_instance_valid(_player) or not is_instance_valid(_camera):
 		return
 	_time += delta
-	if is_instance_valid(_dust):
+	if is_instance_valid(_dust) and _dust.is_inside_tree() and _camera.is_inside_tree():
 		_dust.global_position = _camera.global_position + -_camera.global_basis.z * 3.0
 		_dust.emitting = _flashlight != null and _flashlight.visible
 	var enemy_distance := 100.0
 	var hunting := false
-	if is_instance_valid(_enemy):
+	if is_instance_valid(_enemy) and _enemy.is_inside_tree() and _player.is_inside_tree():
 		enemy_distance = _player.global_position.distance_to(_enemy.global_position)
 		var state_value: Variant = _enemy.get("state")
 		hunting = state_value != null and int(state_value) in [2, 3, 5]

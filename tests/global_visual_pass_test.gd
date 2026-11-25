@@ -24,7 +24,7 @@ func _run() -> void:
 		var player := level.get_node_or_null("Player")
 		assert(player != null, "Player must spawn in each chapter")
 		var camera := player.get_node_or_null("Head/Camera3D") as Camera3D
-		assert(camera != null and is_equal_approx(camera.fov, 64.0), "Default camera FOV must be 64 degrees")
+		assert(camera != null and is_equal_approx(camera.fov, 70.0), "Default camera FOV must be 70 degrees")
 		var pbr_script := load("res://systems/horror_visual_director.gd")
 		var material := pbr_script.material_for(chapter, "wall") as StandardMaterial3D
 		assert(material.normal_texture != null and material.roughness_texture != null, "PBR maps must exist in every chapter")
