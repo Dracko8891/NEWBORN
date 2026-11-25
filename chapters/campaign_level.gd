@@ -388,6 +388,7 @@ func _build_chapter_puzzle_stations() -> void:
 			_add_puzzle_station("set_flag", "LEITOR DE CHIP ALFA", "Sincronize o Chip Alpha e instale o módulo do Tricorder.", ["sincronizar"], ["sincronizar"], Vector3(-6.0, 1.0, -18.0), "alpha_chip_recovered", {"alpha_chip":1, "tricorder_upgrade":1})
 		4:
 			_add_puzzle_station("set_flag", "DRENAGEM DE AMÔNIA", "Equipe a Máscara de Gás e abra a linha de purga.", ["drenar"], ["drenar"], Vector3(0, 1.0, 8.0), "ammonia_fog_drained", {"gas_mask":1})
+			_add_puzzle_station("synthesis_recipe", "BANCADA DE SÍNTESE", "Misture Nitro-Estéril ×2, Ácido Tampão ×1 e Enzima ×3 nessa ordem.", ["nitro", "acid", "enzyme"], ["nitro", "nitro", "acid", "enzyme", "enzyme", "enzyme"], Vector3(0, 1.0, -2.0), "", {"nitro_sterile":2, "acid_buffer":1, "enzyme":3})
 			_add_puzzle_station("genesis_valves", "GALERIA DE VÁLVULAS", "Ordem de fluxo: Azul → Verde → Vermelha.", ["blue", "green", "red"], ["blue", "green", "red"], Vector3(0, 1.0, -18.0))
 			_add_puzzle_station("set_flag", "CHIP BETA", "Sincronize o Chip Beta recuperado no compartimento drenado.", ["recuperar"], ["recuperar"], Vector3(6.0, 1.0, -25.0), "beta_chip_recovered", {"beta_chip":1})
 		5:
