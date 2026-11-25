@@ -105,6 +105,18 @@ func _commit_puzzle() -> bool:
 			success = PuzzleSystem.submit_melody(sequence)
 		"genesis_valves":
 			success = PuzzleSystem.submit_valves(sequence)
+		"synthesis_recipe":
+			if sequence != ["nitro", "nitro", "acid", "enzyme", "enzyme", "enzyme"]:
+				return false
+			if not GameState.remove_item("nitro_sterile", 2):
+				return false
+			if not GameState.remove_item("acid_buffer", 1):
+				return false
+			if not GameState.remove_item("enzyme", 3):
+				return false
+			GameState.set_flag("synthesis_compound_created")
+			GameState.save_game()
+			success = true
 		"reactor_shutdown":
 			success = PuzzleSystem.submit_reactor_shutdown(sequence)
 		"robot_arms":
