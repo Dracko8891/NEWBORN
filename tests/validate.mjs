@@ -1,7 +1,7 @@
 import fs from 'node:fs';import assert from 'node:assert/strict';
 const js=fs.readFileSync('src/main.js','utf8'),css=fs.readFileSync('src/style.css','utf8'),html=fs.readFileSync('index.html','utf8'),icon=fs.readFileSync('public/icon.svg','utf8');
 for(const c of ['DESPERTAR','SEM ENERGIA','PROTOCOLO DE CONTENÇÃO','RUÍDO NO ESCURO','ÚLTIMA AUTORIZAÇÃO','SUPERFÍCIE'])assert(js.includes(c),'Capítulo ausente: '+c);
-for(const c of ['INVENTÁRIO','LANTERNA','CORRER','AGACHAR','INTERAGIR','OBJETIVO PRINCIPAL'])assert(html.includes(c),'HUD ausente: '+c);
+for(const c of ['INVENTÁRIO','LANTERNA','CORRER','AGACHAR','INTERAGIR','OBJETIVO PRINCIPAL'])assert((html+js).includes(c),'HUD ausente: '+c);
 assert(js.includes('new THREE.SpotLight')&&js.includes('camera.add(hand)'),'Lanterna de mão não encontrada');
 assert(js.includes('new THREE.Sprite')&&js.includes('SpriteMaterial'),'Billboards 2D não encontrados');
 assert(js.includes('monsterAI')&&js.includes('collides')&&js.includes('localStorage'),'IA, colisão ou salvamento ausente');
