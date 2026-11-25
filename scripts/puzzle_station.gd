@@ -7,6 +7,7 @@ class_name NewbornPuzzleStation
 @export var choices: Array[String] = []
 @export var solution: Array[String] = []
 @export var success_flag: String = ""
+@export var required_items: Dictionary = {}
 
 var entered: Array[String] = []
 var layer: CanvasLayer
@@ -84,6 +85,11 @@ func _submit_token(token: String) -> void:
 			status_label.text = "FALHA DE VALIDAÇÃO — VERIFIQUE OS RECURSOS"
 
 func _commit_puzzle() -> bool:
+	for item_id in required_items:
+		var amount := maxi(1, int(required_items[item_id]))
+		if not GameState.has_item(str(item_id), amount):
+			GameState.notification_requested.emit("Recurso necessário: " + str(item_id))
+			return false
 	var sequence: Array[String] = entered.duplicate()
 	var success := false
 	match puzzle_id:
@@ -99,6 +105,8 @@ func _commit_puzzle() -> bool:
 			success = PuzzleSystem.submit_valves(sequence)
 		"reactor_shutdown":
 			success = PuzzleSystem.submit_reactor_shutdown(sequence)
+		"robot_arms":
+			success = PuzzleSystem.submit_robot_arms(sequence)
 		"omega_biochips":
 			success = PuzzleSystem.submit_biochips(sequence)
 		"hangar_couplings":
@@ -107,11 +115,20 @@ func _commit_puzzle() -> bool:
 			GameState.set_flag("hangar_couplings_complete")
 			success = true
 		"set_flag":
+			if success_flag.is_empty():
+				return false
 			GameState.set_flag(success_flag)
+			if required_items.has("tricorder_upgrade"):
+				GameState.set_flag("tricorder_level_2")
 			GameState.save_game()
 			success = true
 		_:
 			push_warning("Unknown puzzle station: " + puzzle_id)
+	if success:
+		for item_id in required_items:
+			if bool(GameState.get_flag("consume_puzzle_item_" + str(item_id), false)):
+				GameState.remove_item(str(item_id), maxi(1, int(required_items[item_id])))
+		GameState.save_game()
 	return success
 
 func _close() -> void:
