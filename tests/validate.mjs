@@ -1,8 +1,10 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 const html=fs.readFileSync('index.html','utf8');
 const js=fs.readFileSync('src/main.js','utf8');
 const css=fs.readFileSync('src/style.css','utf8');
+const syntax=spawnSync(process.execPath,['--check','src/main.js'],{encoding:'utf8'});assert.equal(syntax.status,0,'JavaScript syntax error: '+syntax.stderr);
 assert(html.includes('/src/main.js'),'Vite entry missing');
 for(const id of ['game','objective','inventory','status','start','controls','begin','use','light','run','hide','modal']) assert(js.includes("$('"+id+"')"), 'Missing UI element '+id);
 for(const token of ['state.fuse','state.note','state.card','monsterUpdate','localStorage.setItem','localStorage.getItem','state.battery','state.hidden','state.door=true','state.breaker']) assert(js.includes(token),'Missing gameplay system '+token);
