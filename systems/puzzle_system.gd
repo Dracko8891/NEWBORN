@@ -56,7 +56,9 @@ func activate_hydraulic_coupling(index: int) -> bool:
 	couplings[index - 1] = true
 	GameState.set_flag("hangar_couplings", couplings)
 	if couplings.all(func(value: Variant) -> bool: return bool(value)):
+		GameState.set_flag("hangar_couplings_complete")
 		puzzle_solved.emit("hangar_hydraulics")
+		GameState.save_game()
 	return true
 
 func _same_set(a: Array[String], b: Array[String]) -> bool:
