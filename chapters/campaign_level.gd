@@ -19,6 +19,7 @@ func _ready() -> void:
 	_build_sector()
 	_build_chapter_landmarks()
 	_build_chapter_wings()
+	_build_exploration_routes()
 	_build_hide_spots()
 	var chapter_data := Campaign.get_chapter(chapter_number)
 	if bool(chapter_data.get("safe_room", false)):
@@ -212,6 +213,70 @@ func _build_chapter_wings() -> void:
 		sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		sign.modulate = Color(0.42, 0.94, 0.9)
 		add_child(sign)
+
+
+func _build_exploration_routes() -> void:
+	# Each chapter gets a distinct optional annex off the main spine. These rooms
+	# provide readable landmarks and a short branch-and-return exploration loop.
+	var annexes: Array[Dictionary] = []
+	match chapter_number:
+		1:
+			annexes = [{"name":"ARQUIVO CLÍNICO","side":1.0,"z":-3.0,"detail":"PRONTUÁRIOS / REGISTROS"}]
+		2:
+			annexes = [{"name":"DEPÓSITO DE CALIBRAGEM","side":1.0,"z":-3.0,"detail":"COMPONENTES / FERRAMENTAS"}]
+		3:
+			annexes = [{"name":"VESTIÁRIO DA TRIPULAÇÃO","side":-1.0,"z":-3.0,"detail":"ARMÁRIOS / PERTENCES"}]
+		4:
+			annexes = [{"name":"OBSERVAÇÃO BIOLÓGICA","side":-1.0,"z":-3.0,"detail":"TANQUES / AMOSTRAS"}]
+		5:
+			annexes = [{"name":"OFICINA DE MANUTENÇÃO","side":1.0,"z":-3.0,"detail":"FERRAMENTAS / PAINÉIS"}]
+		6:
+			annexes = [{"name":"OBSERVAÇÃO ÔMEGA","side":1.0,"z":-3.0,"detail":"VIDRO BLINDADO / AMOSTRAS"}]
+		7:
+			annexes = [{"name":"DOCA DE SERVIÇO","side":-1.0,"z":-3.0,"detail":"CARGA / ACOPLAMENTOS"}]
+
+	for index in range(annexes.size()):
+		var room: Dictionary = annexes[index]
+		var side := float(room.side)
+		var center_z := float(room.z)
+		var center_x := side * 6.55
+		var front_x := side * 4.25
+		# 4.5 x 7.5 m annex with a 2.6 m doorway back to the main corridor.
+		_make_box("Annex_%d_BackWall" % chapter_number, Vector3(side * 8.85, 1.7, center_z), Vector3(0.24, 3.4, 7.5), MAT_WALL)
+		_make_box("Annex_%d_SideA" % chapter_number, Vector3(center_x, 1.7, center_z - 3.85), Vector3(4.5, 3.4, 0.24), MAT_WALL)
+		_make_box("Annex_%d_SideB" % chapter_number, Vector3(center_x, 1.7, center_z + 3.85), Vector3(4.5, 3.4, 0.24), MAT_WALL)
+		_make_box("Annex_%d_DoorA" % chapter_number, Vector3(front_x, 1.7, center_z - 2.55), Vector3(0.24, 3.4, 2.6), MAT_WALL)
+		_make_box("Annex_%d_DoorB" % chapter_number, Vector3(front_x, 1.7, center_z + 2.55), Vector3(0.24, 3.4, 2.6), MAT_WALL)
+		_make_box("Annex_%d_Floor" % chapter_number, Vector3(center_x, 0.035, center_z), Vector3(4.45, 0.07, 7.45), MAT_FLOOR)
+		_make_box("Annex_%d_Console" % chapter_number, Vector3(side * 7.75, 0.75, center_z), Vector3(0.8, 1.5, 1.1), MAT_ALERT, false)
+		# A low central work surface makes the room silhouette legible on mobile.
+		_make_box("Annex_%d_Workbench" % chapter_number, Vector3(center_x, 0.55, center_z), Vector3(2.0, 1.1, 1.0), MAT_WALL)
+		var sign := Label3D.new()
+		sign.name = "AnnexSign_%d" % chapter_number
+		sign.text = str(room.name) + "\\n" + str(room.detail)
+		sign.position = Vector3(front_x - side * 0.35, 2.65, center_z)
+		sign.font_size = 25
+		sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		sign.modulate = Color(0.48, 0.92, 0.88)
+		add_child(sign)
+
+	# Repeated floor markers and overhead sector IDs make backtracking readable.
+	for marker_index in range(7):
+		var marker_z := 25.0 - float(marker_index) * 9.0
+		var stripe := _chapter_material(chapter_number, false)
+		stripe.albedo_color = Color(0.12, 0.62, 0.58) if marker_index % 2 == 0 else Color(0.68, 0.34, 0.16)
+		stripe.emission_enabled = true
+		stripe.emission = stripe.albedo_color
+		stripe.emission_energy_multiplier = 0.35
+		_make_box("Wayfinding_FloorMark_%02d" % marker_index, Vector3(0, 0.012, marker_z), Vector3(1.1, 0.025, 0.32), stripe, false)
+		var sector_label := Label3D.new()
+		sector_label.name = "Wayfinding_Sector_%02d" % marker_index
+		sector_label.text = "V7  /  %02d" % (chapter_number * 10 + marker_index)
+		sector_label.position = Vector3(0, 3.15, marker_z)
+		sector_label.font_size = 20
+		sector_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		sector_label.modulate = Color(0.42, 0.78, 0.82)
+		add_child(sector_label)
 
 func _make_cylinder(label: String, pos: Vector3, radius: float, height: float, mat: Material) -> void:
 	var node := Node3D.new()
