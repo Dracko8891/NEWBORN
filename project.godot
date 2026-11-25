@@ -17,7 +17,7 @@ window/size/viewport_height=720
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
-window/handheld/orientation=0
+window/handheld/orientation=4
 
 [rendering]
 textures/vram_compression/import_etc2_astc=true
@@ -33,6 +33,7 @@ move_left={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":65)]
 move_right={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":68)]}
 sprint={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":4194325)]}
 crouch={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":67)]}
+slide={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":4194326)]}
 interact={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":70)]}
 flashlight={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":76)]}
 use_medical={"deadzone":0.2,"events":[Object(InputEventKey,"physical_keycode":72)]}

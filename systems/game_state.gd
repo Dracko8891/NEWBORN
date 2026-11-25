@@ -10,8 +10,12 @@ const EXPANDED_SLOTS := 8
 const STACK_LIMIT := 2
 const SAVE_PATH := "user://newborn_save.json"
 
+enum StartMode { STANDARD, CLASSIC_DATA_RODS }
+var start_mode: StartMode = StartMode.STANDARD
+var photosensitive_mode := false
+var directional_subtitles := true
 var chapter: int = 1
-var health_state: int = 0 # 0 = saudável, 1 = sangramento, 2 = morto
+var health_state: int = 0
 var flashlight_charge_saved: float = 240.0
 var inventory_capacity: int = START_SLOTS
 var inventory: Array[Dictionary] = []
@@ -22,6 +26,22 @@ var collected_flags: Dictionary = {}
 
 func _ready() -> void:
 	load_game()
+
+func start_new_game(mode: int = StartMode.STANDARD) -> void:
+	start_mode = mode as StartMode
+	chapter = 1
+	health_state = 0
+	flashlight_charge_saved = 240.0
+	inventory_capacity = START_SLOTS
+	inventory.clear()
+	safe_storage.clear()
+	unlocked_chapters = [1]
+	puzzle_flags.clear()
+	collected_flags.clear()
+	save_game()
+	inventory_changed.emit()
+	health_changed.emit(health_state)
+	chapter_changed.emit(chapter)
 
 func add_item(item_id: String, display_name: String, consumable: bool = false) -> bool:
 	if item_id.is_empty():
@@ -72,40 +92,28 @@ func use_item(item_id: String, user: Node = null) -> bool:
 	if not has_item(item_id):
 		return false
 	var key := item_id.strip_edges().to_lower()
-	var healed := false
+	var used := false
 	match key:
-		"kit_estanca", "hemostatic_kit", "bandage", "curativo":
+		"kit_estanca", "hemostatic_kit", "bandage", "curativo", "kit_medico", "first_aid_kit", "medkit", "hypo_spray", "hipospray":
 			if health_state != 1:
-				notification_requested.emit("O curativo só é necessário durante um sangramento")
+				notification_requested.emit("O tratamento só é necessário durante um sangramento")
 				return false
 			set_health_state(0)
-			notification_requested.emit("Sangramento estancado")
-			healed = true
-		"kit_medico", "first_aid_kit", "medkit", "hypo_spray", "hipospray":
-			if health_state == 2:
-				return false
-			if health_state == 0:
-				notification_requested.emit("Você não precisa de tratamento agora")
-				return false
-			set_health_state(0)
-			notification_requested.emit("Tratamento aplicado")
-			healed = true
+			notification_requested.emit("Ferimento tratado")
+			used = true
 		"bateria", "battery", "energy_cell", "celula_energia":
-			if user == null or not user.has_method("recharge_flashlight"):
-				notification_requested.emit("A bateria precisa ser usada junto à lanterna")
-				return false
-			if not bool(user.recharge_flashlight(90.0)):
+			if user == null or not user.has_method("recharge_flashlight") or not bool(user.recharge_flashlight(90.0)):
+				notification_requested.emit("Não foi possível recarregar a lanterna")
 				return false
 			notification_requested.emit("Carga da lanterna restaurada")
-			healed = true
+			used = true
 		_:
 			notification_requested.emit("Este recurso ainda não pode ser usado")
 			return false
-	if healed:
+	if used:
 		remove_item(item_id, 1)
 		save_game()
-		return true
-	return false
+	return used
 
 func discard_item(item_id: String) -> bool:
 	for i in range(inventory.size()):
@@ -144,13 +152,12 @@ func retrieve_item(item_id: String) -> bool:
 
 func store_all_items() -> int:
 	var moved := inventory.size()
-	if moved <= 0:
-		return 0
 	for slot in inventory:
 		safe_storage.append(slot.duplicate(true))
 	inventory.clear()
-	inventory_changed.emit()
-	save_game()
+	if moved > 0:
+		inventory_changed.emit()
+		save_game()
 	return moved
 
 func retrieve_all_items() -> int:
@@ -185,11 +192,11 @@ func get_flag(flag: String, fallback: Variant = false) -> Variant:
 	return puzzle_flags.get(flag, fallback)
 
 func save_game() -> bool:
-	for player in get_tree().get_nodes_in_group("player"):
-		var current_charge: Variant = player.get("flashlight_charge")
+	for player_node in get_tree().get_nodes_in_group("player"):
+		var current_charge: Variant = player_node.get("flashlight_charge")
 		if current_charge != null:
 			flashlight_charge_saved = clampf(float(current_charge), 0.0, 240.0)
-		break
+			break
 	var data := {
 		"chapter": chapter,
 		"health_state": health_state,
@@ -199,7 +206,10 @@ func save_game() -> bool:
 		"safe_storage": safe_storage,
 		"unlocked_chapters": unlocked_chapters,
 		"puzzle_flags": puzzle_flags,
-		"collected_flags": collected_flags
+		"collected_flags": collected_flags,
+		"start_mode": int(start_mode),
+		"photosensitive_mode": photosensitive_mode,
+		"directional_subtitles": directional_subtitles
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -232,12 +242,17 @@ func load_game() -> bool:
 	inventory = _valid_slots(data.get("inventory", []), inventory_capacity)
 	safe_storage = _valid_slots(data.get("safe_storage", []), 1000)
 	unlocked_chapters.clear()
-	for item in data.get("unlocked_chapters", [1]):
-		var unlocked := clampi(int(item), 1, 7)
-		if not unlocked_chapters.has(unlocked):
-			unlocked_chapters.append(unlocked)
+	var unlocked_data: Variant = data.get("unlocked_chapters", [1])
+	if typeof(unlocked_data) == TYPE_ARRAY:
+		for item in unlocked_data:
+			var unlocked := clampi(int(item), 1, 7)
+			if not unlocked_chapters.has(unlocked):
+				unlocked_chapters.append(unlocked)
 	puzzle_flags = data.get("puzzle_flags", {}) if typeof(data.get("puzzle_flags", {})) == TYPE_DICTIONARY else {}
 	collected_flags = data.get("collected_flags", {}) if typeof(data.get("collected_flags", {})) == TYPE_DICTIONARY else {}
+	start_mode = int(data.get("start_mode", 0)) as StartMode
+	photosensitive_mode = bool(data.get("photosensitive_mode", false))
+	directional_subtitles = bool(data.get("directional_subtitles", true))
 	inventory_changed.emit()
 	health_changed.emit(health_state)
 	chapter_changed.emit(chapter)

@@ -1,47 +1,48 @@
 extends CharacterBody3D
 class_name NewbornHunter
 
-enum State { DORMANT, PATROL, INVESTIGATE, SEARCH, CHASE, STUNNED, RETURN }
+enum State { OBSERVE, PATROL, INVESTIGATE, HUNT, STUNNED, MIMIC_AMBUSH }
 @export var move_speed := 2.4
-@export var chase_speed := 4.2
+@export var hunt_speed := 4.2
 @export var hearing_radius := 18.0
-@export var sight_distance := 13.0
-@export var sight_angle_degrees := 72.0
 @export var forget_seconds := 5.0
-@onready var eyes: RayCast3D = get_node_or_null("EyesRay")
+@export var stun_seconds := 4.5
+@export var mimic_enabled := false
+@export var patrol_points: Array[Vector3] = []
+
+@onready var eyes: RayCast3D = $EyesRay
+@onready var navigation: NavigationAgent3D = $NavigationAgent3D
+@onready var face_veins: MeshInstance3D = get_node_or_null("FaceVeins")
+
 var state: State = State.PATROL
 var target: Node3D
 var last_known_position := Vector3.ZERO
 var lost_timer := 0.0
-var search_timer := 0.0
 var stun_timer := 0.0
-var patrol_points: Array[Vector3] = []
 var patrol_index := 0
 var attack_cooldown := 0.0
-var _path_grid := AStarGrid2D.new()
-var _path_points: Array[Vector3] = []
-var _path_index := 0
-var _path_refresh := 0.0
-var _path_valid := false
-var _path_shape := BoxShape3D.new()
+var _repath_timer := 0.0
+var _investigate_timer := 0.0
 
 func _ready() -> void:
 	add_to_group("noise_listeners")
 	target = get_tree().get_first_node_in_group("player") as Node3D
 	if patrol_points.is_empty():
 		patrol_points = [global_position, global_position + Vector3(5, 0, 0), global_position + Vector3(5, 0, 7), global_position + Vector3(-4, 0, 7)]
-	_path_shape.size = Vector3(0.72, 1.5, 0.72)
-	_path_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
+	navigation.path_desired_distance = 0.45
+	navigation.target_desired_distance = 0.7
+	navigation.avoidance_enabled = true
 
 func hear_noise(origin: Vector3, strength: float) -> void:
-	if state == State.STUNNED or state == State.CHASE:
+	if state == State.STUNNED or state == State.HUNT:
 		return
 	if global_position.distance_to(origin) <= hearing_radius * clampf(strength, 0.1, 1.5):
 		last_known_position = origin
 		state = State.INVESTIGATE
+		_investigate_timer = 8.0
 
 func stun(seconds: float = 4.5) -> void:
-	stun_timer = seconds
+	stun_timer = maxf(seconds, stun_seconds)
 	state = State.STUNNED
 	velocity = Vector3.ZERO
 
@@ -52,75 +53,62 @@ func _physics_process(delta: float) -> void:
 		return
 	if state == State.STUNNED:
 		stun_timer -= delta
+		_update_telemetry(1000.0)
 		if stun_timer <= 0.0:
-			state = State.SEARCH
-			search_timer = 3.5
+			state = State.INVESTIGATE
+			_investigate_timer = 3.5
 		return
-	if bool(target.get("in_safe_room")):
-		state = State.PATROL
-		lost_timer = 0.0
-		search_timer = 0.0
-		velocity.x = 0.0
-		velocity.z = 0.0
+	if bool(target.get("in_safe_room")) or (target.has_method("is_hidden") and target.is_hidden()):
+		if state == State.HUNT:
+			state = State.PATROL
+		velocity.x = move_toward(velocity.x, 0.0, hunt_speed)
+		velocity.z = move_toward(velocity.z, 0.0, hunt_speed)
+		move_and_slide()
 		return
 	var distance := global_position.distance_to(target.global_position)
 	var visible := _can_see_target(distance)
+	_update_telemetry(distance)
 	if visible:
-		state = State.CHASE
+		state = State.HUNT
 		last_known_position = target.global_position
 		lost_timer = 0.0
-	elif state == State.CHASE:
+	elif state == State.HUNT:
 		lost_timer += delta
 		if lost_timer >= forget_seconds:
-			state = State.SEARCH
+			state = State.INVESTIGATE
+			_investigate_timer = 6.0
 			lost_timer = 0.0
-	_path_refresh -= delta
-	if _path_refresh <= 0.0:
-		var goal := target.global_position if state == State.CHASE else last_known_position
-		if state == State.PATROL:
-			goal = patrol_points[patrol_index]
-		_refresh_path(goal)
-		_path_refresh = 1.0
-	var destination := global_position
-	match state:
-		State.PATROL:
-			destination = patrol_points[patrol_index]
-			if global_position.distance_to(destination) < 0.8:
-				patrol_index = (patrol_index + 1) % patrol_points.size()
-		State.INVESTIGATE:
-			destination = last_known_position
-			if global_position.distance_to(destination) < 1.0:
-				state = State.SEARCH
-				search_timer = 3.5
-		State.SEARCH:
-			destination = last_known_position
-			search_timer = maxf(0.0, search_timer - delta)
-			if search_timer <= 0.0:
-				state = State.PATROL
-		State.CHASE:
-			destination = target.global_position
-		_:
-			pass
-	if not _path_valid:
-		# Fail closed: never steer directly toward a target when A* found no safe route.
-		velocity.x = 0.0
-		velocity.z = 0.0
-		if not is_on_floor():
-			velocity.y -= 18.0 * delta
-		else:
-			velocity.y = 0.0
-		move_and_slide()
-		return
-	if not _path_points.is_empty():
-		while _path_index < _path_points.size() - 1 and global_position.distance_to(_path_points[_path_index]) < 0.48:
-			_path_index += 1
-		destination = _path_points[_path_index]
-	var flat := destination - global_position
+	if mimic_enabled and state == State.OBSERVE and distance < 8.0:
+		state = State.MIMIC_AMBUSH
+	if state == State.MIMIC_AMBUSH:
+		last_known_position = target.global_position
+		if distance < 2.0:
+			state = State.HUNT
+	_repath_timer -= delta
+	if _repath_timer <= 0.0:
+		match state:
+			State.PATROL, State.OBSERVE:
+				navigation.target_position = patrol_points[patrol_index]
+			State.INVESTIGATE:
+				navigation.target_position = last_known_position
+			State.HUNT, State.MIMIC_AMBUSH:
+				navigation.target_position = target.global_position
+		_repath_timer = 0.35 if state == State.HUNT else 0.8
+	if navigation.is_navigation_finished() and state == State.PATROL:
+		patrol_index = (patrol_index + 1) % patrol_points.size()
+		navigation.target_position = patrol_points[patrol_index]
+	elif state == State.INVESTIGATE:
+		_investigate_timer -= delta
+		if _investigate_timer <= 0.0 or global_position.distance_to(last_known_position) < 1.0:
+			state = State.PATROL
+	var next_position := navigation.get_next_path_position()
+	var flat := next_position - global_position
 	flat.y = 0.0
-	if flat.length() > 0.15:
-		velocity.x = flat.normalized().x * (chase_speed if state == State.CHASE else move_speed)
-		velocity.z = flat.normalized().z * (chase_speed if state == State.CHASE else move_speed)
-		look_at(Vector3(destination.x, global_position.y, destination.z), Vector3.UP)
+	if flat.length() > 0.12:
+		var speed := hunt_speed if state in [State.HUNT, State.MIMIC_AMBUSH] else move_speed
+		velocity.x = flat.normalized().x * speed
+		velocity.z = flat.normalized().z * speed
+		look_at(Vector3(next_position.x, global_position.y, next_position.z), Vector3.UP)
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, move_speed)
 		velocity.z = move_toward(velocity.z, 0.0, move_speed)
@@ -129,72 +117,47 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y = 0.0
 	move_and_slide()
-	if global_position.distance_to(target.global_position) < 1.15 and attack_cooldown <= 0.0 and state == State.CHASE and not (target.has_method("is_hidden") and target.is_hidden()) and not bool(target.get("in_safe_room")):
+	if global_position.distance_to(target.global_position) < 1.15 and attack_cooldown <= 0.0 and state == State.HUNT:
 		if target.has_method("take_hit"):
 			target.take_hit()
 		attack_cooldown = 3.2
 
 func _can_see_target(distance: float) -> bool:
-	if bool(target.get("in_safe_room")):
+	if bool(target.get("in_safe_room")) or (target.has_method("is_hidden") and target.is_hidden()):
 		return false
-	if distance > sight_distance:
+	var player_flashlight := bool(target.get("flashlight_on")) and float(target.get("flashlight_charge")) > 0.0
+	var range_limit := 22.0 if player_flashlight else (12.0 if _is_in_lit_room() else 2.0)
+	if distance > range_limit:
 		return false
-	if target.has_method("is_hidden") and target.is_hidden():
+	var eye_position := global_position + Vector3.UP * 1.4
+	var player_position := target.global_position + Vector3.UP * 1.45
+	var to_player := (player_position - eye_position).normalized()
+	if (-global_basis.z).dot(to_player) < cos(deg_to_rad(25.0)):
 		return false
-	var to_target := (target.global_position + Vector3.UP * 0.8 - global_position).normalized()
-	var forward := -global_transform.basis.z
-	if rad_to_deg(forward.angle_to(to_target)) > sight_angle_degrees * 0.5:
-		return false
-	var query := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 1.4, target.global_position + Vector3.UP * 0.8)
+	var query := PhysicsRayQueryParameters3D.create(eye_position, player_position)
 	query.exclude = [get_rid()]
+	query.collide_with_areas = false
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	# No hit is not proof of visibility: fail closed unless the first collider is the player.
-	return not hit.is_empty() and hit.get("collider") == target
+	return not hit.is_empty() and (hit.collider == target or target.is_ancestor_of(hit.collider))
 
-# Rebuild a local 1 m navigation grid from real physics occupancy.
-func _refresh_path(goal: Vector3) -> void:
-	_path_valid = false
-	_path_points.clear()
-	_path_index = 0
-	var start_cell := Vector2i(floori(global_position.x), floori(global_position.z))
-	var goal_cell := Vector2i(floori(goal.x), floori(goal.z))
-	var min_x := maxi(-9, mini(start_cell.x, goal_cell.x) - 5)
-	var min_z := maxi(-35, mini(start_cell.y, goal_cell.y) - 5)
-	var max_x := mini(9, maxi(start_cell.x, goal_cell.x) + 6)
-	var max_z := mini(35, maxi(start_cell.y, goal_cell.y) + 6)
-	if max_x <= min_x or max_z <= min_z:
+func _is_in_lit_room() -> bool:
+	for light_zone in get_tree().get_nodes_in_group("lit_zone"):
+		if light_zone is Node3D and global_position.distance_to(light_zone.global_position) <= 8.0:
+			return true
+	return false
+
+func _update_telemetry(distance: float) -> void:
+	if face_veins == null:
 		return
-	_path_grid.region = Rect2i(min_x, min_z, max_x - min_x, max_z - min_z)
-	_path_grid.cell_size = Vector2.ONE
-	_path_grid.update()
-	var exclude_rids: Array[RID] = [get_rid()]
-	if target is CollisionObject3D:
-		exclude_rids.append((target as CollisionObject3D).get_rid())
-	var space := get_world_3d().direct_space_state
-	for z in range(min_z, max_z):
-		for x in range(min_x, max_x):
-			var cell := Vector2i(x, z)
-			# Ignore only the hunter's occupied start cell; the goal must also
-			# pass the physical occupancy query so a closed door cannot be treated as open.
-			if cell == start_cell:
-				continue
-			var query := PhysicsShapeQueryParameters3D.new()
-			query.shape = _path_shape
-			query.transform = Transform3D(Basis.IDENTITY, Vector3(float(x) + 0.5, 0.82, float(z) + 0.5))
-			query.exclude = exclude_rids
-			query.collision_mask = collision_mask
-			if not space.intersect_shape(query, 1).is_empty():
-				_path_grid.set_point_solid(cell, true)
-	if not _path_grid.is_in_boundsv(start_cell) or not _path_grid.is_in_boundsv(goal_cell):
-		_path_points.clear()
-		_path_index = 0
+	var material := face_veins.get_active_material(0) as StandardMaterial3D
+	if material == null:
 		return
-	var ids := _path_grid.get_id_path(start_cell, goal_cell)
-	if ids.is_empty():
-		return
-	for i in range(1, ids.size()):
-		var cell: Vector2i = ids[i]
-		_path_points.append(Vector3(float(cell.x) + 0.5, global_position.y, float(cell.y) + 0.5))
-	if _path_points.is_empty() and start_cell == goal_cell:
-		_path_points.append(Vector3(float(goal_cell.x) + 0.5, global_position.y, float(goal_cell.y) + 0.5))
-	_path_valid = not _path_points.is_empty()
+	if state == State.HUNT:
+		material.albedo_color = Color(0.8, 0.015, 0.08)
+		material.emission = Color(0.65, 0.0, 0.04)
+	elif distance < 8.0:
+		material.albedo_color = Color(0.05, 0.8, 0.95)
+		material.emission = Color(0.0, 0.45, 0.75)
+	else:
+		material.albedo_color = Color(0.015, 0.02, 0.025)
+		material.emission = Color.BLACK
