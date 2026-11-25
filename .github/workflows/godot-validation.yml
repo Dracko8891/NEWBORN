@@ -27,3 +27,5 @@ jobs:
         run: timeout 30s godot --headless --path . --script tests/ai_safe_zone_test.gd
       - name: Run mobile touch layout and multitouch tests
         run: timeout 30s godot --headless --path . --script tests/mobile_controls_test.gd
+      - name: Run campaign puzzle and progression tests
+        run: timeout 30s godot --headless --path . --script tests/campaign_puzzle_test.gd
