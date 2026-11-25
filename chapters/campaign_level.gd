@@ -6,6 +6,7 @@ const MAT_FLOOR := preload("res://materials/medical_floor.tres")
 const MAT_ALERT := preload("res://materials/emergency_red.tres")
 const Campaign = preload("res://systems/campaign_data.gd")
 const NavMeshDirector = preload("res://systems/navmesh_director.gd")
+const NavMeshDirector = preload("res://systems/navmesh_director.gd")
 
 func _ready() -> void:
 	var loading_layer := _create_initial_loading_screen()
@@ -139,7 +140,7 @@ func _build_objectives() -> void:
 		trigger.add_child(objective_sign)
 
 func _spawn_hunter() -> void:
-	var hunter_scene := load("res://ai/newborn_hunter.tscn")
+	var hunter_scene := GameState.get_cached_resource("res://ai/newborn_hunter.tscn") as PackedScene
 	if hunter_scene == null:
 		return
 	var hunter: CharacterBody3D = hunter_scene.instantiate()
