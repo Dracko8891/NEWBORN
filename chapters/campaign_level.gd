@@ -11,6 +11,10 @@ func _ready() -> void:
 	# The main scene is the resume entry point; continue from the saved chapter.
 	if chapter_number == 1 and GameState.chapter > 1:
 		chapter_number = GameState.chapter
+	var campaign_hud := CanvasLayer.new()
+	campaign_hud.name = "CampaignHUD"
+	campaign_hud.set_script(load("res://scripts/campaign_hud.gd"))
+	add_child(campaign_hud)
 	CampaignDirector.begin_chapter(chapter_number)
 	_build_sector()
 	_build_chapter_landmarks()
@@ -96,6 +100,14 @@ func _build_objectives() -> void:
 		marker.mesh = sphere
 		marker.material_override = MAT_ALERT
 		trigger.add_child(marker)
+		var objective_sign := Label3D.new()
+		objective_sign.name = "ObjectiveSign"
+		objective_sign.text = "OBJ %02d" % (i + 1)
+		objective_sign.position = Vector3(0, 0.9, 0)
+		objective_sign.font_size = 30
+		objective_sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		objective_sign.modulate = Color(0.45, 0.95, 0.9)
+		trigger.add_child(objective_sign)
 
 func _spawn_hunter() -> void:
 	var hunter_scene := load("res://ai/newborn_hunter.tscn")
@@ -224,19 +236,72 @@ func _build_safe_room() -> void:
 
 
 func _build_supply_pickups() -> void:
-	var supplies: Array[Dictionary] = [
-		{"id": "kit_estanca", "label": "Kit Estanca", "position": Vector3(-5.5, 0.8, 5.0)},
-		{"id": "battery", "label": "Bateria de lanterna", "position": Vector3(5.5, 0.8, -5.0)}
-	]
-	for supply in supplies:
+	var supplies: Array[Dictionary] = []
+	match chapter_number:
+		1:
+			supplies = [
+				{"id":"kit_estanca","label":"Kit Estanca","position":Vector3(-5.5,0.8,5.0),"consumable":true},
+				{"id":"battery","label":"Bateria de lanterna","position":Vector3(5.5,0.8,-5.0),"consumable":true},
+				{"id":"supervisor_badge","label":"Crachá Supervisor","position":Vector3(5.5,0.8,10.0)},
+				{"id":"pin_note_0719","label":"Anotação do PIN 0719","position":Vector3(-5.5,0.8,-2.0)}
+			]
+		2:
+			supplies = [
+				{"id":"kit_estanca","label":"Kit Estanca","position":Vector3(-5.5,0.8,5.0),"consumable":true},
+				{"id":"battery","label":"Bateria de lanterna","position":Vector3(5.5,0.8,-5.0),"consumable":true},
+				{"id":"calibration_chip_east","label":"Chip de Calibração Leste","position":Vector3(-5.5,0.8,12.0)},
+				{"id":"calibration_chip_west","label":"Chip de Calibração Oeste","position":Vector3(5.5,0.8,2.0)},
+				{"id":"dielectric_key","label":"Chave Dielétrica","position":Vector3(-5.5,0.8,-20.0)}
+			]
+		3:
+			supplies = [
+				{"id":"kit_estanca","label":"Kit Estanca","position":Vector3(-5.5,0.8,5.0),"consumable":true},
+				{"id":"battery","label":"Bateria de lanterna","position":Vector3(5.5,0.8,-5.0),"consumable":true},
+				{"id":"uv_flare","label":"Sinalizador UV","position":Vector3(-5.5,0.8,12.0),"consumable":true},
+				{"id":"alpha_chip","label":"Chip Alpha","position":Vector3(-6.0,0.8,-18.0)},
+				{"id":"tricorder_upgrade","label":"Módulo Tricorder Nv2","position":Vector3(5.5,0.8,-20.0)}
+			]
+		4:
+			supplies = [
+				{"id":"kit_estanca","label":"Kit Estanca","position":Vector3(-5.5,0.8,5.0),"consumable":true},
+				{"id":"battery","label":"Bateria de lanterna","position":Vector3(5.5,0.8,-5.0),"consumable":true},
+				{"id":"gas_mask","label":"Máscara de Gás","position":Vector3(-5.5,0.8,12.0)},
+				{"id":"nitro_sterile","label":"Nitro-Estéril","position":Vector3(5.5,0.8,12.0),"consumable":true},
+				{"id":"nitro_sterile","label":"Nitro-Estéril","position":Vector3(6.5,0.8,12.0),"consumable":true},
+				{"id":"acid_buffer","label":"Ácido Tampão","position":Vector3(-5.5,0.8,-5.0),"consumable":true},
+				{"id":"enzyme","label":"Enzima de Síntese","position":Vector3(5.5,0.8,-18.0),"consumable":true},
+				{"id":"enzyme","label":"Enzima de Síntese","position":Vector3(6.5,0.8,-18.0),"consumable":true},
+				{"id":"enzyme","label":"Enzima de Síntese","position":Vector3(7.5,0.8,-18.0),"consumable":true},
+				{"id":"beta_chip","label":"Chip Beta","position":Vector3(6.0,0.8,-25.0)}
+			]
+		5:
+			supplies = [
+				{"id":"kit_estanca","label":"Kit Estanca","position":Vector3(-5.5,0.8,5.0),"consumable":true},
+				{"id":"battery","label":"Bateria de lanterna","position":Vector3(5.5,0.8,-5.0),"consumable":true},
+				{"id":"gamma_chip","label":"Chip Gamma","position":Vector3(-6.0,0.8,-25.0)},
+				{"id":"electric_arc","label":"Arco Elétrico","position":Vector3(6.0,0.8,10.0)}
+			]
+		6:
+			supplies = [
+				{"id":"kit_estanca","label":"Kit Estanca","position":Vector3(-5.5,0.8,5.0),"consumable":true},
+				{"id":"battery","label":"Bateria de lanterna","position":Vector3(5.5,0.8,-5.0),"consumable":true},
+				{"id":"omega_master_card","label":"Cartão Mestre Ômega","position":Vector3(-6.0,0.8,-27.0)}
+			]
+		7:
+			supplies = [
+				{"id":"kit_estanca","label":"Kit Estanca","position":Vector3(-5.5,0.8,5.0),"consumable":true},
+				{"id":"battery","label":"Bateria de lanterna","position":Vector3(5.5,0.8,-5.0),"consumable":true}
+			]
+	for index in range(supplies.size()):
+		var supply: Dictionary = supplies[index]
 		var pickup := Area3D.new()
-		pickup.name = "Pickup_" + str(supply.id)
+		pickup.name = "Pickup_%s_%02d" % [str(supply.id), index + 1]
 		pickup.position = supply.position
 		pickup.set_script(load("res://scripts/item_pickup.gd"))
 		pickup.set("item_id", str(supply.id))
 		pickup.set("display_name", str(supply.label))
-		pickup.set("is_consumable", true)
-		pickup.set("pickup_id", "c%d_%s" % [chapter_number, str(supply.id)])
+		pickup.set("is_consumable", bool(supply.get("consumable", false)))
+		pickup.set("pickup_id", "c%d_%s_%02d" % [chapter_number, str(supply.id), index + 1])
 		add_child(pickup)
 		var pickup_collision := CollisionShape3D.new()
 		var pickup_shape := SphereShape3D.new()
@@ -247,7 +312,7 @@ func _build_supply_pickups() -> void:
 		var marker_mesh := BoxMesh.new()
 		marker_mesh.size = Vector3(0.45, 0.45, 0.45)
 		marker.mesh = marker_mesh
-		marker.material_override = MAT_ALERT if str(supply.id) == "kit_estanca" else MAT_FLOOR
+		marker.material_override = MAT_ALERT if str(supply.id) in ["kit_estanca", "gas_mask", "omega_master_card"] else MAT_FLOOR
 		pickup.add_child(marker)
 
 func _build_hide_spots() -> void:
@@ -283,7 +348,7 @@ func _build_hide_spots() -> void:
 		spot.add_child(collision)
 
 
-func _add_puzzle_station(id: String, label: String, instructions: String, choices: Array[String], solution: Array[String], position: Vector3, flag: String = "") -> void:
+func _add_puzzle_station(id: String, label: String, instructions: String, choices: Array[String], solution: Array[String], position: Vector3, flag: String = "", required_items: Dictionary = {}) -> void:
 	var station := Area3D.new()
 	station.name = "PuzzleStation_" + id
 	station.position = position
@@ -294,6 +359,7 @@ func _add_puzzle_station(id: String, label: String, instructions: String, choice
 	station.set("choices", choices)
 	station.set("solution", solution)
 	station.set("success_flag", flag)
+	station.set("required_items", required_items)
 	add_child(station)
 	var collision := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
@@ -311,29 +377,29 @@ func _add_puzzle_station(id: String, label: String, instructions: String, choice
 func _build_chapter_puzzle_stations() -> void:
 	match chapter_number:
 		1:
-			_add_puzzle_station("medical_pin", "FECHADURA 0719", "Use a anotação encontrada na triagem.", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], ["0", "7", "1", "9"], Vector3(-6.5, 1.0, -10.0))
-			_add_puzzle_station("medical_relays", "RELÉS MÉDICOS", "Restaure os dois relés identificados no painel.", ["cyan", "amber"], ["cyan", "amber"], Vector3(6.0, 1.0, -10.0))
+			_add_puzzle_station("medical_pin", "FECHADURA 0719", "Use a anotação encontrada na triagem.", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], ["0", "7", "1", "9"], Vector3(-6.5, 1.0, -10.0), "", {"pin_note_0719":1})
+			_add_puzzle_station("medical_relays", "RELÉS MÉDICOS", "Restaure os dois relés identificados no painel.", ["cyan", "amber"], ["cyan", "amber"], Vector3(6.0, 1.0, -10.0), "", {"supervisor_badge":1})
 		2:
-			_add_puzzle_station("dna_matrix", "MATRIZ DE CALIBRAGEM", "Calibre primeiro o canal Leste e depois o Oeste.", ["east", "west"], ["east", "west"], Vector3(0, 1.0, -8.0))
-			_add_puzzle_station("set_flag", "CAMPO DA ALA LESTE", "Desative o campo magnético para liberar a passagem.", ["desativar"], ["desativar"], Vector3(6.0, 1.0, 8.0), "east_field_disabled")
+			_add_puzzle_station("dna_matrix", "MATRIZ DE CALIBRAGEM", "Calibre primeiro o canal Leste e depois o Oeste.", ["east", "west"], ["east", "west"], Vector3(0, 1.0, -8.0), "", {"calibration_chip_east":1, "calibration_chip_west":1})
+			_add_puzzle_station("set_flag", "CAMPO DA ALA LESTE", "Use a Chave Dielétrica para desativar o campo magnético.", ["desativar"], ["desativar"], Vector3(6.0, 1.0, 8.0), "east_field_disabled", {"dielectric_key":1})
 		3:
 			_add_puzzle_station("therapy_melody", "TERAPIA SONORA", "Reproduza a gravação: Dó, Mi, Sol, Ré, Lá.", ["C", "E", "G", "D", "A"], ["C", "E", "G", "D", "A"], Vector3(0, 1.0, 4.0))
-			_add_puzzle_station("set_flag", "LEITOR DE CHIP ALFA", "Aproxime o chip Alfa e atualize o Tricorder.", ["sincronizar"], ["sincronizar"], Vector3(-6.0, 1.0, -18.0), "alpha_chip_recovered")
+			_add_puzzle_station("set_flag", "LEITOR DE CHIP ALFA", "Sincronize o Chip Alpha e instale o módulo do Tricorder.", ["sincronizar"], ["sincronizar"], Vector3(-6.0, 1.0, -18.0), "alpha_chip_recovered", {"alpha_chip":1, "tricorder_upgrade":1})
 		4:
-			_add_puzzle_station("set_flag", "DRENAGEM DE AMÔNIA", "Abra a linha de purga e confirme a leitura segura.", ["drenar"], ["drenar"], Vector3(0, 1.0, 8.0), "ammonia_fog_drained")
+			_add_puzzle_station("set_flag", "DRENAGEM DE AMÔNIA", "Equipe a Máscara de Gás e abra a linha de purga.", ["drenar"], ["drenar"], Vector3(0, 1.0, 8.0), "ammonia_fog_drained", {"gas_mask":1})
 			_add_puzzle_station("genesis_valves", "GALERIA DE VÁLVULAS", "Ordem de fluxo: Azul → Verde → Vermelha.", ["blue", "green", "red"], ["blue", "green", "red"], Vector3(0, 1.0, -18.0))
-			_add_puzzle_station("set_flag", "CHIP BETA", "Recupere o chip do compartimento drenado.", ["recuperar"], ["recuperar"], Vector3(6.0, 1.0, -25.0), "beta_chip_recovered")
+			_add_puzzle_station("set_flag", "CHIP BETA", "Sincronize o Chip Beta recuperado no compartimento drenado.", ["recuperar"], ["recuperar"], Vector3(6.0, 1.0, -25.0), "beta_chip_recovered", {"beta_chip":1})
 		5:
 			_add_puzzle_station("reactor_shutdown", "PROCEDIMENTO DO REATOR", "Apague as luzes e opere os braços: esquerdo, central, direito.", ["lights_off", "arm_left", "arm_center", "arm_right"], ["lights_off", "arm_left", "arm_center", "arm_right"], Vector3(0, 1.0, -12.0))
 			_add_puzzle_station("set_flag", "CONTROLE DOS BRAÇOS", "Confirme a operação dos três braços robóticos.", ["confirmar"], ["confirmar"], Vector3(6.0, 1.0, 10.0), "robot_arms_operated")
-			_add_puzzle_station("set_flag", "COFRE GAMA", "Retire o Chip Gama após estabilizar o núcleo.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -25.0), "gamma_chip_recovered")
+			_add_puzzle_station("set_flag", "COFRE GAMA", "Sincronize o Chip Gamma após estabilizar o núcleo.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -25.0), "gamma_chip_recovered", {"gamma_chip":1})
 		6:
 			_add_puzzle_station("omega_biochips", "MATRIZ EVOLUTIVA", "Ordene os estágios: Celular, Esquelético, Neural, Despertar.", ["cellular", "skeletal", "neural", "awakening"], ["cellular", "skeletal", "neural", "awakening"], Vector3(0, 1.0, -14.0))
 			_add_puzzle_station("set_flag", "DOWNLOAD ÔMEGA", "Inicie e confirme a extração dos dados do terminal.", ["iniciar"], ["iniciar"], Vector3(6.0, 1.0, -24.0), "omega_download_complete")
-			_add_puzzle_station("set_flag", "CARTÃO MESTRE ÔMEGA", "Retire o cartão mestre do terminal.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -27.0), "omega_master_card_recovered")
+			_add_puzzle_station("set_flag", "CARTÃO MESTRE ÔMEGA", "Valide o Cartão Mestre Ômega recolhido.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -27.0), "omega_master_card_recovered", {"omega_master_card":1})
 			_add_puzzle_station("set_flag", "CERCO SOBREVIVIDO", "Confirme que a contenção foi atravessada.", ["confirmar"], ["confirmar"], Vector3(0, 1.0, -30.0), "omega_siege_survived")
 		7:
 			_add_puzzle_station("hangar_couplings", "ACOPLAMENTOS HIDRÁULICOS", "Conecte os três acoplamentos na ordem 1, 2 e 3.", ["1", "2", "3"], ["1", "2", "3"], Vector3(0, 1.0, -8.0))
-			_add_puzzle_station("set_flag", "LEITOR ÔMEGA", "Insira o Cartão Mestre Ômega.", ["inserir"], ["inserir"], Vector3(-6.0, 1.0, -25.0), "omega_card_inserted")
+			_add_puzzle_station("set_flag", "LEITOR ÔMEGA", "Insira o Cartão Mestre Ômega recuperado no Berçário.", ["inserir"], ["inserir"], Vector3(-6.0, 1.0, -25.0), "omega_card_inserted", {"omega_master_card":1})
 			_add_puzzle_station("set_flag", "CABINE OVERRIDE", "Execute a sequência de abertura do hangar.", ["override"], ["override"], Vector3(6.0, 1.0, -25.0), "hangar_override_complete")
 			_add_puzzle_station("set_flag", "SELAMENTO EXTERNO", "Acione o selo manual e alcance a superfície.", ["selar"], ["selar"], Vector3(0, 1.0, -32.0), "surface_escape_complete")
