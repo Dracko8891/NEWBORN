@@ -7,6 +7,10 @@ signal campaign_message(message: String)
 
 const Campaign = preload("res://systems/campaign_data.gd")
 var current_objective: int = 0
+var chapter_transition_pending: bool = false
+
+func _ready() -> void:
+	chapter_completed.connect(_on_chapter_completed)
 var objective_done: Dictionary = {}
 var chapter_scene_paths: Array[String] = [
 	"res://chapters/chapter_01.tscn",
@@ -76,3 +80,14 @@ func restore_campaign_state() -> void:
 	current_objective = int(GameState.puzzle_flags.get("campaign_objective", 0))
 	objective_done = GameState.puzzle_flags.get("campaign_objective_done", {})
 	_emit_current_objective()
+
+func _on_chapter_completed(chapter: int) -> void:
+	if chapter_transition_pending:
+		return
+	chapter_transition_pending = true
+	if chapter >= 7:
+		campaign_message.emit("SINAL PERDIDO — A criatura alcançou a superfície.")
+		return
+	await get_tree().create_timer(2.0).timeout
+	chapter_transition_pending = false
+	advance_chapter()
