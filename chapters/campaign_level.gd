@@ -383,6 +383,7 @@ func _build_chapter_puzzle_stations() -> void:
 			_add_puzzle_station("dna_matrix", "MATRIZ DE CALIBRAGEM", "Calibre primeiro o canal Leste e depois o Oeste.", ["east", "west"], ["east", "west"], Vector3(0, 1.0, -8.0), "", {"calibration_chip_east":1, "calibration_chip_west":1})
 			_add_puzzle_station("set_flag", "CAMPO DA ALA LESTE", "Use a Chave Dielétrica para desativar o campo magnético.", ["desativar"], ["desativar"], Vector3(6.0, 1.0, 8.0), "east_field_disabled", {"dielectric_key":1})
 		3:
+			_add_puzzle_station("quarters_pin", "ACESSO DOS ALOJAMENTOS 0315", "Use o código encontrado nos registros de psicologia.", ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], ["0", "3", "1", "5"], Vector3(-6.0, 1.0, 12.0))
 			_add_puzzle_station("therapy_melody", "TERAPIA SONORA", "Reproduza a gravação: Dó, Mi, Sol, Ré, Lá.", ["C", "E", "G", "D", "A"], ["C", "E", "G", "D", "A"], Vector3(0, 1.0, 4.0))
 			_add_puzzle_station("set_flag", "LEITOR DE CHIP ALFA", "Sincronize o Chip Alpha e instale o módulo do Tricorder.", ["sincronizar"], ["sincronizar"], Vector3(-6.0, 1.0, -18.0), "alpha_chip_recovered", {"alpha_chip":1, "tricorder_upgrade":1})
 		4:
@@ -391,7 +392,8 @@ func _build_chapter_puzzle_stations() -> void:
 			_add_puzzle_station("set_flag", "CHIP BETA", "Sincronize o Chip Beta recuperado no compartimento drenado.", ["recuperar"], ["recuperar"], Vector3(6.0, 1.0, -25.0), "beta_chip_recovered", {"beta_chip":1})
 		5:
 			_add_puzzle_station("reactor_shutdown", "PROCEDIMENTO DO REATOR", "Apague as luzes e opere os braços: esquerdo, central, direito.", ["lights_off", "arm_left", "arm_center", "arm_right"], ["lights_off", "arm_left", "arm_center", "arm_right"], Vector3(0, 1.0, -12.0))
-			_add_puzzle_station("set_flag", "CONTROLE DOS BRAÇOS", "Confirme a operação dos três braços robóticos.", ["confirmar"], ["confirmar"], Vector3(6.0, 1.0, 10.0), "robot_arms_operated")
+			_add_puzzle_station("robot_arms", "CONTROLE DOS BRAÇOS", "Opere os braços na ordem: esquerdo, central, direito.", ["left", "center", "right"], ["left", "center", "right"], Vector3(6.0, 1.0, 10.0))
+			_add_puzzle_station("set_flag", "ARCO ELÉTRICO", "Use o arco elétrico para cegar o Newborn.", ["disparar"], ["disparar"], Vector3(6.0, 1.0, 2.0), "electric_arc_used", {"electric_arc":1})
 			_add_puzzle_station("set_flag", "COFRE GAMA", "Sincronize o Chip Gamma após estabilizar o núcleo.", ["retirar"], ["retirar"], Vector3(-6.0, 1.0, -25.0), "gamma_chip_recovered", {"gamma_chip":1})
 		6:
 			_add_puzzle_station("omega_biochips", "MATRIZ EVOLUTIVA", "Ordene os estágios: Celular, Esquelético, Neural, Despertar.", ["cellular", "skeletal", "neural", "awakening"], ["cellular", "skeletal", "neural", "awakening"], Vector3(0, 1.0, -14.0))
@@ -401,5 +403,5 @@ func _build_chapter_puzzle_stations() -> void:
 		7:
 			_add_puzzle_station("hangar_couplings", "ACOPLAMENTOS HIDRÁULICOS", "Conecte os três acoplamentos na ordem 1, 2 e 3.", ["1", "2", "3"], ["1", "2", "3"], Vector3(0, 1.0, -8.0))
 			_add_puzzle_station("set_flag", "LEITOR ÔMEGA", "Insira o Cartão Mestre Ômega recuperado no Berçário.", ["inserir"], ["inserir"], Vector3(-6.0, 1.0, -25.0), "omega_card_inserted", {"omega_master_card":1})
-			_add_puzzle_station("set_flag", "CABINE OVERRIDE", "Execute a sequência de abertura do hangar.", ["override"], ["override"], Vector3(6.0, 1.0, -25.0), "hangar_override_complete")
+			_add_puzzle_station("hangar_override", "CABINE OVERRIDE", "Valide os três acoplamentos e o Cartão Mestre Ômega para liberar o hangar.", ["validar", "override"], ["validar", "override"], Vector3(6.0, 1.0, -25.0))
 			_add_puzzle_station("set_flag", "SELAMENTO EXTERNO", "Acione o selo manual e alcance a superfície.", ["selar"], ["selar"], Vector3(0, 1.0, -32.0), "surface_escape_complete")
