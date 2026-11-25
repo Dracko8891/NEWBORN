@@ -16,6 +16,7 @@ var lost_timer := 0.0
 var stun_timer := 0.0
 var patrol_points: Array[Vector3] = []
 var patrol_index := 0
+var attack_cooldown := 0.0
 
 func _ready() -> void:
 	add_to_group("noise_listeners")
@@ -36,6 +37,7 @@ func stun(seconds: float = 4.5) -> void:
 	velocity = Vector3.ZERO
 
 func _physics_process(delta: float) -> void:
+	attack_cooldown = maxf(0.0, attack_cooldown - delta)
 	if target == null or not is_instance_valid(target):
 		target = get_tree().get_first_node_in_group("player") as Node3D
 		return
@@ -81,6 +83,10 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y = 0.0
 	move_and_slide()
+	if global_position.distance_to(target.global_position) < 1.15 and attack_cooldown <= 0.0 and state == State.CHASE:
+		if target.has_method("take_hit"):
+			target.take_hit()
+		attack_cooldown = 3.2
 
 func _can_see_target(distance: float) -> bool:
 	if distance > sight_distance:
