@@ -31,7 +31,8 @@ var dead: bool = false
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	flashlight_charge = flashlight_seconds
+	flashlight_charge = clampf(GameState.flashlight_charge_saved, 0.0, flashlight_seconds)
+	flashlight_on = flashlight_charge > 0.0
 	flashlight.visible = flashlight_on
 	add_to_group("player")
 
@@ -85,10 +86,12 @@ func take_hit() -> void:
 		GameState.set_health_state(1)
 		adrenaline_timer = 3.0
 		GameState.notification_requested.emit("Trauma: encontre um Kit Estanca")
+		GameState.save_game()
 	else:
 		GameState.set_health_state(2)
 		dead = true
 		GameState.notification_requested.emit("SINAL PERDIDO")
+		GameState.save_game()
 		get_tree().paused = true
 
 func set_peek(direction: float) -> void:
@@ -119,6 +122,7 @@ func pump_dynamo() -> void:
 	recharge_flashlight(flashlight_seconds)
 	dynamo_busy = false
 	look_enabled = true
+	GameState.save_game()
 	if not in_safe_room:
 		get_tree().call_group("noise_listeners", "hear_noise", global_position, 0.9)
 
