@@ -19,6 +19,9 @@ var unlocked_chapters: Array[int] = [1]
 var puzzle_flags: Dictionary = {}
 var collected_flags: Dictionary = {}
 
+func _ready() -> void:
+	load_game()
+
 func add_item(item_id: String, display_name: String, consumable: bool = false) -> bool:
 	if item_id.is_empty():
 		return false
