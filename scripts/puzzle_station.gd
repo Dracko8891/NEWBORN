@@ -157,31 +157,52 @@ func _commit_puzzle() -> bool:
 
 
 func _start_countdown(duration: float, action: String) -> void:
-	_run_countdown(duration, action)
-
-func _run_countdown(duration: float, action: String) -> void:
-	var remaining := maxi(1, int(ceil(duration)))
+	if countdown_timer != null and is_instance_valid(countdown_timer):
+		countdown_timer.stop()
+		countdown_timer.queue_free()
+	countdown_action = action
+	countdown_remaining = maxf(0.05, duration)
 	var label := "DOWNLOAD ÔMEGA" if action == "download" else "CERCO ÔMEGA"
-	GameState.notification_requested.emit(label + " iniciado: " + str(remaining) + "s")
-	while remaining > 0:
-		await get_tree().create_timer(1.0, false).timeout
-		if not is_inside_tree():
-			return
-		var player := get_tree().get_first_node_in_group("player")
-		if player == null or GameState.health_state == 2:
-			GameState.notification_requested.emit(label + " interrompido")
-			return
-		if player.has_method("is_dead") and player.is_dead():
-			GameState.notification_requested.emit(label + " interrompido: Arthur foi abatido")
-			return
-		remaining -= 1
-		if remaining == 0 or remaining % 15 == 0 or remaining <= 5:
-			GameState.notification_requested.emit(label + ": " + str(remaining) + "s restantes")
-	if action == "download":
-		PuzzleSystem.complete_omega_download()
-	else:
-		PuzzleSystem.survive_omega_siege()
-	GameState.notification_requested.emit(label + " concluído")
+	GameState.notification_requested.emit(label + " iniciado: " + str(int(ceil(countdown_remaining))) + "s")
+	countdown_timer = Timer.new()
+	countdown_timer.name = "TimedObjectiveTimer"
+	countdown_timer.one_shot = true
+	countdown_timer.timeout.connect(_on_countdown_tick)
+	add_child(countdown_timer)
+	_schedule_countdown_tick()
+
+func _schedule_countdown_tick() -> void:
+	if countdown_timer == null or not is_instance_valid(countdown_timer):
+		return
+	countdown_timer.wait_time = minf(1.0, countdown_remaining)
+	countdown_timer.start()
+
+func _on_countdown_tick() -> void:
+	if not is_inside_tree():
+		return
+	var player := get_tree().get_first_node_in_group("player")
+	if player == null or GameState.health_state == 2 or (player.has_method("is_dead") and player.is_dead()):
+		var failed_label := "DOWNLOAD ÔMEGA" if countdown_action == "download" else "CERCO ÔMEGA"
+		GameState.notification_requested.emit(failed_label + " interrompido")
+		countdown_timer.queue_free()
+		countdown_timer = null
+		return
+	countdown_remaining = maxf(0.0, countdown_remaining - countdown_timer.wait_time)
+	var seconds_left := int(ceil(countdown_remaining))
+	if seconds_left == 0 or seconds_left % 15 == 0 or seconds_left <= 5:
+		var label := "DOWNLOAD ÔMEGA" if countdown_action == "download" else "CERCO ÔMEGA"
+		GameState.notification_requested.emit(label + ": " + str(seconds_left) + "s restantes")
+	if countdown_remaining <= 0.0:
+		if countdown_action == "download":
+			PuzzleSystem.complete_omega_download()
+			GameState.notification_requested.emit("DOWNLOAD ÔMEGA concluído")
+		else:
+			PuzzleSystem.survive_omega_siege()
+			GameState.notification_requested.emit("CERCO ÔMEGA concluído")
+		countdown_timer.queue_free()
+		countdown_timer = null
+		return
+	_schedule_countdown_tick()
 
 func _close() -> void:
 	active = false
