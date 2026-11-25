@@ -10,6 +10,7 @@ func _ready() -> void:
 	CampaignDirector.begin_chapter(chapter_number)
 	_build_sector()
 	_build_objectives()
+	_spawn_hunter()
 
 func _make_box(label: String, pos: Vector3, size: Vector3, mat: Material, solid: bool = true) -> void:
 	var node: Node3D = StaticBody3D.new() if solid else Node3D.new()
@@ -86,3 +87,12 @@ func _build_objectives() -> void:
 		marker.mesh = sphere
 		marker.material_override = MAT_ALERT
 		trigger.add_child(marker)
+
+func _spawn_hunter() -> void:
+	var hunter_scene := load("res://ai/newborn_hunter.tscn")
+	if hunter_scene == null:
+		return
+	var hunter := hunter_scene.instantiate()
+	hunter.name = "NewbornHunter"
+	hunter.position = Vector3(0, 0.1, -18)
+	add_child(hunter)
