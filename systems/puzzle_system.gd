@@ -34,6 +34,15 @@ func submit_quarters_pin(value: String) -> bool:
 	GameState.save_game()
 	return true
 
+func submit_camera_grid(sequence: Array[String]) -> bool:
+	if sequence != ["cam_a", "cam_b", "cam_c"]:
+		puzzle_failed.emit("camera_grid", "A varredura das câmeras deve seguir A, B e C")
+		return false
+	GameState.set_flag("security_cameras_disabled")
+	puzzle_solved.emit("camera_grid")
+	GameState.save_game()
+	return true
+
 func submit_robot_arms(sequence: Array[String]) -> bool:
 	if sequence != ["left", "center", "right"]:
 		puzzle_failed.emit("robot_arms", "Sequência dos braços inválida")
