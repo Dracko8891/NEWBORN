@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import './style.css';
+import { buildFacility } from './environment.js';
 const root=document.querySelector('#app');
 root.innerHTML='<div id="game"></div><div id="hud"><div id="objective">CAPÍTULO 1 — DESPERTAR<br>Encontre um fusível.</div><div id="inventory">INVENTÁRIO: vazio</div><div id="status">BATERIA 100% · ENERGIA OFF</div><div id="hint"></div><div id="cross">+</div></div><section id="start"><div class="panel"><small>ARQUIVO 01 / INCIDENTE DE CONTENÇÃO</small><h1>NEWBORN</h1><p>O alarme acorda você no chão de uma instalação de pesquisa. A energia caiu. Há alguma coisa solta nos corredores.</p><b>Não tente enfrentar. Encontre uma saída.</b><p><button id="begin">INICIAR CAPÍTULO</button></p><small>Joystick: mover · Arraste à direita: olhar · USAR / LUZ / CORRER / ESCONDER</small></div></section><section id="controls"><div id="stick"><div id="knob"></div></div><button id="use">USAR</button><button id="light">LUZ</button><button id="run">CORRER</button><button id="hide">ESCONDER</button></section><section id="modal" class="hidden"><div class="panel"><h2 id="modalTitle"></h2><p id="modalText"></p><div id="modalActions"></div></div></section>';
 const $=id=>document.getElementById(id);
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x050708);scene.fog=new THREE.FogExp2(0x050708,.043);
+const scene=new THREE.Scene();buildFacility(scene);scene.background=new THREE.Color(0x050708);scene.fog=new THREE.FogExp2(0x050708,.043);
 const camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.08,60);camera.position.set(0,1.62,9);
 const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.25));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;$('game').appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0x83909a,0x171311,.38));const emergency=new THREE.PointLight(0x9b1d18,1.1,15);emergency.position.set(0,2.6,-4);scene.add(emergency);
