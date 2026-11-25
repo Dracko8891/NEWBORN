@@ -47,3 +47,9 @@ Use OhMyGame as an optional studio and playtesting companion, not as a reason to
 
 ## Upstream
 Adapted from the workflow concepts in https://github.com/WhiteTowerAI/ohmygame (Apache-2.0). This file is an original project-specific adaptation; it does not bundle OhMyGame or its MCP server.
+
+
+## Godot asset handoff
+- For Godot projects, the repository is the source of truth; use `docs/MCP_ASSET_PIPELINE.md` for the reviewed handoff.
+- Do not copy generated media directly into gameplay folders or replace existing assets before review.
+- Keep MCP/playtest/provider dependencies in the authoring environment only; exported games must run offline.
