@@ -6,7 +6,8 @@ var _clock := 0.0
 var _photosensitive := false
 
 func _ready() -> void:
-	_photosensitive = bool(GameState.photosensitive_mode)
+	var game_state := get_node_or_null("/root/GameState")
+	_photosensitive = bool(game_state.get("photosensitive_mode")) if game_state != null else false
 	_material = ShaderMaterial.new()
 	var shader := Shader.new()
 	shader.code = """

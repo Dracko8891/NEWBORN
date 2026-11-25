@@ -289,9 +289,9 @@ func _make_hanging_cable(index: int, z: float, accent: Color) -> void:
 
 func _make_grime_and_drag_marks(index: int, z: float) -> void:
 	var director = load("res://systems/horror_visual_director.gd")
-	var stain := director.add_grime_quad(self, "DriedBloodStain_%02d" % index, Vector3(-0.72, 0.012, z), Vector2(0.72, 0.34), Color(0.16, 0.012, 0.018, 0.72))
+	var stain: MeshInstance3D = director.add_grime_quad(self, "DriedBloodStain_%02d" % index, Vector3(-0.72, 0.012, z), Vector2(0.72, 0.34), Color(0.16, 0.012, 0.018, 0.72))
 	stain.rotation.x = -PI * 0.5
-	var drag := director.add_grime_quad(self, "DraggedResidue_%02d" % index, Vector3(-0.70, 0.013, z - 0.72), Vector2(0.18, 1.15), Color(0.085, 0.008, 0.012, 0.52))
+	var drag: MeshInstance3D = director.add_grime_quad(self, "DraggedResidue_%02d" % index, Vector3(-0.70, 0.013, z - 0.72), Vector2(0.18, 1.15), Color(0.085, 0.008, 0.012, 0.52))
 	drag.rotation.x = -PI * 0.5
 
 func _make_floor_spill(index: int, z: float) -> void:

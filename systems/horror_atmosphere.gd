@@ -3,7 +3,6 @@ extends Node3D
 
 const DUST_COUNT := 36
 const BASE_FOV := 64.0
-const PLAYER_SCENE := preload("res://scenes/player.tscn")
 
 var _player: Node3D
 var _camera: Camera3D
@@ -26,7 +25,8 @@ func _ready() -> void:
 	_flashlight = _player.get_node_or_null("Head/Camera3D/Flashlight") as SpotLight3D
 	if _camera == null:
 		return
-	_photosensitive = GameState.photosensitive_mode
+	var game_state := get_node_or_null("/root/GameState")
+	_photosensitive = bool(game_state.get("photosensitive_mode")) if game_state != null else false
 	_create_viewmodel()
 	_create_screen_overlay()
 	_create_dust()
@@ -154,3 +154,50 @@ func _process(delta: float) -> void:
 		_shader_material.set_shader_parameter("vignette_strength", 0.28 if _photosensitive else 0.42)
 		_shader_material.set_shader_parameter("threat", 0.0 if _photosensitive else fear)
 		_shader_material.set_shader_parameter("crt_scan", 0.0 if _photosensitive else (1.0 if enemy_distance < 8.0 or hunting else 0.0))
+
+func _material(color: Color, roughness: float, metallic: float = 0.0) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = roughness
+	material.metallic = metallic
+	return material
+
+
+func _add_capsule(parent: Node3D, label: String, position: Vector3, scale_value: Vector3, material: Material) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.name = label
+	var mesh := CapsuleMesh.new()
+	mesh.radius = 0.5
+	mesh.height = 1.0
+	node.mesh = mesh
+	node.position = position
+	node.scale = scale_value
+	node.material_override = material
+	parent.add_child(node)
+	return node
+
+
+func _add_sphere(parent: Node3D, label: String, position: Vector3, scale_value: Vector3, material: Material) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.name = label
+	var mesh := SphereMesh.new()
+	mesh.radius = 0.5
+	mesh.height = 1.0
+	node.mesh = mesh
+	node.position = position
+	node.scale = scale_value
+	node.material_override = material
+	parent.add_child(node)
+	return node
+
+
+func _add_box(parent: Node3D, label: String, position: Vector3, size: Vector3, material: Material) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.name = label
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	node.mesh = mesh
+	node.position = position
+	node.material_override = material
+	parent.add_child(node)
+	return node

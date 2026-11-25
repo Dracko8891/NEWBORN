@@ -1,13 +1,23 @@
 extends SceneTree
 const Atmosphere = preload("res://systems/horror_atmosphere.gd")
-const PlayerScene = preload("res://scenes/player.tscn")
 const HunterScene = preload("res://ai/newborn_hunter.tscn")
 
 func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
-	var player := PlayerScene.instantiate()
+	var player := CharacterBody3D.new()
+	player.name = "TestPlayer"
+	player.add_to_group("player")
+	var head := Node3D.new()
+	head.name = "Head"
+	player.add_child(head)
+	var camera := Camera3D.new()
+	camera.name = "Camera3D"
+	head.add_child(camera)
+	var flashlight := SpotLight3D.new()
+	flashlight.name = "Flashlight"
+	camera.add_child(flashlight)
 	root.add_child(player)
 	var hunter := HunterScene.instantiate()
 	root.add_child(hunter)
