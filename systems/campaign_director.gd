@@ -140,4 +140,18 @@ func _objective_requirements_met(objective_id: String) -> bool:
 	for flag in required_flags.get(objective_id, []):
 		if not bool(GameState.get_flag(flag, false)):
 			return false
+	var required_items := {
+		"c1_o1": {"kit_estanca":1},
+		"c1_o2": {"supervisor_badge":1, "pin_note_0719":1},
+		"c2_o1": {"calibration_chip_east":1, "calibration_chip_west":1},
+		"c3_o2": {"uv_flare":1},
+		"c4_o1": {"gas_mask":1},
+		"c4_o2": {"nitro_sterile":2, "acid_buffer":1, "enzyme":3},
+		"c5_o4": {"electric_arc":1},
+		"c7_o3": {"omega_master_card":1}
+	}
+	for item_id in required_items.get(objective_id, {}):
+		var amount := int(required_items[objective_id][item_id])
+		if not GameState.has_item(str(item_id), amount):
+			return false
 	return true
