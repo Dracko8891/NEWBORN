@@ -5,8 +5,11 @@ const MAT_WALL := preload("res://materials/medical_wall.tres")
 const MAT_FLOOR := preload("res://materials/medical_floor.tres")
 const MAT_ALERT := preload("res://materials/emergency_red.tres")
 const Campaign = preload("res://systems/campaign_data.gd")
+const NavMeshDirector = preload("res://systems/navmesh_director.gd")
 
 func _ready() -> void:
+	var loading_layer := _create_initial_loading_screen()
+	await GameState.wait_for_preloads()
 	_ensure_environment()
 	# The main scene is the resume entry point; continue from the saved chapter.
 	if chapter_number == 1 and GameState.chapter > 1:
@@ -29,6 +32,27 @@ func _ready() -> void:
 	_build_objectives()
 	_build_chapter_puzzle_stations()
 	_spawn_hunter()
+	await NavMeshDirector.garantir_navegacao_capitulo(self)
+	loading_layer.queue_free()
+
+func _create_initial_loading_screen() -> CanvasLayer:
+	var layer := CanvasLayer.new()
+	layer.name = "InitialLoadingScreen"
+	layer.layer = 120
+	add_child(layer)
+	var background := ColorRect.new()
+	background.color = Color(0.008, 0.012, 0.018, 1.0)
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(background)
+	var title := Label.new()
+	title.text = "PROTOCOLO NEWBORN\nCARREGANDO RECURSOS E NAVEGAÇÃO..."
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	title.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_color_override("font_color", Color(0.35, 0.9, 0.88))
+	background.add_child(title)
+	return layer
 
 func _make_box(label: String, pos: Vector3, size: Vector3, mat: Material, solid: bool = true) -> void:
 	var node: Node3D = StaticBody3D.new() if solid else Node3D.new()
@@ -75,7 +99,7 @@ func _build_sector() -> void:
 		_spawn_player()
 
 func _spawn_player() -> void:
-	var player_scene := load("res://scenes/player.tscn")
+	var player_scene := GameState.get_cached_resource("res://scenes/player.tscn") as PackedScene
 	if player_scene != null:
 		var p: Node3D = player_scene.instantiate()
 		p.name = "Player"
