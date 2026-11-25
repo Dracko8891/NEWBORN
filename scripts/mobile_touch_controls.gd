@@ -2,12 +2,10 @@ extends Control
 ## Landscape touch layer: left virtual stick, right look zone and contextual buttons.
 ## Desktop/gamepad input remains available; this layer is hidden outside mobile devices.
 
-var player: Node = null
 var joystick_finger := -1
 var look_finger := -1
 var joystick_origin := Vector2.ZERO
 var joystick_vector := Vector2.ZERO
-var last_look := Vector2.ZERO
 var active_buttons: Dictionary = {}
 var button_rects: Dictionary = {}
 
@@ -68,20 +66,20 @@ func _touch_begin(index: int, pos: Vector2) -> void:
 		joystick_finger = index
 		joystick_origin = pos
 		joystick_vector = Vector2.ZERO
-	else:
-		if look_finger == -1:
-			look_finger = index
-			last_look = pos
+		queue_redraw()
+	elif look_finger == -1:
+		look_finger = index
 
 func _touch_drag(index: int, pos: Vector2, relative: Vector2) -> void:
 	if index == joystick_finger:
 		var radius := minf(get_viewport_rect().size.x, get_viewport_rect().size.y) * 0.14
 		joystick_vector = ((pos - joystick_origin) / radius).limit_length(1.0)
+		# Redraw on every stick movement so the thumb indicator follows the finger.
+		queue_redraw()
 	elif index == look_finger:
 		var target := get_tree().get_first_node_in_group("player")
 		if target != null and target.has_method("apply_touch_look"):
 			target.apply_touch_look(relative)
-		queue_redraw()
 
 func _touch_end(index: int) -> void:
 	if index == joystick_finger:
