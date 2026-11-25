@@ -3,6 +3,9 @@ const js=fs.readFileSync('src/main.js','utf8'),css=fs.readFileSync('src/style.cs
 for(const c of ['DESPERTAR','SEM ENERGIA','PROTOCOLO DE CONTENÇÃO','RUÍDO NO ESCURO','ÚLTIMA AUTORIZAÇÃO','SUPERFÍCIE'])assert(js.includes(c),'Capítulo ausente: '+c);
 for(const c of ['INVENTÁRIO','LANTERNA','CORRER','AGACHAR','INTERAGIR','OBJETIVO PRINCIPAL'])assert((html+js).includes(c),'HUD ausente: '+c);
 assert(js.includes('new THREE.SpotLight')&&js.includes('camera.add(hand)'),'Lanterna de mão não encontrada');
+assert(js.includes('function inventorySlots()')&&js.includes('selectSlot(index)'),'Inventário hotbar ausente');
+assert(js.includes('flashlightModel')&&js.includes('const palm=')&&js.includes('const fingers='),'Modelo da lanterna/mão detalhada ausente');
+assert(css.includes('#hotbar{display:flex;flex-direction:row')&&css.includes('#inventory{left:50%'),'Hotbar não está centralizada na parte inferior');
 assert(js.includes('camera.add(flashlight)')&&js.includes('camera.add(flashlight.target)'),'Lanterna não acompanha a câmera');
 assert(js.includes('function startPuzzle()')&&js.includes('CONFIRMAR')&&js.includes("entered===ch.code"),'Puzzle de código incompleto');
 assert(js.includes('CÓDIGO DO TERMINAL'),'Pista do puzzle ausente');
