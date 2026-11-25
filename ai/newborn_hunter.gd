@@ -13,6 +13,7 @@ var state: State = State.PATROL
 var target: Node3D
 var last_known_position := Vector3.ZERO
 var lost_timer := 0.0
+var search_timer := 0.0
 var stun_timer := 0.0
 var patrol_points: Array[Vector3] = []
 var patrol_index := 0
@@ -45,6 +46,14 @@ func _physics_process(delta: float) -> void:
 		stun_timer -= delta
 		if stun_timer <= 0.0:
 			state = State.SEARCH
+			search_timer = 3.5
+		return
+	if bool(target.get("in_safe_room")):
+		state = State.PATROL
+		lost_timer = 0.0
+		search_timer = 0.0
+		velocity.x = 0.0
+		velocity.z = 0.0
 		return
 	var distance := global_position.distance_to(target.global_position)
 	var visible := _can_see_target(distance)
@@ -63,10 +72,18 @@ func _physics_process(delta: float) -> void:
 			destination = patrol_points[patrol_index]
 			if global_position.distance_to(destination) < 0.8:
 				patrol_index = (patrol_index + 1) % patrol_points.size()
-		State.INVESTIGATE, State.SEARCH, State.CHASE:
-			destination = target.global_position if state == State.CHASE else last_known_position
-			if state == State.SEARCH and global_position.distance_to(destination) < 1.0:
+		State.INVESTIGATE:
+			destination = last_known_position
+			if global_position.distance_to(destination) < 1.0:
+				state = State.SEARCH
+				search_timer = 3.5
+		State.SEARCH:
+			destination = last_known_position
+			search_timer = maxf(0.0, search_timer - delta)
+			if search_timer <= 0.0:
 				state = State.PATROL
+		State.CHASE:
+			destination = target.global_position
 		_:
 			pass
 	var flat := destination - global_position
@@ -83,12 +100,14 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y = 0.0
 	move_and_slide()
-	if global_position.distance_to(target.global_position) < 1.15 and attack_cooldown <= 0.0 and state == State.CHASE:
+	if global_position.distance_to(target.global_position) < 1.15 and attack_cooldown <= 0.0 and state == State.CHASE and not (target.has_method("is_hidden") and target.is_hidden()) and not bool(target.get("in_safe_room")):
 		if target.has_method("take_hit"):
 			target.take_hit()
 		attack_cooldown = 3.2
 
 func _can_see_target(distance: float) -> bool:
+	if bool(target.get("in_safe_room")):
+		return false
 	if distance > sight_distance:
 		return false
 	if target.has_method("is_hidden") and target.is_hidden():
