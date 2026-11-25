@@ -115,7 +115,9 @@ func _physics_process(delta: float) -> void:
 	if touch_layer != null and touch_layer.has_method("get_virtual_move"):
 		var touch_move: Vector2 = touch_layer.get_virtual_move()
 		if touch_move.length() > input_2d.length():
-			input_2d = Vector2(touch_move.x, -touch_move.y)
+			# The virtual stick already reports up as a negative Y, matching Input.get_vector().
+			# Inverting Y here made pushing forward move the player backwards on Android.
+			input_2d = touch_move
 	var direction := (transform.basis * Vector3(input_2d.x, 0.0, input_2d.y)).normalized()
 	var sprinting := Input.is_action_pressed("sprint") and stamina > 0.0 and not crouched
 	var speed := crouch_speed if crouched else walk_speed * (sprint_multiplier if sprinting else 1.0)
