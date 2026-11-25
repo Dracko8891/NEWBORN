@@ -18,6 +18,7 @@ func _ready() -> void:
 	CampaignDirector.begin_chapter(chapter_number)
 	_build_sector()
 	_build_chapter_landmarks()
+	_build_chapter_wings()
 	_build_hide_spots()
 	_build_safe_room()
 	_build_supply_pickups()
@@ -168,6 +169,47 @@ func _build_chapter_landmarks() -> void:
 			_make_box("Cabine_Override", Vector3(-6, 1.8, -27), Vector3(3.0, 3.6, 3.0), MAT_ALERT)
 			for i in range(3):
 				_make_cylinder("Acoplamento_Hidraulico_%d" % i, Vector3(-5.0 + float(i) * 5.0, 1.1, -8), 0.45, 2.2, MAT_ALERT)
+
+
+func _build_chapter_wings() -> void:
+	var rooms: Array[Dictionary] = []
+	match chapter_number:
+		1:
+			rooms = [{"name":"TRIAGEM","side":1.0,"z":12.0},{"name":"ENFERMARIA","side":-1.0,"z":-16.0}]
+		2:
+			rooms = [{"name":"RECEPÇÃO LESTE","side":1.0,"z":12.0},{"name":"MATRIZ CENTRAL","side":-1.0,"z":-16.0}]
+		3:
+			rooms = [{"name":"ALOJAMENTOS","side":1.0,"z":12.0},{"name":"PSICOLOGIA","side":-1.0,"z":-16.0}]
+		4:
+			rooms = [{"name":"CULTURA CELULAR","side":1.0,"z":12.0},{"name":"BANCADA DE SÍNTESE","side":-1.0,"z":-16.0}]
+		5:
+			rooms = [{"name":"CONTROLE DE ENERGIA","side":1.0,"z":12.0},{"name":"CÂMARA DO REATOR","side":-1.0,"z":-16.0}]
+		6:
+			rooms = [{"name":"TUBOS EVOLUTIVOS","side":1.0,"z":12.0},{"name":"CÂMARA OMEGA","side":-1.0,"z":-16.0}]
+		7:
+			rooms = [{"name":"ÁTRIO RUPTURADO","side":1.0,"z":12.0},{"name":"HANGAR DE CARGA","side":-1.0,"z":-16.0}]
+	for index in range(rooms.size()):
+		var room: Dictionary = rooms[index]
+		var side := float(room.side)
+		var center_z := float(room.z)
+		var center_x := side * 6.55
+		var front_x := side * 4.25
+		var room_name := str(room.name)
+		# Side walls and split front wall create a real doorway into each wing.
+		_make_box("Wing_%d_SideA" % index, Vector3(center_x, 1.7, center_z - 3.85), Vector3(4.5, 3.4, 0.24), MAT_WALL)
+		_make_box("Wing_%d_SideB" % index, Vector3(center_x, 1.7, center_z + 3.85), Vector3(4.5, 3.4, 0.24), MAT_WALL)
+		_make_box("Wing_%d_DoorA" % index, Vector3(front_x, 1.7, center_z - 2.55), Vector3(0.24, 3.4, 2.6), MAT_WALL)
+		_make_box("Wing_%d_DoorB" % index, Vector3(front_x, 1.7, center_z + 2.55), Vector3(0.24, 3.4, 2.6), MAT_WALL)
+		_make_box("Wing_%d_Floor" % index, Vector3(center_x, 0.035, center_z), Vector3(4.45, 0.07, 7.45), MAT_FLOOR)
+		_make_box("Wing_%d_Console" % index, Vector3(side * 7.75, 0.75, center_z), Vector3(0.9, 1.5, 1.3), MAT_ALERT)
+		var sign := Label3D.new()
+		sign.name = "WingSign_%d" % index
+		sign.text = room_name
+		sign.position = Vector3(side * 6.45, 2.75, center_z)
+		sign.font_size = 34
+		sign.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		sign.modulate = Color(0.42, 0.94, 0.9)
+		add_child(sign)
 
 func _make_cylinder(label: String, pos: Vector3, radius: float, height: float, mat: Material) -> void:
 	var node := Node3D.new()
