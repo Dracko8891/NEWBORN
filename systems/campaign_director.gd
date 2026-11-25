@@ -8,9 +8,6 @@ signal campaign_message(message: String)
 const Campaign = preload("res://systems/campaign_data.gd")
 var current_objective: int = 0
 var chapter_transition_pending: bool = false
-
-func _ready() -> void:
-	chapter_completed.connect(_on_chapter_completed)
 var objective_done: Dictionary = {}
 var chapter_scene_paths: Array[String] = [
 	"res://chapters/chapter_01.tscn",
@@ -22,9 +19,17 @@ var chapter_scene_paths: Array[String] = [
 	"res://chapters/chapter_07.tscn"
 ]
 
+func _ready() -> void:
+	chapter_completed.connect(_on_chapter_completed)
+
 func begin_chapter(chapter: int) -> void:
 	GameState.set_chapter(chapter)
-	current_objective = 0
+	var saved_chapter := int(GameState.puzzle_flags.get("campaign_saved_chapter", 0))
+	if saved_chapter == chapter:
+		restore_campaign_state()
+	else:
+		current_objective = 0
+		save_campaign_state()
 	var data := Campaign.get_chapter(chapter)
 	if data.is_empty():
 		return
@@ -39,12 +44,11 @@ func complete_objective(objective_id: String) -> bool:
 	if current_objective >= objectives.size():
 		return false
 	var expected_id := "c%d_o%d" % [GameState.chapter, current_objective + 1]
-	if objective_id != expected_id:
-		return false
-	if objective_done.get(objective_id, false):
+	if objective_id != expected_id or objective_done.get(objective_id, false):
 		return false
 	objective_done[objective_id] = true
 	current_objective += 1
+	save_campaign_state()
 	if current_objective >= objectives.size():
 		chapter_completed.emit(GameState.chapter)
 		campaign_message.emit("Capítulo concluído: " + str(data.title))
@@ -68,17 +72,23 @@ func advance_chapter() -> bool:
 		campaign_message.emit("Próximo setor ainda não está disponível: " + scene_path)
 		return false
 	GameState.set_chapter(next_chapter)
+	current_objective = 0
+	save_campaign_state()
 	get_tree().change_scene_to_file(scene_path)
 	return true
 
 func save_campaign_state() -> void:
+	GameState.puzzle_flags["campaign_saved_chapter"] = GameState.chapter
 	GameState.puzzle_flags["campaign_objective"] = current_objective
 	GameState.puzzle_flags["campaign_objective_done"] = objective_done
 	GameState.save_game()
 
 func restore_campaign_state() -> void:
-	current_objective = int(GameState.puzzle_flags.get("campaign_objective", 0))
-	objective_done = GameState.puzzle_flags.get("campaign_objective_done", {})
+	var saved_done: Variant = GameState.puzzle_flags.get("campaign_objective_done", {})
+	objective_done = saved_done if typeof(saved_done) == TYPE_DICTIONARY else {}
+	var data := Campaign.get_chapter(GameState.chapter)
+	var objective_count := int(data.get("objectives", []).size())
+	current_objective = clampi(int(GameState.puzzle_flags.get("campaign_objective", 0)), 0, objective_count)
 	_emit_current_objective()
 
 func _on_chapter_completed(chapter: int) -> void:
