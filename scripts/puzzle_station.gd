@@ -95,6 +95,8 @@ func _commit_puzzle() -> bool:
 	match puzzle_id:
 		"medical_pin":
 			success = PuzzleSystem.submit_pin("".join(sequence))
+		"quarters_pin":
+			success = PuzzleSystem.submit_quarters_pin("".join(sequence))
 		"medical_relays":
 			success = PuzzleSystem.submit_relays(sequence)
 		"dna_matrix":
@@ -110,10 +112,14 @@ func _commit_puzzle() -> bool:
 		"omega_biochips":
 			success = PuzzleSystem.submit_biochips(sequence)
 		"hangar_couplings":
+			if sequence != ["1", "2", "3"]:
+				return false
 			for i in range(1, 4):
-				PuzzleSystem.activate_hydraulic_coupling(i)
-			GameState.set_flag("hangar_couplings_complete")
-			success = true
+				if not PuzzleSystem.activate_hydraulic_coupling(i):
+					return false
+			success = bool(GameState.get_flag("hangar_couplings_complete", false))
+		"hangar_override":
+			success = PuzzleSystem.execute_hangar_override()
 		"set_flag":
 			if success_flag.is_empty():
 				return false
