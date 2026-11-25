@@ -121,6 +121,7 @@ func _spawn_hunter() -> void:
 	var hunter: CharacterBody3D = hunter_scene.instantiate()
 	hunter.name = "NewbornHunter"
 	hunter.position = Vector3(0, 0.1, -18)
+	hunter.set("mimic_enabled", chapter_number >= 3)
 	add_child(hunter)
 
 func _chapter_material(chapter: int, floor_surface: bool) -> StandardMaterial3D:
