@@ -123,6 +123,12 @@ func _commit_puzzle() -> bool:
 			success = PuzzleSystem.submit_robot_arms(sequence)
 		"omega_biochips":
 			success = PuzzleSystem.submit_biochips(sequence)
+		"omega_download":
+			_start_countdown(20.0, "download")
+			success = true
+		"omega_siege":
+			_start_countdown(75.0, "siege")
+			success = true
 		"hangar_couplings":
 			if sequence != ["1", "2", "3"]:
 				return false
@@ -148,6 +154,34 @@ func _commit_puzzle() -> bool:
 				GameState.remove_item(str(item_id), maxi(1, int(required_items[item_id])))
 		GameState.save_game()
 	return success
+
+
+func _start_countdown(duration: float, action: String) -> void:
+	_run_countdown(duration, action)
+
+func _run_countdown(duration: float, action: String) -> void:
+	var remaining := maxi(1, int(ceil(duration)))
+	var label := "DOWNLOAD ÔMEGA" if action == "download" else "CERCO ÔMEGA"
+	GameState.notification_requested.emit(label + " iniciado: " + str(remaining) + "s")
+	while remaining > 0:
+		await get_tree().create_timer(1.0, false).timeout
+		if not is_inside_tree():
+			return
+		var player := get_tree().get_first_node_in_group("player")
+		if player == null or GameState.health_state == 2:
+			GameState.notification_requested.emit(label + " interrompido")
+			return
+		if player.has_method("is_dead") and player.is_dead():
+			GameState.notification_requested.emit(label + " interrompido: Arthur foi abatido")
+			return
+		remaining -= 1
+		if remaining == 0 or remaining % 15 == 0 or remaining <= 5:
+			GameState.notification_requested.emit(label + ": " + str(remaining) + "s restantes")
+	if action == "download":
+		PuzzleSystem.complete_omega_download()
+	else:
+		PuzzleSystem.survive_omega_siege()
+	GameState.notification_requested.emit(label + " concluído")
 
 func _close() -> void:
 	active = false
