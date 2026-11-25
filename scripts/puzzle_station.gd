@@ -12,6 +12,9 @@ class_name NewbornPuzzleStation
 var entered: Array[String] = []
 var layer: CanvasLayer
 var status_label: Label
+var countdown_timer: Timer
+var countdown_remaining: float = 0.0
+var countdown_action: String = ""
 var active: bool = false
 
 func interact(player: Node) -> void:
@@ -124,9 +127,13 @@ func _commit_puzzle() -> bool:
 		"omega_biochips":
 			success = PuzzleSystem.submit_biochips(sequence)
 		"omega_download":
-			_start_countdown(20.0, "download")
+			_start_countdown(75.0, "download")
 			success = true
 		"omega_siege":
+			if sequence != ["north", "east", "south", "west"]:
+				return false
+			if not GameState.remove_item("battery", 2):
+				return false
 			_start_countdown(75.0, "siege")
 			success = true
 		"hangar_couplings":
