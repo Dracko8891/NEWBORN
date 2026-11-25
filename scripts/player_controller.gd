@@ -73,6 +73,9 @@ func apply_touch_look(delta: Vector2) -> void:
 func is_hidden() -> bool:
 	return hidden_in_cover
 
+func is_dead() -> bool:
+	return dead
+
 func enter_hide_spot() -> void:
 	if hidden_in_cover:
 		return
