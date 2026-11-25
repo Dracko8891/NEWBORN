@@ -2,7 +2,7 @@ name: NEWBORN Android APK
 
 on:
   push:
-    branches: [main]
+    branches: [main, newborn-rebuild]
   workflow_dispatch:
 
 permissions:
