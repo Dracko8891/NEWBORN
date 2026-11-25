@@ -543,7 +543,7 @@ func _build_room_location_markers() -> void:
 
 	# Side-wing and annex markers sit beyond their actual door thresholds.
 	var wing_ids := {
-		1: [["c1_triage", "Sala de Triagem", 1.0, -16.0], ["c1_relay", "Painel de Relés", -1.0, -30.0]],
+		1: [["c1_triage", "Sala de Triagem", 1.0, -16.0], ["c1_infirmary", "Enfermaria", -1.0, -30.0]],
 		2: [["c2_east", "Recepção Leste", 1.0, -16.0], ["c2_matrix", "Matriz de DNA", -1.0, -30.0]],
 		3: [["c3_quarters", "Cabines da Tripulação", 1.0, 22.0], ["c3_therapy", "Sala de Terapia Sonora", -1.0, -30.0]],
 		4: [["c4_upper", "Passarela Superior Respirável", 1.0, 22.0], ["c4_synthesis", "Cabine de Síntese", -1.0, -30.0]],
@@ -555,13 +555,13 @@ func _build_room_location_markers() -> void:
 		_add_room_marker(str(entry[0]), str(entry[1]), Vector3(float(entry[2]) * 6.55, 1.0, float(entry[3])), 2.0)
 
 	var annex_ids := {
-		1: ["c1_triage", "Sala de Triagem", 1.0],
-		2: ["c2_west", "Recepção Oeste", 1.0],
-		3: ["c3_locker", "Armário do Turno Gama", -1.0],
-		4: ["c4_pit", "Poço Drenado", -1.0],
-		5: ["c5_load", "Controle de Carga", 1.0],
-		6: ["c6_lab", "Laboratório Ômega", 1.0],
-		7: ["c7_couplings", "Pátio dos Acoplamentos", -1.0]
+		1: ["c1_archive", "Arquivo Clínico", 1.0],
+		2: ["c2_calibration_depot", "Depósito de Calibragem", 1.0],
+		3: ["c3_dressing", "Vestiário da Tripulação", -1.0],
+		4: ["c4_observation", "Observação Biológica", -1.0],
+		5: ["c5_workshop", "Oficina de Manutenção", 1.0],
+		6: ["c6_omega_observation", "Observação Ômega", 1.0],
+		7: ["c7_service_dock", "Doca de Serviço", -1.0]
 	}
 	var annex: Array = annex_ids.get(chapter_number, [])
 	if not annex.is_empty():

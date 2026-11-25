@@ -6,6 +6,14 @@ class_name NewbornWorldMap
 
 const ROOMS := [
 	{"id":"c1_security","chapter":1,"name":"Sala de Segurança","sector":"Ala Médica","kind":"room"},
+	{"id":"c1_infirmary","chapter":1,"name":"Enfermaria","sector":"Ala Médica","kind":"room"},
+	{"id":"c1_archive","chapter":1,"name":"Arquivo Clínico","sector":"Ala Médica","kind":"optional_room"},
+	{"id":"c2_calibration_depot","chapter":2,"name":"Depósito de Calibragem","sector":"Hub Central","kind":"optional_room"},
+	{"id":"c3_dressing","chapter":3,"name":"Vestiário da Tripulação","sector":"Alojamentos e Psicologia","kind":"optional_room"},
+	{"id":"c4_observation","chapter":4,"name":"Observação Biológica","sector":"Bio-Cultura e Síntese","kind":"optional_room"},
+	{"id":"c5_workshop","chapter":5,"name":"Oficina de Manutenção","sector":"Engenharia Profunda","kind":"optional_room"},
+	{"id":"c6_omega_observation","chapter":6,"name":"Observação Ômega","sector":"Subnível Ômega","kind":"optional_room"},
+	{"id":"c7_service_dock","chapter":7,"name":"Doca de Serviço","sector":"Hangar","kind":"optional_room"},
 	{"id":"c1_triage","chapter":1,"name":"Sala de Triagem","sector":"Ala Médica","kind":"room"},
 	{"id":"c1_relay","chapter":1,"name":"Painel de Relés","sector":"Ala Médica","kind":"puzzle"},
 	{"id":"c1_hatch","chapter":1,"name":"Comporta do Átrio","sector":"Ala Médica","kind":"locked_exit"},
@@ -45,6 +53,14 @@ const ROOMS := [
 
 const CONNECTIONS := [
 	{"from":"c1_security","to":"c1_triage","type":"door","state":"open"},
+	{"from":"c1_triage","to":"c1_archive","type":"side_room","state":"open"},
+	{"from":"c1_hatch","to":"c1_infirmary","type":"side_room","state":"open"},
+	{"from":"c2_west","to":"c2_calibration_depot","type":"side_room","state":"open"},
+	{"from":"c3_cafeteria","to":"c3_dressing","type":"side_room","state":"open"},
+	{"from":"c4_synthesis","to":"c4_observation","type":"side_room","state":"open"},
+	{"from":"c5_load","to":"c5_workshop","type":"side_room","state":"open"},
+	{"from":"c6_tubes","to":"c6_omega_observation","type":"side_room","state":"open"},
+	{"from":"c7_hangar","to":"c7_service_dock","type":"side_room","state":"open"},
 	{"from":"c1_triage","to":"c1_relay","type":"corridor","state":"open"},
 	{"from":"c1_relay","to":"c1_hatch","type":"pneumatic_door","state":"locked_until_relays_and_pin"},
 	{"from":"c1_hatch","to":"c2_atrium","type":"chapter_transition","state":"pin_0719"},
