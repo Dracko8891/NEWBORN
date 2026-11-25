@@ -1,0 +1,34 @@
+name: Maintain nightly-godot release tag
+
+on:
+  push:
+    branches: [protocol-newborn-godot]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nightly-godot-release
+  cancel-in-progress: true
+
+jobs:
+  update-nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout beta branch
+        uses: actions/checkout@v4
+        with:
+          ref: protocol-newborn-godot
+          fetch-depth: 0
+      - name: Move nightly tag and update prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag -f nightly-godot "$GITHUB_SHA"
+          git push origin refs/tags/nightly-godot --force
+          if gh release view nightly-godot >/dev/null 2>&1; then
+            gh release edit nightly-godot --title "PROTOCOLO NEWBORN — Nightly" --notes "Build noturna automatizada da branch protocol-newborn-godot. Use a beta APK e a versão Web publicadas pelos workflows correspondentes." --prerelease
+          else
+            gh release create nightly-godot --target "$GITHUB_SHA" --title "PROTOCOLO NEWBORN — Nightly" --notes "Build noturna automatizada da branch protocol-newborn-godot. Use a beta APK e a versão Web publicadas pelos workflows correspondentes." --prerelease
+          fi
