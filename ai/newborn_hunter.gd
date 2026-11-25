@@ -18,12 +18,19 @@ var stun_timer := 0.0
 var patrol_points: Array[Vector3] = []
 var patrol_index := 0
 var attack_cooldown := 0.0
+var _path_grid := AStarGrid2D.new()
+var _path_points: Array[Vector3] = []
+var _path_index := 0
+var _path_refresh := 0.0
+var _path_shape := BoxShape3D.new()
 
 func _ready() -> void:
 	add_to_group("noise_listeners")
 	target = get_tree().get_first_node_in_group("player") as Node3D
 	if patrol_points.is_empty():
 		patrol_points = [global_position, global_position + Vector3(5, 0, 0), global_position + Vector3(5, 0, 7), global_position + Vector3(-4, 0, 7)]
+	_path_shape.size = Vector3(0.72, 1.5, 0.72)
+	_path_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
 
 func hear_noise(origin: Vector3, strength: float) -> void:
 	if state == State.STUNNED or state == State.CHASE:
@@ -66,6 +73,13 @@ func _physics_process(delta: float) -> void:
 		if lost_timer >= forget_seconds:
 			state = State.SEARCH
 			lost_timer = 0.0
+	_path_refresh -= delta
+	if _path_refresh <= 0.0:
+		var goal := target.global_position if state == State.CHASE else last_known_position
+		if state == State.PATROL:
+			goal = patrol_points[patrol_index]
+		_refresh_path(goal)
+		_path_refresh = 1.0
 	var destination := global_position
 	match state:
 		State.PATROL:
@@ -86,6 +100,10 @@ func _physics_process(delta: float) -> void:
 			destination = target.global_position
 		_:
 			pass
+	if not _path_points.is_empty():
+		while _path_index < _path_points.size() - 1 and global_position.distance_to(_path_points[_path_index]) < 0.48:
+			_path_index += 1
+		destination = _path_points[_path_index]
 	var flat := destination - global_position
 	flat.y = 0.0
 	if flat.length() > 0.15:
@@ -120,3 +138,47 @@ func _can_see_target(distance: float) -> bool:
 	query.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	return hit.is_empty() or hit.get("collider") == target
+
+# Rebuild a local 1 m navigation grid from real physics occupancy.
+func _refresh_path(goal: Vector3) -> void:
+	var start_cell := Vector2i(floori(global_position.x), floori(global_position.z))
+	var goal_cell := Vector2i(floori(goal.x), floori(goal.z))
+	var min_x := maxi(-9, mini(start_cell.x, goal_cell.x) - 5)
+	var min_z := maxi(-35, mini(start_cell.y, goal_cell.y) - 5)
+	var max_x := mini(9, maxi(start_cell.x, goal_cell.x) + 6)
+	var max_z := mini(35, maxi(start_cell.y, goal_cell.y) + 6)
+	if max_x <= min_x or max_z <= min_z:
+		_path_points.clear()
+		_path_index = 0
+		return
+	_path_grid.region = Rect2i(min_x, min_z, max_x - min_x, max_z - min_z)
+	_path_grid.cell_size = Vector2.ONE
+	_path_grid.update()
+	var exclude_rids: Array[RID] = [get_rid()]
+	if target is CollisionObject3D:
+		exclude_rids.append((target as CollisionObject3D).get_rid())
+	var space := get_world_3d().direct_space_state
+	for z in range(min_z, max_z):
+		for x in range(min_x, max_x):
+			var cell := Vector2i(x, z)
+			if cell == start_cell or cell == goal_cell:
+				continue
+			var query := PhysicsShapeQueryParameters3D.new()
+			query.shape = _path_shape
+			query.transform = Transform3D(Basis.IDENTITY, Vector3(float(x) + 0.5, 0.82, float(z) + 0.5))
+			query.exclude = exclude_rids
+			query.collision_mask = collision_mask
+			if not space.intersect_shape(query, 1).is_empty():
+				_path_grid.set_point_solid(cell, true)
+	if not _path_grid.is_in_boundsv(start_cell) or not _path_grid.is_in_boundsv(goal_cell):
+		_path_points.clear()
+		_path_index = 0
+		return
+	var ids := _path_grid.get_id_path(start_cell, goal_cell)
+	_path_points.clear()
+	_path_index = 0
+	for i in range(1, ids.size()):
+		var cell: Vector2i = ids[i]
+		_path_points.append(Vector3(float(cell.x) + 0.5, global_position.y, float(cell.y) + 0.5))
+	if _path_points.is_empty() and start_cell == goal_cell:
+		_path_points.append(Vector3(float(goal_cell.x) + 0.5, global_position.y, float(goal_cell.y) + 0.5))
