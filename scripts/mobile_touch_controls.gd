@@ -168,6 +168,7 @@ func _touch_end(index: int) -> void:
 
 func _pulse_button(action: String) -> void:
 	var current := float(button_scales.get(action, 1.0))
+	button_scales[action] = current
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_method(Callable(self, "_set_button_scale").bind(action), current, 1.18, 0.075)
