@@ -125,7 +125,7 @@ func store_item(item_id: String) -> bool:
 		if str(inventory[i].get("id", "")) == item_id:
 			safe_storage.append(inventory.pop_at(i))
 			inventory_changed.emit()
-		save_game()
+			save_game()
 			return true
 	return false
 
