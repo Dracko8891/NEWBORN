@@ -35,8 +35,6 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and look_enabled:
 		_rotate_view(event.relative)
-	elif event is InputEventScreenDrag and look_enabled:
-		_rotate_view(event.relative)
 	elif event.is_action_pressed("flashlight"):
 		toggle_flashlight()
 	elif event.is_action_pressed("crouch"):
