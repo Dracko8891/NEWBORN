@@ -1,0 +1,63 @@
+name: Android beta APK
+
+on:
+  push:
+    branches: [protocol-newborn-godot]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-beta:
+    name: Export Android beta (arm64)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout beta branch
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "cmdline-tools;latest"
+
+      - name: Set up Godot 4.7.2 and export templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import project resources
+        run: godot --headless --editor --path . --quit
+
+      - name: Install Android build template
+        run: godot --headless --path . --install-android-build-template
+
+      - name: Export debug APK
+        run: |
+          mkdir -p build
+          godot --headless --path . --export-debug "Android" build/PROTOCOLO_NEWBORN-beta.apk
+
+      - name: Verify APK
+        run: |
+          test -s build/PROTOCOLO_NEWBORN-beta.apk
+          file build/PROTOCOLO_NEWBORN-beta.apk
+          sha256sum build/PROTOCOLO_NEWBORN-beta.apk
+
+      - name: Upload beta APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: PROTOCOLO-NEWBORN-Android-Beta
+          path: build/PROTOCOLO_NEWBORN-beta.apk
+          if-no-files-found: error
+          retention-days: 30
