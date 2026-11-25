@@ -1,23 +1,15 @@
-# NEWBORN
+# NEWBORN — Rebuild
 
-Survival horror em primeira pessoa. Projeto em desenvolvimento com Three.js, Vite e Capacitor para Android.
-
-## Estado
-- Protótipo web existente em processo de migração para estrutura de produção.
-- Campanha planejada em seis capítulos; conteúdo será implementado incrementalmente.
-- APK será compilado por GitHub Actions; ainda não existe APK validado.
-
-## Requisitos
-- Node.js 24+
-- Capacitor 8
-- Android SDK API 36 para build local
+Reimplementação independente da campanha de terror em primeira pessoa, com seis capítulos, controles touch em paisagem, lanterna na mão, inventário, objetivos, puzzles simples, IA de perseguição e salvamento local.
 
 ## Desenvolvimento
-```bash
-npm install
-npm run dev
-npm test
-npm run build
-```
+- `npm install`
+- `npm test`
+- `npm run build`
 
-Consulte `docs/PRODUCTION_PLAN.md` e `docs/TESTING.md` para escopo e critérios de aceite.
+## Android
+- `npx cap add android`
+- `npx cap sync android`
+- `cd android && ./gradlew assembleDebug`
+
+A campanha e o sistema estão em fase de implementação. Build e validação estática não substituem testes de gameplay nem validação no Moto G35.
