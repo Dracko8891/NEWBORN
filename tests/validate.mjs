@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync('index.html','utf8');
+const js=fs.readFileSync('src/main.js','utf8');
+const css=fs.readFileSync('src/style.css','utf8');
+assert(html.includes('/src/main.js'),'Vite entry missing');
+for(const id of ['game','objective','inventory','status','start','controls','begin','use','light','run','hide','modal']) assert(js.includes("$('"+id+"')"), 'Missing UI element '+id);
+for(const token of ['state.fuse','state.note','state.card','monsterUpdate','localStorage.setItem','localStorage.getItem','state.battery','state.hidden','state.door=true','state.breaker']) assert(js.includes(token),'Missing gameplay system '+token);
+assert(css.includes('#stick')&&css.includes('#modal'),'HUD/touch styling missing');
+const ids=[...html.matchAll(/id="([^"]+)"/g)].map(x=>x[1]);assert.equal(new Set(ids).size,ids.length,'duplicate HTML IDs');
+console.log('NEWBORN static validation: PASS');
