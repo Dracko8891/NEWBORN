@@ -32,7 +32,6 @@ func _rebuild_button_rects() -> void:
 		"crouch": Rect2(Vector2(s.x - d * 1.2, s.y - d * 2.25), Vector2(d, d)),
 		"sprint": Rect2(Vector2(s.x - d * 2.35, s.y - d * 1.1), Vector2(d, d)),
 		"flashlight": Rect2(Vector2(s.x - d * 1.2, s.y - d * 1.1), Vector2(d, d)),
-		"padd": Rect2(Vector2(s.x - d * 1.2, d * 0.35), Vector2(d, d))
 	}
 
 func get_virtual_move() -> Vector2:
@@ -64,9 +63,6 @@ func _touch_begin(index: int, pos: Vector2) -> void:
 			elif action == "flashlight":
 				Input.action_press("flashlight")
 				Input.action_release("flashlight")
-			elif action == "padd":
-				Input.action_press("padd")
-				Input.action_release("padd")
 			return
 	if pos.x < get_viewport_rect().size.x * 0.43 and joystick_finger == -1:
 		joystick_finger = index
@@ -96,6 +92,7 @@ func _touch_end(index: int) -> void:
 		if active_buttons[index] == "sprint":
 			Input.action_release("sprint")
 		active_buttons.erase(index)
+	queue_redraw()
 
 func _draw() -> void:
 	if not visible:
@@ -109,5 +106,5 @@ func _draw() -> void:
 		var rect: Rect2 = button_rects[action]
 		draw_circle(rect.get_center(), rect.size.x * 0.48, Color(0.06, 0.16, 0.22, 0.72))
 		draw_arc(rect.get_center(), rect.size.x * 0.48, 0.0, TAU, 32, Color(0.25, 0.85, 0.88, 0.9), 2.0)
-		var labels := {"interact":"F", "crouch":"C", "sprint":"RUN", "flashlight":"L", "padd":"PADD"}
+		var labels := {"interact":"F", "crouch":"C", "sprint":"RUN", "flashlight":"L"}
 		draw_string(ThemeDB.fallback_font, rect.position + Vector2(8, rect.size.y * 0.58), labels[action], HORIZONTAL_ALIGNMENT_CENTER, rect.size.x - 16, 14, Color(0.85, 0.98, 1.0))
