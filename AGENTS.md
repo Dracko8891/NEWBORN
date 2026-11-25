@@ -23,3 +23,8 @@ Leia a skill complementar antes de tarefas que envolvam seu domínio:
 - OhMyGame, organização de canvas e playtests externos: `.agents/skills/game-studio-orchestrator/SKILL.md`
 
 Estas skills são guias de projeto, não instalações de aplicações nem ferramentas MCP. Não alegue que um servidor externo está conectado sem confirmar as ferramentas disponíveis. Preserve Godot como engine principal do PROTOCOLO NEWBORN.
+
+
+## Geração e integração de assets
+
+Para gerar, revisar ou importar mídia externa, leia `docs/MCP_ASSET_PIPELINE.md` e a skill `.agents/skills/gemini-media-producer/SKILL.md`. Assets aprovados entram em `assets/generated/` por meio de `tools/asset_pipeline.py`. O runtime deve usar apenas recursos locais `res://`; nunca exigir MCP, API, rede ou credenciais para iniciar ou jogar.
