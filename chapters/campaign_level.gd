@@ -68,7 +68,7 @@ func _build_sector() -> void:
 func _spawn_player() -> void:
 	var player_scene := load("res://scenes/player.tscn")
 	if player_scene != null:
-		var p := player_scene.instantiate()
+		var p: Node3D = player_scene.instantiate()
 		p.name = "Player"
 		p.position = Vector3(0, 1, 28)
 		add_child(p)
@@ -101,7 +101,7 @@ func _spawn_hunter() -> void:
 	var hunter_scene := load("res://ai/newborn_hunter.tscn")
 	if hunter_scene == null:
 		return
-	var hunter := hunter_scene.instantiate()
+	var hunter: CharacterBody3D = hunter_scene.instantiate()
 	hunter.name = "NewbornHunter"
 	hunter.position = Vector3(0, 0.1, -18)
 	add_child(hunter)
