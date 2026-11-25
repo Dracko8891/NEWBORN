@@ -77,7 +77,7 @@ func _run() -> void:
 	assert(campaign_director._objective_requirements_met("c3_o1"))
 
 	# Chapter 4: synthesis requires and consumes the exact ingredient quantities.
-	var synthesis_station: Node = load("res://scripts/puzzle_station.gd").new()
+	var synthesis_station: Variant = load("res://scripts/puzzle_station.gd").new()
 	synthesis_station.puzzle_id = "synthesis_recipe"
 	synthesis_station.required_items = {"nitro_sterile":2, "acid_buffer":1, "enzyme":3}
 	synthesis_station.entered = _strings(["nitro", "nitro", "acid", "enzyme", "enzyme", "enzyme"])
@@ -126,7 +126,7 @@ func _run() -> void:
 	var mock_player := MockPlayer.new()
 	mock_player.add_to_group("player")
 	add_child(mock_player)
-	var timed_station: Node = load("res://scripts/puzzle_station.gd").new()
+	var timed_station: Variant = load("res://scripts/puzzle_station.gd").new()
 	add_child(timed_station)
 	timed_station._start_countdown(0.05, "siege")
 	var success_check := Timer.new()
@@ -136,10 +136,10 @@ func _run() -> void:
 	add_child(success_check)
 	success_check.start()
 
-func _on_siege_success(timed_station: Node, mock_player: Node) -> void:
+func _on_siege_success(timed_station: Variant, mock_player: Variant) -> void:
 	assert(GameState.get_flag("omega_siege_survived", false))
 	GameState.set_flag("omega_siege_survived", false)
-	mock_player.dead = true
+	mock_player.set("dead", true)
 	timed_station._start_countdown(0.05, "siege")
 	var failure_check := Timer.new()
 	failure_check.wait_time = 0.15
@@ -148,7 +148,7 @@ func _on_siege_success(timed_station: Node, mock_player: Node) -> void:
 	add_child(failure_check)
 	failure_check.start()
 
-func _on_siege_interrupted(timed_station: Node, mock_player: Node) -> void:
+func _on_siege_interrupted(timed_station: Variant, mock_player: Variant) -> void:
 	assert(not GameState.get_flag("omega_siege_survived", false))
 	timed_station.queue_free()
 	mock_player.queue_free()
