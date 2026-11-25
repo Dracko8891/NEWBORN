@@ -132,6 +132,24 @@ func _run() -> void:
 	assert(puzzle_system.submit_biochips(_strings(["cellular", "skeletal", "neural", "awakening"])))
 	assert(campaign_director._objective_requirements_met("c6_o2"))
 
+	# Completed timed milestones and hydraulic setup must be idempotent on re-entry.
+	var replay_station: Variant = load("res://scripts/puzzle_station.gd").new()
+	replay_station.puzzle_id = "omega_siege"
+	replay_station.required_items = {"battery":2}
+	replay_station.entered = _strings(["north", "east", "south", "west"])
+	game_state.set_flag("omega_siege_survived")
+	assert(replay_station._commit_puzzle())
+	assert(not game_state.has_item("battery"))
+	replay_station.puzzle_id = "omega_download"
+	replay_station.required_items = {}
+	replay_station.entered = _strings(["iniciar"])
+	game_state.set_flag("omega_download_complete")
+	assert(replay_station._commit_puzzle())
+	replay_station.puzzle_id = "hangar_couplings"
+	game_state.set_flag("hangar_couplings_complete")
+	assert(replay_station._commit_puzzle())
+	replay_station.free()
+
 	# Chapter 7: the override cannot run until all couplings and the master card exist.
 	assert(puzzle_system.activate_hydraulic_coupling(1))
 	assert(puzzle_system.activate_hydraulic_coupling(2))
