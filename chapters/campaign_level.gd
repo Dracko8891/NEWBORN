@@ -251,19 +251,32 @@ func _build_supply_pickups() -> void:
 
 func _build_hide_spots() -> void:
 	for index in range(2):
+		var base_position := Vector3(-6.0 if index == 0 else 6.0, 1.1, 13.0 - float(index) * 8.0)
+		# The locker is a real solid obstacle, not just a decorative mesh.
+		var cover := StaticBody3D.new()
+		cover.name = "HideCover_Locker_%d" % index
+		cover.position = base_position
+		add_child(cover)
+		var cover_collision := CollisionShape3D.new()
+		var cover_shape := BoxShape3D.new()
+		cover_shape.size = Vector3(1.5, 2.2, 1.35)
+		cover_collision.shape = cover_shape
+		cover.add_child(cover_collision)
+		var cover_mesh := MeshInstance3D.new()
+		var cover_box := BoxMesh.new()
+		cover_box.size = cover_shape.size
+		cover_mesh.mesh = cover_box
+		cover_mesh.material_override = MAT_WALL
+		cover.add_child(cover_mesh)
+
+		# Interaction zone sits in front of the solid locker, reachable by the player ray.
 		var spot := Area3D.new()
 		spot.name = "HideSpot_Locker_%d" % index
-		spot.position = Vector3(-6.0 if index == 0 else 6.0, 1.1, 13.0 - float(index) * 8.0)
+		spot.position = base_position + Vector3(0, 0, 1.25)
 		spot.set_script(load("res://scripts/hide_spot.gd"))
 		add_child(spot)
 		var collision := CollisionShape3D.new()
 		var shape := BoxShape3D.new()
-		shape.size = Vector3(1.8, 2.2, 1.8)
+		shape.size = Vector3(1.8, 2.2, 1.0)
 		collision.shape = shape
 		spot.add_child(collision)
-		var marker := MeshInstance3D.new()
-		var mesh := BoxMesh.new()
-		mesh.size = Vector3(1.0, 2.0, 1.0)
-		marker.mesh = mesh
-		marker.material_override = MAT_WALL
-		spot.add_child(marker)
