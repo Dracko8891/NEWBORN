@@ -11,3 +11,15 @@ Consulte também:
 A skill define a versão da engine, arquitetura, branch permitida, fluxo de implementação, critérios de teste e regras de honestidade de validação. Estas instruções são obrigatórias para alterações de código, cenas, recursos, testes e workflows.
 
 Trabalhe somente na branch `protocol-newborn-godot`. Não faça alterações em `main` ou `newborn-rebuild`.
+
+
+## Skills complementares
+
+Leia a skill complementar antes de tarefas que envolvam seu domínio:
+
+- Arte, áudio, storyboards, vídeo e assets generativos: `.agents/skills/gemini-media-producer/SKILL.md`
+- Integração/implementação com Gemini API ou SDK: `.agents/skills/gemini-api-engineer/SKILL.md`
+- Google Flow via FlowKit ou Flow Agent: `.agents/skills/google-flow-integration/SKILL.md`
+- OhMyGame, organização de canvas e playtests externos: `.agents/skills/game-studio-orchestrator/SKILL.md`
+
+Estas skills são guias de projeto, não instalações de aplicações nem ferramentas MCP. Não alegue que um servidor externo está conectado sem confirmar as ferramentas disponíveis. Preserve Godot como engine principal do PROTOCOLO NEWBORN.
