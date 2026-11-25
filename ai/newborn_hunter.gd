@@ -11,7 +11,7 @@ enum State { OBSERVE, PATROL, INVESTIGATE, HUNT, STUNNED, MIMIC_AMBUSH }
 @export var patrol_points: Array[Vector3] = []
 
 @onready var eyes: RayCast3D = $EyesRay
-@onready var navigation: NavigationAgent3D = $NavigationAgent3D
+var navigation: NavigationAgent3D
 @onready var face_veins: MeshInstance3D = get_node_or_null("FaceVeins")
 
 var state: State = State.PATROL
@@ -26,6 +26,12 @@ var _investigate_timer := 0.0
 
 func _ready() -> void:
 	add_to_group("noise_listeners")
+	if navigation == null:
+		navigation = get_node_or_null("NavigationAgent3D") as NavigationAgent3D
+	if navigation == null:
+		navigation = NavigationAgent3D.new()
+		navigation.name = "NavigationAgent3D"
+		add_child(navigation)
 	target = get_tree().get_first_node_in_group("player") as Node3D
 	if patrol_points.is_empty():
 		patrol_points = [global_position, global_position + Vector3(5, 0, 0), global_position + Vector3(5, 0, 7), global_position + Vector3(-4, 0, 7)]
@@ -58,7 +64,7 @@ func _physics_process(delta: float) -> void:
 			state = State.INVESTIGATE
 			_investigate_timer = 3.5
 		return
-	if bool(target.get("in_safe_room")) or (target.has_method("is_hidden") and target.is_hidden()):
+	if _target_flag("in_safe_room") or (target.has_method("is_hidden") and target.is_hidden()):
 		if state == State.HUNT:
 			state = State.PATROL
 		velocity.x = move_toward(velocity.x, 0.0, hunt_speed)
@@ -123,9 +129,9 @@ func _physics_process(delta: float) -> void:
 		attack_cooldown = 3.2
 
 func _can_see_target(distance: float) -> bool:
-	if bool(target.get("in_safe_room")) or (target.has_method("is_hidden") and target.is_hidden()):
+	if _target_flag("in_safe_room") or (target.has_method("is_hidden") and target.is_hidden()):
 		return false
-	var player_flashlight := bool(target.get("flashlight_on")) and float(target.get("flashlight_charge")) > 0.0
+	var player_flashlight := _target_flag("flashlight_on") and float(target.get("flashlight_charge")) > 0.0
 	var range_limit := 22.0 if player_flashlight else (12.0 if _is_in_lit_room() else 2.0)
 	if distance > range_limit:
 		return false
@@ -161,3 +167,9 @@ func _update_telemetry(distance: float) -> void:
 	else:
 		material.albedo_color = Color(0.015, 0.02, 0.025)
 		material.emission = Color.BLACK
+
+func _target_flag(property_name: String) -> bool:
+	if target == null or not is_instance_valid(target):
+		return false
+	var value: Variant = target.get(property_name)
+	return value is bool and value
