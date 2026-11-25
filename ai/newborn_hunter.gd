@@ -40,6 +40,8 @@ func _ready() -> void:
 		navigation.name = "NavigationAgent3D"
 		add_child(navigation)
 	target = get_tree().get_first_node_in_group("player") as Node3D
+	# Chapters 3+ use the observation entry state so the mimic ambush is reachable.
+	state = State.OBSERVE if mimic_enabled else State.PATROL
 	if patrol_points.is_empty():
 		patrol_points = [global_position, global_position + Vector3(5, 0, 0), global_position + Vector3(5, 0, 7), global_position + Vector3(-4, 0, 7)]
 	navigation.path_desired_distance = 0.45

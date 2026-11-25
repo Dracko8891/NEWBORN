@@ -84,7 +84,18 @@ func _run() -> void:
 	await physics_frame
 	assert(player.hit_count == 1, "Visible, unhidden player at contact range should be attackable")
 
-	print("NEWBORN real physics chase / locker collision / hiding tests: PASS")
+	# Mimic chapters must actually enter OBSERVE and transition into their ambush state.
+	var mimic_hunter: CharacterBody3D = HunterScript.new()
+	mimic_hunter.name = "MimicHunter"
+	mimic_hunter.set("mimic_enabled", true)
+	mimic_hunter.position = player.global_position + Vector3(0, 0, -4.0)
+	world.add_child(mimic_hunter)
+	_add_capsule_collision(mimic_hunter, 0.42, 2.25)
+	assert(int(mimic_hunter.get("state")) == 0, "Mimic hunter must start in OBSERVE")
+	await physics_frame
+	assert(int(mimic_hunter.get("state")) == 5, "Mimic hunter must transition to MIMIC_AMBUSH when close and unseen")
+
+	print("NEWBORN real physics chase / locker collision / hiding / mimic tests: PASS")
 	quit(0)
 
 func _add_box_collision(parent: Node3D, dimensions: Vector3) -> void:
