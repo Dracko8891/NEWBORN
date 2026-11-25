@@ -9,15 +9,35 @@ class LookTarget:
 	func apply_touch_look(delta: Vector2) -> void:
 		look_delta += delta
 
+class MockGameState:
+	extends Node
+	var look_sensitivity := 1.0
+	var movement_speed_multiplier := 1.0
+
+	func set_look_sensitivity(value: float) -> void:
+		look_sensitivity = value
+		var config := ConfigFile.new()
+		config.load("user://config.cfg")
+		config.set_value("controls", "look_sensitivity", value)
+		config.set_value("controls", "movement_speed", movement_speed_multiplier)
+		config.save("user://config.cfg")
+
+	func set_movement_speed_multiplier(value: float) -> void:
+		movement_speed_multiplier = value
+		var config := ConfigFile.new()
+		config.load("user://config.cfg")
+		config.set_value("controls", "look_sensitivity", look_sensitivity)
+		config.set_value("controls", "movement_speed", value)
+		config.save("user://config.cfg")
+
 func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
 	var game_state: Node = root.get_node_or_null("GameState")
 	if game_state == null:
-		game_state = Node.new()
+		game_state = MockGameState.new()
 		game_state.name = "GameState"
-		game_state.set_script(load("res://systems/game_state.gd"))
 		root.add_child(game_state)
 		await process_frame
 	var controls := Control.new()
