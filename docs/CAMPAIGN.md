@@ -1,67 +1,61 @@
-# NEWBORN — campanha completa (documento de implementação)
+# PROTOCOLO NEWBORN — campanha de 7 capítulos
 
-## Visão de produção
-Terror de sobrevivência em primeira pessoa. O jogador é Nycollas Gabriel, funcionário da instalação. A prioridade é escapar, não matar o NEWBORN. A história começa após o massacre e termina quando a fuga do protagonista permite que a criatura alcance o exterior.
+## Escopo narrativo de produção
+Survival horror em primeira pessoa. Arthur Vance tenta escapar do complexo Vanguard-7; a fuga permite que a ameaça alcance o exterior. O escopo de campanha é de **sete capítulos**. Este documento define o conteúdo-alvo; a presença de uma cena, mapa ou função de puzzle não significa que o capítulo esteja completo ou aprovado em playtest.
 
-A campanha é composta por seis capítulos conectados. Duração-alvo global: 2–4 horas, sujeita a playtest e ajuste de ritmo.
+## Capítulos e sequência de objetivos
 
-## Capítulos e objetivos
+### 1 — Ala Médica & Quarentena
+- Início escondido atrás do balcão após os flashbacks.
+- Encontrar o crachá 0719 e restaurar o Painel de Relés.
+- Ensinar movimentação, lanterna, interação, furtividade e esconderijos.
 
-### 1 — Despertar | Ala administrativa
-- Acordar após o apagão e aprender movimentação, lanterna, interação e esconderijo.
-- Encontrar fusível e anotação; restaurar painel com sequência 2–1–3.
-- Recuperar cartão de acesso, liberar terminal e alcançar a saída.
-- Revelação: a criatura está ativa e conhece os corredores.
-- Estado: protótipo jogável inicial em implementação; não aprovado em playtest.
+### 2 — Átrio Central Vanguard
+- Hub vertical de dois andares e Matriz DNA.
+- Safe Room #1 com Baú Pneumático compartilhado.
+- Obter a Chave Dielétrica e atravessar os Tubos de Jeffries.
 
-### 2 — Sem energia | Manutenção e geradores
-- Atravessar oficina, sala de bombas e galerias de cabos.
-- Localizar três disjuntores e uma manivela; restabelecer energia por setores.
-- Gerenciar ruído de máquinas e esconder-se durante a ronda do NEWBORN.
-- Clímax: religar gerador principal enquanto a criatura invade a sala.
+### 3 — Alojamentos & Psicologia
+- Descobrir a senha 0315 e executar a sequência musical Dó–Mi–Sol–Ré–Lá.
+- Recuperar Chip Alfa e Tricorder Nv. 2.
+- Enfrentar o Mimetismo da Dra. Clara Sato no Refeitório; painel UV é a rota de contingência anti-softlock.
 
-### 3 — Protocolo de contenção | Laboratórios biológicos
-- Investigar câmaras de observação e registros de experimento.
-- Recolher amostras e duas credenciais para abrir a contenção secundária.
-- Puzzle de válvulas e pressão; evitar salas com vidro comprometido.
-- Revelação narrativa: o projeto pretendia criar uma nova raça, não curar uma doença.
+### 4 — Tanques de Bio-Cultura
+- Passarela limpa e dispensador reserva de filtro anti-softlock.
+- Máscara e Cinto Tático ampliam o inventário de 6 para 8 slots.
+- Centrífuga: 2 Nitro + 1 Ácido + 3 Enzima.
+- Sequência de válvulas: Azul → Verde → Vermelha; recuperar Chip Beta.
 
-### 4 — Ruído no escuro | Ala médica e alojamentos
-- Explorar enfermaria, vestiários, dormitórios e necrotério técnico.
-- Encontrar kit médico, bateria e código de acesso por pistas ambientais.
-- A criatura reage a passos, portas e objetos derrubados.
-- Sequência de perseguição com rotas alternativas e esconderijos.
+### 5 — Engenharia Profunda & Núcleo de Plasma
+- Apagão total (100%); navegação no breu com Lanterna Cinética e dínamo de recarga infinita.
+- Braços Robóticos, três Câmeras CRT e Arco UV de parede.
+- Recuperar Chip Gama.
 
-### 5 — Última autorização | Centro de controle
-- Acessar arquivo de incidentes, sala de segurança e controle de portas.
-- Restaurar rede local e decidir a rota de evacuação.
-- Usar câmeras e alarmes como distração, com recursos limitados.
-- Descobrir que os protocolos externos foram parcialmente desativados.
+### 6 — Subnível Ômega — O Berçário Proibido
+- Progressão biológica em quatro estágios: Celular → Esquelético → Neural → Despertar.
+- Câmara 00 e cerco de 75 segundos, alternando duas e quatro escotilhas eletromagnéticas.
+- Obter Cartão Mestre Ômega.
 
-### 6 — Superfície | Docas e perímetro
-- Cruzar docas, área de carga, pátio e túnel de serviço.
-- Preparar abertura do portão e alcançar o transporte de emergência.
-- Sobreviver ao confronto final sem combate convencional.
-- Final: o protagonista escapa, mas o NEWBORN alcança o mundo exterior; gancho para a sequência.
+### 7 — Ruptura & Liberdade Fatal
+- Átrio em colapso e três acoplamentos no Hangar.
+- Override enganoso do Protocolo Éden na cabine rachando.
+- Túnel de Descompressão com botão Strobe fixo anti-softlock e deslize sob vão de 0,85 m.
+- Botão de Selamento Externo.
+- Epílogo 3D na neve: PADD revela grades térmicas abertas; olhos acendem na chaminé da montanha e imitam o suspiro de Arthur.
 
-## Sistemas obrigatórios em todos os capítulos
-- Objetivos claros e atualizados, inventário legível, interação contextual e pistas ambientais.
-- Checkpoints, salvamento persistente e retorno após falha.
-- IA com estados de patrulha, investigação, busca, perseguição e perda de alvo.
-- Colisões consistentes, rotas alternativas e esconderijos funcionais.
+## Sistemas transversais obrigatórios
+- Objetivos, portas, flags e puzzles persistentes; checkpoints e salvamento restaurável.
+- IA com percepção por linha de visão bloqueada por geometria, audição/ruído, investigação, busca e perseguição; pathfinding que não atravesse obstáculos.
+- Inventário inicial de seis slots, expansão para oito no capítulo 4, pilhas limitadas e Baú Pneumático.
+- Dois estágios de dano, tratamento, esconderijos e rotas alternativas.
+- PADD com inspeção diegética de itens, logs e pistas.
+- Controles touch configuráveis, teclado/mouse e gamepad; orientação horizontal no Android.
 - Áudio posicional, legendas, mixagem e opções de acessibilidade.
-- Controles touch configuráveis, pausa e opções gráficas para Android.
+- Recursos de contingência anti-softlock para filtro, iluminação, UV e eventos de perseguição.
 
-## Identidade visual e orientação
-- Cada setor recebe código, cor de iluminação e silhueta arquitetônica próprios.
-- Placas grandes nos cruzamentos; números nas portas; setas e linhas coloridas no piso.
-- Marcos de navegação: janelas de observação, consoles, geradores, macas, armários, tubulações e quadros elétricos.
-- Materiais variados: concreto pintado, aço, vidro reforçado, borracha, piso úmido e sinalização gasta.
-- Evitar corredores longos indistinguíveis; inserir salas de referência e vistas entre setores.
+## Portões de qualidade por capítulo
+1. **Funcional:** missões, portas, puzzles, inventário, flags, checkpoints e salvamento.
+2. **Gameplay:** IA, raycast, pathfinding, perseguição, esconderijos, colisões, animações e rotas alternativas.
+3. **Desempenho:** FPS, memória, carregamento, controles, temperatura e bateria no Moto G35.
 
-## Gate de qualidade por capítulo
-1. Funcional: missões, portas, puzzles, inventário e salvamento.
-2. Gameplay: IA, perseguição, esconderijos, colisões e animações.
-3. Desempenho: FPS, memória, carregamento, controles, temperatura e bateria no Moto G35.
-
-Nenhum capítulo será marcado como concluído sem os três gates documentados. Build verde não equivale a playtest aprovado.
+Nenhum capítulo será declarado completo sem evidência dos três portões. Build verde ou teste estático não substitui playthrough integral nem teste físico.
