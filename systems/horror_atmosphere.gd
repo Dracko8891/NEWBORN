@@ -1,8 +1,10 @@
 extends Node3D
-## Lightweight cinematic layer: one screen shader, low-count CPU dust and a tiny first-person viewmodel.
+## Cinematic horror layer: compatibility-safe post-process, first-person viewmodel and panic telemetry.
 
 const DUST_COUNT := 36
-const BASE_FOV := 70.0
+const BASE_FOV := 64.0
+const HUNT_FOV := 54.0
+const TELEMETRY_INTERVAL := 1.0
 
 var _player: Node3D
 var _camera: Camera3D
@@ -12,10 +14,12 @@ var _overlay: ColorRect
 var _shader_material: ShaderMaterial
 var _viewmodel: Node3D
 var _time := 0.0
-var _fov_offset := 0.0
 var _heartbeat := 0.0
 var _enemy: Node3D
 var _photosensitive := false
+var _panic_recorder: Node
+var _telemetry_timer := 0.0
+var _last_enemy_state := -1
 
 func _ready() -> void:
 	_player = get_tree().get_first_node_in_group("player") as Node3D
@@ -25,12 +29,24 @@ func _ready() -> void:
 	_flashlight = _player.get_node_or_null("Head/Camera3D/Flashlight") as SpotLight3D
 	if _camera == null:
 		return
+	_camera.fov = BASE_FOV
 	var game_state := get_node_or_null("/root/GameState")
 	_photosensitive = bool(game_state.get("photosensitive_mode")) if game_state != null else false
 	_create_viewmodel()
 	_create_screen_overlay()
 	_create_dust()
+	_create_panic_recorder()
 	_enemy = get_tree().get_first_node_in_group("noise_listeners") as Node3D
+
+func _create_panic_recorder() -> void:
+	var recorder_script := load("res://systems/panic_event_recorder.gd") as Script
+	if recorder_script == null:
+		push_warning("PanicEventRecorder ausente; telemetria desativada.")
+		return
+	_panic_recorder = Node.new()
+	_panic_recorder.name = "DeveloperPanicEventRecorder"
+	_panic_recorder.set_script(recorder_script)
+	add_child(_panic_recorder)
 
 func _create_screen_overlay() -> void:
 	var layer := CanvasLayer.new()
@@ -38,7 +54,7 @@ func _create_screen_overlay() -> void:
 	layer.layer = 40
 	add_child(layer)
 	_overlay = ColorRect.new()
-	_overlay.name = "FilmAndVignette"
+	_overlay.name = "FilmVignetteRadialDollyZoom"
 	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_shader_material = ShaderMaterial.new()
@@ -53,6 +69,7 @@ uniform float chromatic = 0.0;
 uniform float clock = 0.0;
 uniform float threat = 0.0;
 uniform float crt_scan = 0.0;
+uniform float radial_blur = 0.0;
 float hash21(vec2 p) {
 	p = fract(p * vec2(123.34, 456.21));
 	p += dot(p, p + 45.32);
@@ -63,16 +80,23 @@ void fragment() {
 	vec2 centered = uv - vec2(0.5);
 	float edge = smoothstep(0.22, 0.78, length(centered) * 1.38);
 	vec2 direction = normalize(centered + vec2(0.0001));
-	float shift = chromatic * edge * 0.0025;
+	vec2 radial_step = -centered * radial_blur * 0.075;
+	vec3 scene = vec3(0.0);
+	for (int i = 0; i < 5; i++) {
+		float t = float(i) / 4.0;
+		scene += texture(screen_texture, uv + radial_step * t).rgb;
+	}
+	scene /= 5.0;
+	float shift = chromatic * edge * 0.0035;
 	vec3 col;
 	col.r = texture(screen_texture, uv + direction * shift).r;
-	col.g = texture(screen_texture, uv).g;
+	col.g = scene.g;
 	col.b = texture(screen_texture, uv - direction * shift).b;
 	float noise = hash21(floor(uv * vec2(1280.0, 720.0) + clock * 37.0));
 	float grain = (noise - 0.5) * grain_strength;
 	float scan = sin(uv.y * 920.0 + clock * 2.0) * crt_scan * 0.025;
 	float interference = step(0.997, hash21(vec2(floor(clock * 3.0), floor(uv.y * 12.0)))) * threat * 0.035;
-	float vignette = 1.0 - edge * (vignette_strength + pulse * 0.12);
+	float vignette = 1.0 - edge * (vignette_strength + pulse * 0.16);
 	col = col * vignette + grain + scan + interference;
 	COLOR = vec4(col, 1.0);
 }
@@ -95,6 +119,7 @@ func _create_viewmodel() -> void:
 	_add_sphere(_viewmodel, "LeftHand", Vector3(-0.18, -0.36, -0.77), Vector3(0.12, 0.10, 0.16), skin)
 	_add_box(_viewmodel, "KineticFlashlightBody", Vector3(0.08, -0.23, -0.92), Vector3(0.12, 0.12, 0.48), metal)
 	_add_box(_viewmodel, "FlashlightGrip", Vector3(0.08, -0.29, -0.82), Vector3(0.13, 0.18, 0.14), sleeve)
+	_add_box(_viewmodel, "TricorderBody", Vector3(-0.22, -0.48, -0.72), Vector3(0.18, 0.22, 0.045), metal)
 
 func _create_dust() -> void:
 	_dust = GPUParticles3D.new()
@@ -131,31 +156,50 @@ func _process(delta: float) -> void:
 	if is_instance_valid(_dust) and _dust.is_inside_tree() and _camera.is_inside_tree():
 		_dust.global_position = _camera.global_position + -_camera.global_basis.z * 3.0
 		_dust.emitting = _flashlight != null and _flashlight.visible
+
 	var enemy_distance := 100.0
-	var hunting := false
+	var enemy_state := -1
+	var observing_or_hunting := false
 	if is_instance_valid(_enemy) and _enemy.is_inside_tree() and _player.is_inside_tree():
 		enemy_distance = _player.global_position.distance_to(_enemy.global_position)
 		var state_value: Variant = _enemy.get("state")
-		hunting = state_value != null and int(state_value) in [2, 3, 5]
-	var fear := clampf(1.0 - enemy_distance / 12.0, 0.0, 1.0)
-	var target_fov := lerpf(BASE_FOV, 56.0, fear) if hunting else lerpf(BASE_FOV, 64.0, fear * 0.45)
-	_fov_offset = move_toward(_fov_offset, target_fov - BASE_FOV, delta * (2.0 if hunting else 3.2))
-	_camera.fov = BASE_FOV + _fov_offset
-	var heartbeat_rate := 1.0 + fear * 1.8
-	_heartbeat = (sin(_time * TAU * heartbeat_rate) * 0.5 + 0.5) * fear
+		if state_value != null:
+			enemy_state = int(state_value)
+			observing_or_hunting = enemy_state in [0, 3, 5]
+	var proximity_fear := clampf(1.0 - enemy_distance / 14.0, 0.0, 1.0)
+	var game_state := get_node_or_null("/root/GameState")
+	var health_level := int(game_state.get("health_state")) if game_state != null else 0
+	var injury_factor := clampf(float(health_level) / 2.0, 0.0, 1.0)
+	var panic := clampf(proximity_fear * 0.78 + injury_factor * 0.22, 0.0, 1.0)
+	var fear := maxf(proximity_fear, injury_factor * 0.72)
+	var target_fov := lerpf(BASE_FOV, HUNT_FOV, fear) if observing_or_hunting or enemy_distance < 8.0 else BASE_FOV
+	_camera.fov = move_toward(_camera.fov, target_fov, delta * (7.0 if observing_or_hunting else 4.0))
+
+	var bpm_estimate := int(round(72.0 + panic * 72.0 + injury_factor * 14.0))
+	var heartbeat_rate := float(bpm_estimate) / 60.0
+	_heartbeat = (sin(_time * TAU * heartbeat_rate) * 0.5 + 0.5) * panic
 	var camera_bob := sin(_time * 1.7) * 0.008
 	if is_instance_valid(_viewmodel):
-		_viewmodel.position.y = camera_bob
-		_viewmodel.rotation.z = sin(_time * 1.1) * 0.012 + fear * sin(_time * 8.0) * 0.018
-		_viewmodel.rotation.x = fear * sin(_time * 11.0) * 0.012
+		_viewmodel.position.y = camera_bob - panic * 0.012
+		_viewmodel.rotation.z = sin(_time * 1.1) * 0.012 + panic * sin(_time * 8.0) * 0.024
+		_viewmodel.rotation.x = panic * sin(_time * 11.0) * 0.016
 	if _shader_material != null:
 		_shader_material.set_shader_parameter("clock", _time)
-		_shader_material.set_shader_parameter("pulse", 0.0 if _photosensitive else _heartbeat)
-		_shader_material.set_shader_parameter("chromatic", 0.0 if _photosensitive else fear * (1.0 if hunting else 0.35))
+		_shader_material.set_shader_parameter("pulse", 0.0 if _photosensitive else panic)
+		_shader_material.set_shader_parameter("chromatic", 0.0 if _photosensitive else panic * (1.1 if observing_or_hunting else 0.4))
 		_shader_material.set_shader_parameter("grain_strength", 0.009 if _photosensitive else 0.018)
-		_shader_material.set_shader_parameter("vignette_strength", 0.28 if _photosensitive else 0.42)
-		_shader_material.set_shader_parameter("threat", 0.0 if _photosensitive else fear)
-		_shader_material.set_shader_parameter("crt_scan", 0.0 if _photosensitive else (1.0 if enemy_distance < 8.0 or hunting else 0.0))
+		_shader_material.set_shader_parameter("vignette_strength", 0.30 if _photosensitive else 0.42 + injury_factor * 0.18)
+		_shader_material.set_shader_parameter("threat", 0.0 if _photosensitive else proximity_fear)
+		_shader_material.set_shader_parameter("crt_scan", 0.0 if _photosensitive else (1.0 if enemy_distance < 8.0 or observing_or_hunting else 0.0))
+		_shader_material.set_shader_parameter("radial_blur", 0.0 if _photosensitive else panic * (0.85 if observing_or_hunting else 0.48) + injury_factor * 0.45)
+
+	_telemetry_timer += delta
+	if _panic_recorder != null and _telemetry_timer >= TELEMETRY_INTERVAL:
+		_telemetry_timer = 0.0
+		_panic_recorder.call("record_sample", panic, bpm_estimate, enemy_distance, enemy_state, health_level)
+	if enemy_state != _last_enemy_state and _last_enemy_state != -1 and _panic_recorder != null:
+		_panic_recorder.call("record_event", "AI_STATE", "state_%d_to_%d" % [_last_enemy_state, enemy_state], panic, bpm_estimate, enemy_distance, enemy_state, health_level)
+	_last_enemy_state = enemy_state
 
 func _material(color: Color, roughness: float, metallic: float = 0.0) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
@@ -163,7 +207,6 @@ func _material(color: Color, roughness: float, metallic: float = 0.0) -> Standar
 	material.roughness = roughness
 	material.metallic = metallic
 	return material
-
 
 func _add_capsule(parent: Node3D, label: String, position: Vector3, scale_value: Vector3, material: Material) -> MeshInstance3D:
 	var node := MeshInstance3D.new()
@@ -178,7 +221,6 @@ func _add_capsule(parent: Node3D, label: String, position: Vector3, scale_value:
 	parent.add_child(node)
 	return node
 
-
 func _add_sphere(parent: Node3D, label: String, position: Vector3, scale_value: Vector3, material: Material) -> MeshInstance3D:
 	var node := MeshInstance3D.new()
 	node.name = label
@@ -191,7 +233,6 @@ func _add_sphere(parent: Node3D, label: String, position: Vector3, scale_value: 
 	node.material_override = material
 	parent.add_child(node)
 	return node
-
 
 func _add_box(parent: Node3D, label: String, position: Vector3, size: Vector3, material: Material) -> MeshInstance3D:
 	var node := MeshInstance3D.new()

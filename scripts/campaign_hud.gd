@@ -29,46 +29,47 @@ func _build_interface() -> void:
 	panel.position = Vector2(18, 16)
 	panel.custom_minimum_size = Vector2(310, 0)
 	panel.size = Vector2(310, 112)
+	panel.modulate = Color(1, 1, 1, 0.78)
 	var glass := StyleBoxFlat.new()
-	glass.bg_color = Color(0.012, 0.022, 0.028, 0.22)
-	glass.border_color = Color(0.35, 0.62, 0.65, 0.18)
+	glass.bg_color = Color(0.012, 0.022, 0.028, 0.10)
+	glass.border_color = Color(0.35, 0.62, 0.65, 0.10)
 	glass.set_border_width_all(1)
 	glass.set_corner_radius_all(3)
-	glass.content_margin_left = 10
-	glass.content_margin_right = 10
-	glass.content_margin_top = 6
-	glass.content_margin_bottom = 6
+	glass.content_margin_left = 8
+	glass.content_margin_right = 8
+	glass.content_margin_top = 4
+	glass.content_margin_bottom = 4
 	panel.add_theme_stylebox_override("panel", glass)
 	add_child(panel)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 5)
+	column.add_theme_constant_override("separation", 4)
 	panel.add_child(column)
 	chapter_label = Label.new()
-	chapter_label.add_theme_font_size_override("font_size", 19)
+	chapter_label.add_theme_font_size_override("font_size", 17)
 	chapter_label.text = "PROTOCOLO NEWBORN"
 	column.add_child(chapter_label)
 	progress_label = Label.new()
-	progress_label.add_theme_font_size_override("font_size", 13)
-	progress_label.modulate = Color(0.35, 0.9, 0.88)
+	progress_label.add_theme_font_size_override("font_size", 12)
+	progress_label.modulate = Color(0.35, 0.9, 0.88, 0.8)
 	column.add_child(progress_label)
 	objective_label = Label.new()
 	objective_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	objective_label.custom_minimum_size = Vector2(360, 52)
+	objective_label.custom_minimum_size = Vector2(330, 46)
 	column.add_child(objective_label)
 	message_label = Label.new()
 	message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	message_label.modulate = Color(1.0, 0.78, 0.35)
+	message_label.modulate = Color(1.0, 0.78, 0.35, 0.85)
 	column.add_child(message_label)
 	var map_button := Button.new()
 	map_button.text = "PADD  [M]"
 	map_button.flat = true
-	map_button.modulate = Color(0.68, 0.82, 0.84, 0.72)
+	map_button.modulate = Color(0.68, 0.82, 0.84, 0.68)
 	map_button.pressed.connect(_toggle_map)
 	column.add_child(map_button)
 	var credits_button := Button.new()
 	credits_button.text = "CRÉDITOS"
 	credits_button.flat = true
-	credits_button.modulate = Color(0.68, 0.82, 0.84, 0.72)
+	credits_button.modulate = Color(0.68, 0.82, 0.84, 0.68)
 	credits_button.pressed.connect(_show_credits)
 	column.add_child(credits_button)
 
@@ -120,9 +121,41 @@ func _toggle_map() -> void:
 		holographic_map.toggle_map()
 
 func _show_credits() -> void:
+	var credits := [
+		"IDEIA ORIGINAL: Nycollas Gabriel",
+		"CRIAÇÃO: Damião Bruno",
+		"CONCEPÇÃO DO UNIVERSO: Damião Bruno",
+		"CRIAÇÃO DO NEWBORN: Damião Bruno",
+		"CRIAÇÃO DOS PERSONAGENS: Damião Bruno",
+		"INTERPRETAÇÃO DO ALIEN FANTASIADO: Damião Bruno",
+		"ATUAÇÃO: Damião Bruno",
+		"VOZES: Damião Bruno",
+		"NARRAÇÃO: Damião Bruno",
+		"DIREÇÃO DE VOZ: Damião Bruno",
+		"SONORIZAÇÃO: Damião Bruno",
+	"EFEITOS SONOROS: Damião Bruno",
+		"TRILHA SONORA: Damião Bruno",
+		"CRIAÇÃO ARTÍSTICA: Damião Bruno",
+		"DIREÇÃO DE ARTE: Damião Bruno",
+		"DIREÇÃO VISUAL: Damião Bruno",
+		"DESIGN DE CRIATURAS: Damião Bruno",
+		"DESIGN DE AMBIENTES: Damião Bruno",
+		"DESIGN DE FASES: Damião Bruno",
+		"DESIGN DE GAMEPLAY: Damião Bruno",
+		"CRIAÇÃO DOS PUZZLES: Damião Bruno",
+		"ROTEIRO: Damião Bruno",
+		"DIÁLOGOS: Damião Bruno",
+		"CONCEPÇÃO DO TERROR: Damião Bruno",
+		"PROGRAMAÇÃO: Damião Bruno",
+		"INTEGRAÇÃO: Damião Bruno",
+		"PRODUÇÃO: Damião Bruno",
+		"IDEALIZAÇÃO E DIREÇÃO DO PROJETO: Damião Bruno",
+		"",
+		"RECURSOS DE TERCEIROS: manter os créditos e licenças dos respectivos autores."
+	]
 	var dialog := AcceptDialog.new()
 	dialog.title = "CRÉDITOS — PROTOCOLO NEWBORN"
-	dialog.dialog_text = "IDEIA ORIGINAL: Nycollas Gabriel\n\nCRIAÇÃO: Damião Bruno\nDIREÇÃO CRIATIVA: Damião Bruno\nROTEIRO: Damião Bruno\nNARRAÇÃO: Damião Bruno\nVOZES: Damião Bruno\nATUAÇÃO: Damião Bruno\nPERSONAGENS: Damião Bruno\nCONCEPÇÃO DO NEWBORN: Damião Bruno\nDIREÇÃO DE ARTE: Damião Bruno\nDIREÇÃO VISUAL: Damião Bruno\nDESIGN DE AMBIENTES: Damião Bruno\nDESIGN DE FASES: Damião Bruno\nDESIGN DE GAMEPLAY: Damião Bruno\nDESIGN DE PUZZLES: Damião Bruno\nPROGRAMAÇÃO E INTEGRAÇÃO: Damião Bruno\nPRODUÇÃO: Damião Bruno\n\nRECURSOS DE TERCEIROS: conforme créditos e licenças dos respectivos autores."
-	dialog.min_size = Vector2i(560, 560)
+	dialog.dialog_text = "\n".join(credits)
+	dialog.min_size = Vector2i(560, 680)
 	add_child(dialog)
 	dialog.popup_centered()

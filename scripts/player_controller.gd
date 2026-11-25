@@ -229,10 +229,14 @@ func pump_dynamo() -> void:
 	look_enabled = true
 	GameState.save_game()
 
+func _log_resource_usage(resource_name: String) -> void:
+	get_tree().call_group("panic_event_recorder", "record_resource", resource_name, GameState.inventory.size())
+
 func use_medical_resource() -> void:
 	for item_id in ["kit_estanca", "hemostatic_kit", "bandage", "curativo", "kit_medico", "first_aid_kit", "medkit", "hypo_spray", "hipospray"]:
 		if GameState.has_item(item_id):
 			GameState.use_item(item_id, self)
+			_log_resource_usage("MEDICAL:" + item_id)
 			return
 	GameState.notification_requested.emit("Você não possui itens médicos")
 
@@ -240,6 +244,7 @@ func use_battery_resource() -> void:
 	for item_id in ["bateria", "battery", "energy_cell", "celula_energia"]:
 		if GameState.has_item(item_id):
 			GameState.use_item(item_id, self)
+			_log_resource_usage("BATTERY:" + item_id)
 			return
 	GameState.notification_requested.emit("Você não possui baterias")
 

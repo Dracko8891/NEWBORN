@@ -21,6 +21,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = OS.has_feature("mobile")
+	modulate.a = 0.58
 	z_index = 100
 	_rebuild_button_rects()
 	_build_sensitivity_ui()
@@ -48,6 +49,7 @@ func _build_sensitivity_ui() -> void:
 	settings_panel = PanelContainer.new()
 	settings_panel.name = "ControlTuning"
 	settings_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	settings_panel.modulate.a = 0.62
 	add_child(settings_panel)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 2)
@@ -192,18 +194,17 @@ func _set_button_scale(value: float, action: String) -> void:
 func _draw() -> void:
 	if not visible:
 		return
-	modulate.a = 0.68
 	var s := get_viewport_rect().size
 	var radius := minf(s.x, s.y) * 0.14
 	var origin := joystick_origin if joystick_finger != -1 else Vector2(radius * 1.45, s.y - radius * 1.45)
-	draw_circle(origin, radius, Color(0.1, 0.42, 0.48, 0.075))
-	draw_arc(origin, radius, 0.0, TAU, 40, Color(0.42, 0.72, 0.74, 0.20), 1.3)
-	draw_circle(origin + joystick_vector * radius, radius * 0.34, Color(0.48, 0.78, 0.78, 0.22))
+	draw_circle(origin, radius, Color(0.1, 0.42, 0.48, 0.045))
+	draw_arc(origin, radius, 0.0, TAU, 40, Color(0.42, 0.72, 0.74, 0.13), 1.2)
+	draw_circle(origin + joystick_vector * radius, radius * 0.34, Color(0.48, 0.78, 0.78, 0.13))
 	var labels := {"interact":"F", "crouch":"C", "sprint":"RUN", "flashlight":"L", "medical":"MED", "battery":"BAT"}
 	for action in button_rects:
 		var rect: Rect2 = button_rects[action]
 		var scale := float(button_scales.get(action, 1.0))
 		var button_radius := rect.size.x * 0.48 * scale
-		draw_circle(rect.get_center(), button_radius, Color(0.025, 0.045, 0.052, 0.24))
-		draw_arc(rect.get_center(), button_radius, 0.0, TAU, 32, Color(0.48, 0.72, 0.74, 0.38), 1.4)
-		draw_string(ThemeDB.fallback_font, rect.position + Vector2(8, rect.size.y * 0.58), labels[action], HORIZONTAL_ALIGNMENT_CENTER, rect.size.x - 16, 14, Color(0.78, 0.88, 0.88, 0.76))
+		draw_circle(rect.get_center(), button_radius, Color(0.025, 0.045, 0.052, 0.12))
+		draw_arc(rect.get_center(), button_radius, 0.0, TAU, 32, Color(0.48, 0.72, 0.74, 0.24), 1.2)
+		draw_string(ThemeDB.fallback_font, rect.position + Vector2(8, rect.size.y * 0.58), labels[action], HORIZONTAL_ALIGNMENT_CENTER, rect.size.x - 16, 14, Color(0.78, 0.88, 0.88, 0.58))
