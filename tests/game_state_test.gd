@@ -1,5 +1,8 @@
 extends SceneTree
 
+const GameStateScript = preload("res://systems/game_state.gd")
+var game_state: Variant
+
 class MockPlayer:
 	extends Node
 	var recharged_seconds: float = 0.0
@@ -9,53 +12,55 @@ class MockPlayer:
 		return true
 
 func _initialize() -> void:
+	game_state = GameStateScript.new()
+	root.add_child(game_state)
 	call_deferred("_run")
 
 func _run() -> void:
-	GameState.inventory.clear()
-	GameState.safe_storage.clear()
-	GameState.inventory_capacity = GameState.START_SLOTS
-	GameState.chapter = 1
-	GameState.set_health_state(0)
+	game_state.inventory.clear()
+	game_state.safe_storage.clear()
+	game_state.inventory_capacity = game_state.START_SLOTS
+	game_state.chapter = 1
+	game_state.set_health_state(0)
 
 	# Stack totals and removal across multiple inventory slots.
-	assert(GameState.add_item("ammo_test", "Munição de teste", true))
-	assert(GameState.add_item("ammo_test", "Munição de teste", true))
-	assert(GameState.add_item("ammo_test", "Munição de teste", true))
-	assert(GameState.has_item("ammo_test", 3))
-	assert(GameState.remove_item("ammo_test", 3))
-	assert(not GameState.has_item("ammo_test"))
+	assert(game_state.add_item("ammo_test", "Munição de teste", true))
+	assert(game_state.add_item("ammo_test", "Munição de teste", true))
+	assert(game_state.add_item("ammo_test", "Munição de teste", true))
+	assert(game_state.has_item("ammo_test", 3))
+	assert(game_state.remove_item("ammo_test", 3))
+	assert(not game_state.has_item("ammo_test"))
 
 	# Medical item is consumed only when it can treat bleeding.
-	GameState.set_health_state(1)
-	assert(GameState.add_item("kit_estanca", "Kit Estanca", true))
-	assert(GameState.use_item("kit_estanca"))
-	assert(GameState.health_state == 0)
-	assert(not GameState.has_item("kit_estanca"))
+	game_state.set_health_state(1)
+	assert(game_state.add_item("kit_estanca", "Kit Estanca", true))
+	assert(game_state.use_item("kit_estanca"))
+	assert(game_state.health_state == 0)
+	assert(not game_state.has_item("kit_estanca"))
 
 	# Battery consumable calls the player's flashlight recharge API.
 	var mock_player := MockPlayer.new()
-	assert(GameState.add_item("battery", "Bateria", true))
-	assert(GameState.use_item("battery", mock_player))
+	assert(game_state.add_item("battery", "Bateria", true))
+	assert(game_state.use_item("battery", mock_player))
 	assert(is_equal_approx(mock_player.recharged_seconds, 90.0))
 	mock_player.free()
 
 	# Safe storage supports bulk deposit, withdrawal and persistence.
-	assert(GameState.add_item("keycard_test", "Cartão de teste", false))
-	assert(GameState.store_all_items() == 1)
-	assert(GameState.inventory.is_empty())
-	assert(GameState.safe_storage_count() == 1)
-	assert(GameState.save_game())
-	GameState.safe_storage.clear()
-	assert(GameState.load_game())
-	assert(GameState.safe_storage_count() == 1)
-	assert(GameState.retrieve_all_items() == 1)
-	assert(GameState.has_item("keycard_test"))
+	assert(game_state.add_item("keycard_test", "Cartão de teste", false))
+	assert(game_state.store_all_items() == 1)
+	assert(game_state.inventory.is_empty())
+	assert(game_state.safe_storage_count() == 1)
+	assert(game_state.save_game())
+	game_state.safe_storage.clear()
+	assert(game_state.load_game())
+	assert(game_state.safe_storage_count() == 1)
+	assert(game_state.retrieve_all_items() == 1)
+	assert(game_state.has_item("keycard_test"))
 
 	# Leave the test save in a clean state.
-	GameState.inventory.clear()
-	GameState.safe_storage.clear()
-	GameState.set_health_state(0)
-	GameState.save_game()
+	game_state.inventory.clear()
+	game_state.safe_storage.clear()
+	game_state.set_health_state(0)
+	game_state.save_game()
 	print("NEWBORN GameState integration tests: PASS")
 	quit(0)
