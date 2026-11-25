@@ -6,7 +6,6 @@ const MAT_FLOOR := preload("res://materials/medical_floor.tres")
 const MAT_ALERT := preload("res://materials/emergency_red.tres")
 const Campaign = preload("res://systems/campaign_data.gd")
 const NavMeshDirector = preload("res://systems/navmesh_director.gd")
-const NavMeshDirector = preload("res://systems/navmesh_director.gd")
 
 func _ready() -> void:
 	var loading_layer := _create_initial_loading_screen()
